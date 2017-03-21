@@ -44,12 +44,13 @@ message AuthCreateResponse {
 }
 
 message AuthConfirmRequest {
-
-    string AuthenticationCode = 4;
+    string UserId = 1;
+    string AuthenticationCode = 2;
 }
 
 message AuthConfirmResponse {
     bool Success = 1;
+    repeated string Roles = 2;
 }
 
 message AuthAdminRequest {
