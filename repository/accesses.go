@@ -6,6 +6,8 @@ import (
 )
 
 type AccessesRepository interface {
+	SaveAllianceAndCorpLevelRole(allianceId int64, corporationId int64, role model.Role) error
+	SaveAllianceRole(allianceId int64, corporationId int64, role model.Role) error
 	FindByChatId(chatId string) []string
 }
 
@@ -17,75 +19,84 @@ var roleQuery string = `
 SELECT
   role.*,
   'alliance_corp' AS role_from
-FROM user user
+FROM users user
   JOIN user_character_map ucm ON (user.user_id = ucm.user_id)
-  JOIN character char ON (ucm.character_id = char.character_id)
-  JOIN corporation corp ON (char.corporation_id = corp.corporation_id)
-  JOIN alliance alliance ON (corp.alliance_id = alliance.alliance_id)
+  JOIN characters chars ON (ucm.character_id = chars.character_id)
+  JOIN corporations corp ON (chars.corporation_id = corp.corporation_id)
+  JOIN alliances alliance ON (corp.alliance_id = alliance.alliance_id)
   JOIN alliance_corporation_role_map acrm
     ON (alliance.alliance_id = acrm.alliance_id AND corp.corporation_id = acrm.corporation_id)
-  JOIN role role ON (acrm.role_id = role.role_id)
-WHERE user.id = '%s'
+  JOIN roles role ON (acrm.role_id = role.role_id)
+WHERE user.chat_id = '%s'
 UNION
 SELECT
   role.*,
   'alliance' AS role_from
-FROM user user
+FROM users user
   JOIN user_character_map ucm ON (user.user_id = ucm.user_id)
-  JOIN character char ON (ucm.character_id = char.character_id)
-  JOIN corporation corp ON (char.corporation_id = corp.corporation_id)
-  JOIN alliance alliance ON (corp.alliance_id = alliance.alliance_id)
+  JOIN characters chars ON (ucm.character_id = chars.character_id)
+  JOIN corporations corp ON (chars.corporation_id = corp.corporation_id)
+  JOIN alliances alliance ON (corp.alliance_id = alliance.alliance_id)
   JOIN alliance_role_map arm ON (alliance.alliance_id = arm.alliance_id)
-  JOIN role role ON (arm.role_id = role.role_id)
-WHERE user.id = '%s'
+  JOIN roles role ON (arm.role_id = role.role_id)
+WHERE user.chat_id = '%s'
 UNION
 SELECT
   role.*,
   'corp' AS role_from
-FROM user user
+FROM users user
   JOIN user_character_map ucm ON (user.user_id = ucm.user_id)
-  JOIN character char ON (ucm.character_id = char.character_id)
-  JOIN corporation corp ON (char.corporation_id = corp.corporation_id)
+  JOIN characters chars ON (ucm.character_id = chars.character_id)
+  JOIN corporations corp ON (chars.corporation_id = corp.corporation_id)
   JOIN corporation_role_map crm ON (corp.corporation_id = crm.corporation_id)
-  JOIN role role ON (crm.role_id = role.role_id)
-WHERE user.id = '%s'
+  JOIN roles role ON (crm.role_id = role.role_id)
+WHERE user.chat_id = '%s'
 UNION
 SELECT
   role.*,
   'character' AS role_from
-FROM user user
+FROM users user
   JOIN user_character_map ucm ON (user.user_id = ucm.user_id)
-  JOIN character char ON (ucm.character_id = char.character_id)
-  JOIN character_role_map crm ON (char.corporation_id = crm.character_id)
-  JOIN role role ON (crm.role_id = role.role_id)
-WHERE user.id = '%s'
+  JOIN characters chars ON (ucm.character_id = chars.character_id)
+  JOIN character_role_map crm ON (chars.corporation_id = crm.character_id)
+  JOIN roles role ON (crm.role_id = role.role_id)
+WHERE user.chat_id = '%s'
 UNION
 SELECT
   role.*,
   'alliance_corporation_leadership' AS role_from
-FROM user user
+FROM users user
   JOIN user_character_map ucm ON (user.user_id = ucm.user_id)
-  JOIN character char ON (ucm.character_id = char.character_id)
-  JOIN corporation corp ON (char.corporation_id = corp.corporation_id)
-  JOIN alliance alliance ON (corp.alliance_id = alliance.alliance_id)
+  JOIN characters chars ON (ucm.character_id = chars.character_id)
+  JOIN corporations corp ON (chars.corporation_id = corp.corporation_id)
+  JOIN alliances alliance ON (corp.alliance_id = alliance.alliance_id)
   JOIN alliance_character_leadership_role_map aclrm
-    ON (char.character_id = aclrm.character_id AND alliance.alliance_id = aclrm.alliance_id)
-  JOIN role role ON (aclrm.role_id = role.role_id)
-WHERE user.id = '%s'
+    ON (chars.character_id = aclrm.character_id AND alliance.alliance_id = aclrm.alliance_id)
+  JOIN roles role ON (aclrm.role_id = role.role_id)
+WHERE user.chat_id = '%s'
 UNION
 SELECT
   role.*,
   'corporation_character_leadership' AS role_from
-FROM user user
+FROM users user
   JOIN user_character_map ucm ON (user.user_id = ucm.user_id)
-  JOIN character char ON (ucm.character_id = char.character_id)
+  JOIN characters chars ON (ucm.character_id = chars.character_id)
   JOIN corp_character_leadership_role_map cclrm
-    ON (char.character_id = cclrm.character_id AND char.corporation_id = cclrm.corporation_id)
-  JOIN role role ON (cclrm.role_id = role.role_id)
-WHERE user.id = '%s'
+    ON (chars.character_id = cclrm.character_id AND chars.corporation_id = cclrm.corporation_id)
+  JOIN roles role ON (cclrm.role_id = role.role_id)
+WHERE user.chat_id = '%s'
 `
 
 func (acc *accesses) findByUserId ( userId int64 ) []string {
+	return nil
+}
+
+// Saves a role that is linked to an alliance AND a corporation
+func (acc *accesses) SaveAllianceAndCorpLevelRole(allianceId int64, corporationId int64, role model.Role) error {
+	return nil
+}
+
+func (acc *accesses) SaveAllianceRole(allianceId int64, corporationId int64, role model.Role) error {
 	return nil
 }
 
