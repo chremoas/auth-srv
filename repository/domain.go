@@ -5,6 +5,14 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+type CharacterRepository interface {
+	FindByCharacterId(characterId int64) model.Character
+}
+
+type AllianceRepository interface {
+	FindByAllianceId(allianceId int64) model.Alliance
+}
+
 type character struct {
 	db *gorm.DB
 }
@@ -14,21 +22,22 @@ type alliance struct {
 }
 
 //BGN Character accessor methods
-func (chr *character) findByCharacterId ( characterId int64 ) model.Character {
-	return nil
+func (chr *character) FindByCharacterId(characterId int64) model.Character {
+	return model.Character{}
 }
 
 func (char *character) findByCharacterName ( characterName string ) model.Character {
-	return nil
+	return model.Character{}
 }
 //END Character accessor methods
 
-//BGN Alliance accessor methods
-func (all *alliance) findByAllianceId ( allianceId int64 ) model.Alliance {
-	return nil
+//BGN AllianceRepo accessor methods
+func (all *alliance) FindByAllianceId(allianceId int64) model.Alliance {
+	return model.Alliance{}
 }
 
 func (all *alliance) findByAllianceName ( allianceName string ) model.Alliance {
-	return nil
+	return model.Alliance{}
 }
-//END Alliance accessor methods
+
+//END AllianceRepo accessor methods
