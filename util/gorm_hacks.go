@@ -29,10 +29,10 @@ func HackJoinTableHandlerData(db *gorm.DB) {
 		}
 	}
 
-	userCharRel.ForeignDBNames = []string{"character_id"}
-	userCharRel.AssociationForeignDBNames = []string{"user_id"}
-	charUserRel.ForeignDBNames = []string{"user_id"}
-	charUserRel.AssociationForeignDBNames = []string{"character_id"}
+	userCharRel.ForeignDBNames = []string{"user_id"}
+	userCharRel.AssociationForeignDBNames = []string{"character_id"}
+	charUserRel.ForeignDBNames = []string{"character_id"}
+	charUserRel.AssociationForeignDBNames = []string{"user_id"}
 
 	userJoinTableHandler.Source.ForeignKeys[0].DBName = "user_id"
 	userJoinTableHandler.Destination.ForeignKeys[0].DBName = "character_id"

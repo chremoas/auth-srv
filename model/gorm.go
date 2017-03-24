@@ -1,21 +1,21 @@
 package model
 
 func (Alliance) TableName() string {
-	return "alliance"
+	return "alliances"
 }
 
 func (Corporation) TableName() string {
-	return "corporation"
+	return "corporations"
 }
 
 func (Character) TableName() string {
-	return "character"
+	return "characters"
 }
 
 func (Role) TableName() string {
-	return "role"
+	return "roles"
 }
 
 func (User) TableName() string {
-	return "user"
+	return "users"
 }

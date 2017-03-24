@@ -1,23 +1,24 @@
 package repository
 
 import (
-	_ "github.com/mattn/go-sqlite3"
+	//_ "github.com/mattn/go-sqlite3"
+	_ "github.com/go-sql-driver/mysql"
 	"testing"
 	"github.com/abaeve/auth-srv/model"
 	"github.com/jinzhu/gorm"
-	"fmt"
-	"encoding/json"
 	"github.com/abaeve/auth-srv/util"
 )
 
 func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 	//<editor-fold desc="Setup code">
-	err := Setup("sqlite3", "file:../test/authSrv.db?loc=auto")
+	/*err := Setup("sqlite3", "file:../test/authSrv.db?loc=auto")*/
+	err := Setup("mysql", "root@tcp(localhost:3306)/microservices")
 
 	if err != nil {
 		t.Fatalf("Could not open database connection: %s", err)
 	}
 
+	DB.LogMode(true)
 	util.HackJoinTableHandlerData(DB)
 
 	alliance := model.Alliance{AllianceId: 1, AllianceTicker: "TST", AllianceName: "Test AllianceRepo 1"}
@@ -25,10 +26,10 @@ func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 	character := model.Character{CharacterId: 1, CharacterName: "Test Character 1", CorporationId: 1, Corporation: corporation, Token: ""}
 	user := model.User{UserId: 1, ChatId: "1234567890", Characters: []model.Character{character}}
 
-	DB.Save(&alliance)
-	DB.Save(&corporation)
-	DB.Save(&character)
-	//DB.Save(&user)
+	DB.Create(&alliance)
+	DB.Create(&corporation)
+	DB.Create(&character)
+	DB.Create(&user)
 	//</editor-fold>
 
 	t.Run("Character-Retrieve", func(t *testing.T) {
@@ -49,7 +50,7 @@ func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 	})
 
 	t.Run("Corporation-Count", func(t *testing.T) {
-		rows, err := DB.DB().Query("select count(*) from corporation")
+		rows, err := DB.DB().Query("select count(*) from corporations")
 
 		if err != nil {
 			t.Fatal("Raw corporation count query had an issue")
@@ -68,10 +69,35 @@ func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 	})
 
 	t.Run("Character-NewAndAttachToUser", func(t *testing.T) {
-		//DB.Where
+		var userAsRetrieved model.User
+		newCharacter := model.Character{CharacterId: 2, CharacterName: "Test Character 2", CorporationId: 1, Corporation: corporation, Token: ""}
+
+		DB.Create(&newCharacter)
+
+		DB.Where("user_id = ?", 1).First(&userAsRetrieved)
+
+		DB.Model(&user).Association("Characters").Append(newCharacter)
+
+		charCount := DB.Model(&user).Association("Characters").Count()
+
+		if charCount != 2{
+			t.Fatalf("Expected 2 characters, only got %d", charCount)
+		}
+
+		err = DB.Model(&user).Association("Characters").Delete(&newCharacter).Error
+
+		if err != nil {
+			t.Fatalf("Could not remove the new character -> user association: %s", err)
+		}
+
+		rowsAffected := DB.Delete(&newCharacter).RowsAffected
+
+		if rowsAffected != 1 {
+			t.Fatalf("Did not remove the character, removed %d records", rowsAffected)
+		}
 	})
 
-	t.Run("User-PrintRelationships", func(t *testing.T) {
+	t.Run("User-Relationships", func(t *testing.T) {
 		var userCharRel *gorm.Relationship
 		var charUserRel *gorm.Relationship
 
@@ -87,40 +113,40 @@ func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 			}
 		}
 
-		if userCharRel.ForeignDBNames[0] != "character_id" {
-			t.Fatalf("User Character many2many had wrong mapping, expected character_id but got %s", userCharRel.ForeignDBNames)
+		if userCharRel.ForeignDBNames[0] != "user_id" {
+			t.Fatalf("User Character many2many had wrong mapping, expected user_id but got %s", userCharRel.ForeignDBNames)
 		}
 
 		if userCharRel.ForeignFieldNames[0] != "user_id" {
-			t.Fatalf("User Character many2many had wrong mapping, expected user_id but got %s", userCharRel.ForeignDBNames)
+			t.Fatalf("User Character many2many had wrong mapping, expected user_id but got %s", userCharRel.ForeignFieldNames)
 		}
 
-		if userCharRel.AssociationForeignDBNames[0] != "user_id" {
-			t.Fatalf("User Character many2many had wrong mapping, expected user_id but got %s", userCharRel.ForeignDBNames)
+		if userCharRel.AssociationForeignDBNames[0] != "character_id" {
+			t.Fatalf("User Character many2many had wrong mapping, expected character_id but got %s", userCharRel.AssociationForeignDBNames)
 		}
 
 		if userCharRel.AssociationForeignFieldNames[0] != "character_id" {
-			t.Fatalf("User Character many2many had wrong mapping, expected character_id but got %s", userCharRel.ForeignDBNames)
+			t.Fatalf("User Character many2many had wrong mapping, expected character_id but got %s", userCharRel.AssociationForeignFieldNames)
 		}
 
-		if charUserRel.ForeignDBNames[0] != "user_id" {
-			t.Fatalf("User Character many2many had wrong mapping, expected user_id but got %s", userCharRel.ForeignDBNames)
+		if charUserRel.ForeignDBNames[0] != "character_id" {
+			t.Fatalf("User Character many2many had wrong mapping, expected character_id but got %s", charUserRel.ForeignDBNames)
 		}
 
 		if charUserRel.ForeignFieldNames[0] != "character_id" {
-			t.Fatalf("User Character many2many had wrong mapping, expected character_id but got %s", userCharRel.ForeignDBNames)
+			t.Fatalf("User Character many2many had wrong mapping, expected character_id but got %s", charUserRel.ForeignFieldNames)
 		}
 
-		if charUserRel.AssociationForeignDBNames[0] != "character_id" {
-			t.Fatalf("User Character many2many had wrong mapping, expected character_id but got %s", userCharRel.ForeignDBNames)
+		if charUserRel.AssociationForeignDBNames[0] != "user_id" {
+			t.Fatalf("User Character many2many had wrong mapping, expected user_id but got %s", charUserRel.AssociationForeignDBNames)
 		}
 
 		if charUserRel.AssociationForeignFieldNames[0] != "user_id" {
-			t.Fatalf("User Character many2many had wrong mapping, expected user_id but got %s", userCharRel.ForeignDBNames)
+			t.Fatalf("User Character many2many had wrong mapping, expected user_id but got %s", charUserRel.AssociationForeignFieldNames)
 		}
 	})
 
-	t.Run("User-PrintJoinTableHandlers", func(t *testing.T) {
+	t.Run("User-JoinTableHandlers", func(t *testing.T) {
 		var userJoinTableHandler *gorm.JoinTableHandler
 		var charJoinTableHandler *gorm.JoinTableHandler
 
@@ -136,30 +162,64 @@ func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 			}
 		}
 
-		userJoinTableHandlerData, _ := json.Marshal(userJoinTableHandler)
-		charJoinTableHandlerData, _ := json.Marshal(charJoinTableHandler)
+		if userJoinTableHandler.Source.ForeignKeys[0].DBName != "user_id" {
+			t.Fatalf("user join table handler has wrong value for user_id association column: %s",
+				userJoinTableHandler.Source.ForeignKeys[0].DBName)
+		}
 
-		//fmt.Println(userJoinTableHandler)
-		fmt.Println(string(userJoinTableHandlerData))
-		fmt.Println(string(charJoinTableHandlerData))
+		if userJoinTableHandler.Destination.ForeignKeys[0].DBName != "character_id" {
+			t.Fatalf("user join table handler has wrong value for character_id association column: %s",
+				userJoinTableHandler.Destination.ForeignKeys[0].DBName)
+		}
+
+		if charJoinTableHandler.Source.ForeignKeys[0].DBName != "character_id" {
+			t.Fatalf("character join table handler has wrong value for character_id association column: %s",
+				charJoinTableHandler.Source.ForeignKeys[0].DBName)
+		}
+
+		if charJoinTableHandler.Destination.ForeignKeys[0].DBName != "user_id" {
+			t.Fatalf("character join table handler has wrong value for user_id association column: %s",
+				charJoinTableHandler.Destination.ForeignKeys[0].DBName)
+		}
 	})
 
 	//<editor-fold desc="Teardown Code">
 	tx := DB.Begin()
 
-	tx.Delete(&user)
-	tx.Delete(&character)
-	tx.Delete(&corporation)
-	tx.Delete(&alliance)
+	err = tx.Model(&user).Association("Characters").Delete(&character).Error
+
+	if err != nil {
+		t.Errorf("Could not remove user -> character association: (%s)", err)
+	}
+
+	rowsAffected := tx.Delete(&user).RowsAffected
+
+	if rowsAffected != 1 {
+		t.Errorf("Did not remove the user, removed %d records", rowsAffected)
+	}
+
+	rowsAffected = tx.Delete(&character).RowsAffected
+
+	if rowsAffected != 1 {
+		t.Errorf("Did not remove the character, removed %d records", rowsAffected)
+	}
+
+	rowsAffected = tx.Delete(&corporation).RowsAffected
+
+	if rowsAffected != 1 {
+		t.Errorf("Did not remove the corporation, removed %d records", rowsAffected)
+	}
+
+	rowsAffected = tx.Delete(&alliance).RowsAffected
+
+	if rowsAffected != 1 {
+		t.Errorf("Did not remove the alliance, removed %d records", rowsAffected)
+	}
 
 	tx.Commit()
 	//</editor-fold>
 }
 
 func TestCreateAndRetrieveThroughREPO(t *testing.T) {
-
-}
-
-func TestPrintUserForeignKeys(t *testing.T) {
 
 }
