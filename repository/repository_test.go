@@ -1,8 +1,8 @@
 package repository
 
 import (
-	//_ "github.com/mattn/go-sqlite3"
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/mattn/go-sqlite3"
+	//_ "github.com/go-sql-driver/mysql"
 	"testing"
 	"github.com/abaeve/auth-srv/model"
 	"github.com/jinzhu/gorm"
@@ -11,8 +11,8 @@ import (
 
 func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 	//<editor-fold desc="Setup code">
-	/*err := Setup("sqlite3", "file:../test/authSrv.db?loc=auto")*/
-	err := Setup("mysql", "root@tcp(localhost:3306)/microservices")
+	err := Setup("sqlite3", "file:../test/authSrv.db?loc=auto")
+	/*err := Setup("mysql", "root@tcp(localhost:3306)/microservices")*/
 
 	if err != nil {
 		t.Fatalf("Could not open database connection: %s", err)
@@ -33,10 +33,12 @@ func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 	//</editor-fold>
 
 	t.Run("Character-Retrieve", func(t *testing.T) {
+		tx := DB.Begin()
+
 		var characterAsRetrieved model.Character
 		var corporationAsRetrieved model.Corporation
 
-		DB.First(&characterAsRetrieved).Related(&corporationAsRetrieved)
+		tx.First(&characterAsRetrieved).Related(&corporationAsRetrieved)
 
 		if character.Corporation.CorporationId != corporationAsRetrieved.CorporationId {
 			t.Fatalf("Retrieved character's corporation (%d) doesn't equal original characters corporation: (%d)",
@@ -47,9 +49,13 @@ func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 			t.Fatalf("Retrieved character's corporation id: (%d) doesn't equal origin characters corporation: (%d)",
 				characterAsRetrieved.CorporationId, character.CorporationId)
 		}
+
+		tx.Rollback()
 	})
 
 	t.Run("Corporation-Count", func(t *testing.T) {
+		tx := DB.Begin()
+
 		rows, err := DB.DB().Query("select count(*) from corporations")
 
 		if err != nil {
@@ -66,35 +72,41 @@ func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 		} else {
 			t.Fatal("Raw corporation count query returned rows")
 		}
+
+		tx.Rollback()
 	})
 
 	t.Run("Character-NewAndAttachToUser", func(t *testing.T) {
+		tx := DB.Begin()
+
 		var userAsRetrieved model.User
 		newCharacter := model.Character{CharacterId: 2, CharacterName: "Test Character 2", CorporationId: 1, Corporation: corporation, Token: ""}
 
-		DB.Create(&newCharacter)
+		tx.Create(&newCharacter)
 
-		DB.Where("user_id = ?", 1).First(&userAsRetrieved)
+		tx.Where("user_id = ?", 1).First(&userAsRetrieved)
 
-		DB.Model(&user).Association("Characters").Append(newCharacter)
+		tx.Model(&user).Association("Characters").Append(newCharacter)
 
-		charCount := DB.Model(&user).Association("Characters").Count()
+		charCount := tx.Model(&user).Association("Characters").Count()
 
 		if charCount != 2{
 			t.Fatalf("Expected 2 characters, only got %d", charCount)
 		}
 
-		err = DB.Model(&user).Association("Characters").Delete(&newCharacter).Error
+		err = tx.Model(&user).Association("Characters").Delete(&newCharacter).Error
 
 		if err != nil {
 			t.Fatalf("Could not remove the new character -> user association: %s", err)
 		}
 
-		rowsAffected := DB.Delete(&newCharacter).RowsAffected
+		rowsAffected := tx.Delete(&newCharacter).RowsAffected
 
 		if rowsAffected != 1 {
 			t.Fatalf("Did not remove the character, removed %d records", rowsAffected)
 		}
+
+		tx.Rollback()
 	})
 
 	t.Run("User-Relationships", func(t *testing.T) {
