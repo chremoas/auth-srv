@@ -6,10 +6,9 @@ import (
 	"testing"
 	"github.com/abaeve/auth-srv/model"
 	"github.com/jinzhu/gorm"
-	"github.com/abaeve/auth-srv/util"
 )
 
-func TestCreateAndRetrieveThroughGORM(t *testing.T) {
+func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, model.Character, model.User) {
 	//<editor-fold desc="Setup code">
 	err := Setup("sqlite3", "file:../test/authSrv.db?loc=auto")
 	/*err := Setup("mysql", "root@tcp(localhost:3306)/microservices")*/
@@ -19,7 +18,6 @@ func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 	}
 
 	DB.LogMode(true)
-	util.HackJoinTableHandlerData(DB)
 
 	alliance := model.Alliance{AllianceId: 1, AllianceTicker: "TST", AllianceName: "Test AllianceRepo 1"}
 	corporation := model.Corporation{CorporationId: 1, AllianceId: 1, CorporationName: "Test Corporation 1", CorporationTicker: "TST", Alliance: alliance}
@@ -31,6 +29,40 @@ func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 	DB.Create(&character)
 	DB.Create(&user)
 	//</editor-fold>
+
+	return alliance, corporation, character, user
+}
+
+func SharedTearDown(t *testing.T, alliance model.Alliance, corporation model.Corporation, character model.Character, user model.User) {
+	//<editor-fold desc="Teardown Code">
+	/*TODO: WTF?*/
+	/*
+	This works...
+	DB.Model(&user).Association("Characters").Delete(&character)
+	DB.Delete(&user)
+	DB.Delete(&character)
+	DB.Delete(&corporation)
+	DB.Delete(&alliance)
+	*/
+	/*This doesn't?  I need this to work to clean up the other testing cases... or do I?*/
+	tx, _ := DB.DB().Begin()
+	t.Log("Deleting user_character_map entries")
+	tx.Exec("delete from user_character_map")
+	t.Log("Deleting user entries")
+	tx.Exec("delete from users")
+	t.Log("Deleting character entries")
+	tx.Exec("delete from characters")
+	t.Log("Deleting corporation entries")
+	tx.Exec("delete from corporations")
+	t.Log("Deleting alliance entries")
+	tx.Exec("delete from alliacnes")
+	tx.Commit()
+	//</editor-fold>
+}
+
+func TestCreateAndRetrieveThroughGORM(t *testing.T) {
+	var err error
+	alliance, corporation, character, user := SharedSetup(t)
 
 	t.Run("Character-Retrieve", func(t *testing.T) {
 		tx := DB.Begin()
@@ -76,7 +108,7 @@ func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 		tx.Rollback()
 	})
 
-	t.Run("Character-NewAndAttachToUser", func(t *testing.T) {
+	t.Run("Character-CreateAndAttachToUser", func(t *testing.T) {
 		tx := DB.Begin()
 
 		var userAsRetrieved model.User
@@ -195,43 +227,183 @@ func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 		}
 	})
 
-	//<editor-fold desc="Teardown Code">
-	tx := DB.Begin()
-
-	err = tx.Model(&user).Association("Characters").Delete(&character).Error
-
-	if err != nil {
-		t.Errorf("Could not remove user -> character association: (%s)", err)
-	}
-
-	rowsAffected := tx.Delete(&user).RowsAffected
-
-	if rowsAffected != 1 {
-		t.Errorf("Did not remove the user, removed %d records", rowsAffected)
-	}
-
-	rowsAffected = tx.Delete(&character).RowsAffected
-
-	if rowsAffected != 1 {
-		t.Errorf("Did not remove the character, removed %d records", rowsAffected)
-	}
-
-	rowsAffected = tx.Delete(&corporation).RowsAffected
-
-	if rowsAffected != 1 {
-		t.Errorf("Did not remove the corporation, removed %d records", rowsAffected)
-	}
-
-	rowsAffected = tx.Delete(&alliance).RowsAffected
-
-	if rowsAffected != 1 {
-		t.Errorf("Did not remove the alliance, removed %d records", rowsAffected)
-	}
-
-	tx.Commit()
-	//</editor-fold>
+	SharedTearDown(t, alliance, corporation, character, user)
 }
 
-func TestCreateAndRetrieveThroughREPO(t *testing.T) {
+//TODO: Implement Me
+func TestCreateAndRetrieveAlliancesThroughREPO(t *testing.T) {
+	alliance, corporation, character, user := SharedSetup(t)
 
+	t.Run("RetrieveByAllianeId", func(t *testing.T) {
+		t.Fatal("Implement me")
+	})
+
+	t.Run("Create", func(t *testing.T) {
+		t.Fatal("Implement me")
+	})
+
+	SharedTearDown(t, alliance, corporation, character, user)
 }
+
+//TODO: Implement Me
+func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
+	alliance, corporation, character, user := SharedSetup(t)
+
+	t.Run("RetrieveByCorporationId", func(t *testing.T) {
+		t.Fatal("Implement me")
+	})
+
+	t.Run("Create", func(t *testing.T) {
+		t.Fatal("Implement me")
+	})
+
+	SharedTearDown(t, alliance, corporation, character, user)
+}
+
+func TestCreateAndRetrieveCharactersThroughREPO(t *testing.T) {
+	alliance, corporation, character, user := SharedSetup(t)
+
+	t.Run("RetrieveByCharacterId", func(t *testing.T) {
+		characterAsRetrieved := CharacterRepo.FindByCharacterId(character.CharacterId)
+		corporationAsRetrieved := characterAsRetrieved.Corporation
+
+		if character.Corporation.CorporationId != corporationAsRetrieved.CorporationId {
+			t.Fatalf("Retrieved character's corporation (%d) doesn't equal original characters corporation: (%d)",
+				corporationAsRetrieved.CorporationId, character.Corporation.CorporationId)
+		}
+
+		if character.CorporationId != characterAsRetrieved.CorporationId {
+			t.Fatalf("Retrieved character's corporation id: (%d) doesn't equal origin characters corporation: (%d)",
+				characterAsRetrieved.CorporationId, character.CorporationId)
+		}
+	})
+
+	t.Run("RetrieveByAuthenticationCode", func(t *testing.T) {
+		characterAsRetrieved := CharacterRepo.FindByAutenticationCode("123456789012345678901")
+
+		if characterAsRetrieved.CharacterId != 1 {
+			t.Fatalf("Retrieved characters character id: (%d) doesn't equal original: (%d)",
+				characterAsRetrieved.CharacterId, character.CharacterId)
+		}
+	})
+
+	t.Run("Create", func(t *testing.T) {
+		characterAsCreated := model.Character{CharacterId: 2, CorporationId: 1, Token: "123456", CharacterName: "Test Character 2"}
+		var characterAsRetrieved model.Character
+
+		err := CharacterRepo.Save(characterAsCreated)
+
+		if err != nil {
+			t.Fatalf("Had an error saving the character: %s", err)
+		}
+
+		DB.Where("character_id = 2").Find(&characterAsRetrieved)
+
+		if characterAsRetrieved.CharacterId != characterAsCreated.CharacterId {
+			t.Fatalf("Retrieved characters id: (%d) does not equal the created one: (%d)",
+				characterAsRetrieved.CharacterId, characterAsCreated.CharacterId)
+		}
+
+		if characterAsRetrieved.CharacterName != characterAsCreated.CharacterName {
+			t.Fatalf("Retrieved characters name: (%s) does not equal the created one: (%s)",
+				characterAsRetrieved.CharacterName, characterAsCreated.CharacterName)
+		}
+
+		if characterAsRetrieved.Token != characterAsCreated.Token {
+			t.Fatalf("Retrieved characters token: (%s) does not equal the created one: (%s)",
+				characterAsRetrieved.Token, characterAsCreated.Token)
+		}
+
+		if characterAsRetrieved.CorporationId != characterAsCreated.CorporationId {
+			t.Fatalf("Retrieved characters corporation id: (%d) does not equal the created one: (%d)",
+				characterAsRetrieved.CorporationId, characterAsCreated.CorporationId)
+		}
+	})
+
+	t.Run("CreateAndAttachToUser", func(t *testing.T) {
+		characterAsCreated := model.Character{CharacterId: 3, CorporationId: 1, Token: "12345678901234567891", Users: []model.User{user}}
+		var characterAsRetrieved model.Character
+
+		err := CharacterRepo.Save(characterAsCreated)
+
+		if err != nil {
+			t.Fatalf("Had an error while saving the character: (s)", err)
+		}
+
+		DB.Where("character_id = 3").Find(&characterAsRetrieved)
+
+		if characterAsRetrieved.CharacterId != characterAsCreated.CharacterId {
+			t.Fatalf("Retrieved characters id: (%d) does not equal the created one: (%d)",
+				characterAsRetrieved.CharacterId, characterAsCreated.CharacterId)
+		}
+
+		if characterAsRetrieved.CharacterName != characterAsCreated.CharacterName {
+			t.Fatalf("Retrieved characters name: (%s) does not equal the created one: (%s)",
+				characterAsRetrieved.CharacterName, characterAsCreated.CharacterName)
+		}
+
+		if characterAsRetrieved.Token != characterAsCreated.Token {
+			t.Fatalf("Retrieved characters token: (%s) does not equal the created one: (%s)",
+				characterAsRetrieved.Token, characterAsCreated.Token)
+		}
+
+		if characterAsRetrieved.CorporationId != characterAsCreated.CorporationId {
+			t.Fatalf("Retrieved characters corporation id: (%d) does not equal the created one: (%d)",
+				characterAsRetrieved.CorporationId, characterAsCreated.CorporationId)
+		}
+
+		if characterAsRetrieved.Users[0].UserId != user.UserId {
+			t.Fatalf("Retrieved characters user id: (%s) does not equal the created one: (%s)",
+				characterAsRetrieved.Users[0].UserId, user.UserId)
+		}
+	})
+
+	SharedTearDown(t, alliance, corporation, character, user)
+}
+
+//TODO: Implement Me
+func TestCreateAndRetrieveUsersThroughREPO(t *testing.T) {
+	alliance, corporation, character, user := SharedSetup(t)
+
+	t.Run("RetrieveByChatId", func(t *testing.T) {
+		t.Fatal("Implement me")
+	})
+
+	t.Run("LinkCharacterToUserByAuthCode", func(t *testing.T) {
+		t.Fatal("Implement me")
+	})
+
+	t.Run("Create", func(t *testing.T) {
+		t.Fatal("Implement me")
+	})
+
+	SharedTearDown(t, alliance, corporation, character, user)
+}
+
+//TODO: Implement Me
+func TestCreateRolesThroughREPO(t *testing.T) {
+	alliance, corporation, character, user := SharedSetup(t)
+
+	t.Run("Create", func(t *testing.T) {
+		t.Fatal("Implement me")
+	})
+
+	SharedTearDown(t, alliance, corporation, character, user)
+}
+
+//TODO: Implement Me
+func TestCreateAndRetrieveAuthenticationCodesThroughREPO(t *testing.T) {
+	alliance, corporation, character, user := SharedSetup(t)
+
+	t.Run("Create", func(t *testing.T) {
+		t.Fatal("Implement me")
+	})
+
+	t.Run("RetrieveByCharacterId", func(t *testing.T) {
+		t.Fatal("Implement me")
+	})
+
+	SharedTearDown(t, alliance, corporation, character, user)
+}
+
+

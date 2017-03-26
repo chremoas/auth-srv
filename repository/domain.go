@@ -24,10 +24,16 @@ type CharacterRepository interface {
 type UserRepository interface {
 	Save(user model.User) error
 	FindByChatId(chatId string) model.User
-	LinkCharacterToUser(character model.Character, user model.User) error
+	LinkCharacterToUserByAuthCode(authCode string, user model.User) error
 }
+
 type RoleRepository interface {
 	Save(role model.Role) error
+}
+
+type AuthenticationCodeRepository interface {
+	Save(character model.Character, authCode string) error
+	FindByCharacterId(characterId int64) model.AuthenticationCode
 }
 
 type alliance struct {
@@ -47,6 +53,10 @@ type user struct {
 }
 
 type role struct {
+	db *gorm.DB
+}
+
+type authCodes struct {
 	db *gorm.DB
 }
 
@@ -101,7 +111,7 @@ func (usr *user) FindByChatId(chatId string) model.User {
 	return model.User{}
 }
 
-func (usr *user) LinkCharacterToUser(character model.Character, user model.User) error {
+func (usr *user) LinkCharacterToUserByAuthCode(authCode string, user model.User) error {
 	return nil
 }
 //END User accessor methods
@@ -111,3 +121,13 @@ func (rle *role) Save(role model.Role) error {
 	return nil
 }
 //END Role accessor methods
+
+//BGN Authentication Code methods
+func (ac *authCodes) Save(character model.Character, authCode string) error {
+	return nil
+}
+func (ac *authCodes) FindByCharacterId(characterId int64) model.AuthenticationCode {
+	return model.AuthenticationCode{}
+}
+
+//END Authentication Code methods

@@ -1,4 +1,4 @@
-package util
+package repository
 
 import (
 	"github.com/jinzhu/gorm"
@@ -6,7 +6,7 @@ import (
 )
 
 //TODO: Make this generic enough that it won't only hack one specific many2many relationship
-func HackJoinTableHandlerData(db *gorm.DB) {
+func hackJoinTableHandlerData(db *gorm.DB) {
 	//<editor-fold desc="Stupid hack because the developer won't fix it">
 	//Due to a bug being rejected this will never be fixed...
 	//https://github.com/jinzhu/gorm/issues/707
