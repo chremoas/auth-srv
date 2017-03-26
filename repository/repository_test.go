@@ -8,7 +8,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, model.Character, model.User) {
+func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, model.Character, model.User, model.AuthenticationCode) {
 	//<editor-fold desc="Setup code">
 	err := Setup("sqlite3", "file:../test/authSrv.db?loc=auto")
 	/*err := Setup("mysql", "root@tcp(localhost:3306)/microservices")*/
@@ -23,21 +23,24 @@ func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, model.Charact
 	corporation := model.Corporation{CorporationId: 1, AllianceId: 1, CorporationName: "Test Corporation 1", CorporationTicker: "TST", Alliance: alliance}
 	character := model.Character{CharacterId: 1, CharacterName: "Test Character 1", CorporationId: 1, Corporation: corporation, Token: ""}
 	user := model.User{UserId: 1, ChatId: "1234567890", Characters: []model.Character{character}}
+	authCode := model.AuthenticationCode{CharacterId: 1, Character: character, AuthenticationCode: "123456789012345678901"}
 
 	DB.Create(&alliance)
 	DB.Create(&corporation)
 	DB.Create(&character)
 	DB.Create(&user)
+	DB.Create(&authCode)
 	//</editor-fold>
 
-	return alliance, corporation, character, user
+	return alliance, corporation, character, user, authCode
 }
 
-func SharedTearDown(t *testing.T, alliance model.Alliance, corporation model.Corporation, character model.Character, user model.User) {
+func SharedTearDown(t *testing.T, alliance model.Alliance, corporation model.Corporation, character model.Character, user model.User, authCode model.AuthenticationCode) {
 	//<editor-fold desc="Teardown Code">
 	/*TODO: WTF?*/
 	/*
 	This works...
+	DB.Delete(&authCode)
 	DB.Model(&user).Association("Characters").Delete(&character)
 	DB.Delete(&user)
 	DB.Delete(&character)
@@ -46,6 +49,8 @@ func SharedTearDown(t *testing.T, alliance model.Alliance, corporation model.Cor
 	*/
 	/*This doesn't?  I need this to work to clean up the other testing cases... or do I?*/
 	tx, _ := DB.DB().Begin()
+	t.Log("Delete authentication_code entries")
+	tx.Exec("delete from authentication_codes")
 	t.Log("Deleting user_character_map entries")
 	tx.Exec("delete from user_character_map")
 	t.Log("Deleting user entries")
@@ -62,7 +67,7 @@ func SharedTearDown(t *testing.T, alliance model.Alliance, corporation model.Cor
 
 func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 	var err error
-	alliance, corporation, character, user := SharedSetup(t)
+	alliance, corporation, character, user, authCode := SharedSetup(t)
 
 	t.Run("Character-Retrieve", func(t *testing.T) {
 		tx := DB.Begin()
@@ -227,12 +232,12 @@ func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 		}
 	})
 
-	SharedTearDown(t, alliance, corporation, character, user)
+	SharedTearDown(t, alliance, corporation, character, user, authCode)
 }
 
 //TODO: Implement Me
 func TestCreateAndRetrieveAlliancesThroughREPO(t *testing.T) {
-	alliance, corporation, character, user := SharedSetup(t)
+	alliance, corporation, character, user, authCode := SharedSetup(t)
 
 	t.Run("RetrieveByAllianeId", func(t *testing.T) {
 		t.Fatal("Implement me")
@@ -242,12 +247,12 @@ func TestCreateAndRetrieveAlliancesThroughREPO(t *testing.T) {
 		t.Fatal("Implement me")
 	})
 
-	SharedTearDown(t, alliance, corporation, character, user)
+	SharedTearDown(t, alliance, corporation, character, user, authCode)
 }
 
 //TODO: Implement Me
 func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
-	alliance, corporation, character, user := SharedSetup(t)
+	alliance, corporation, character, user, authCode := SharedSetup(t)
 
 	t.Run("RetrieveByCorporationId", func(t *testing.T) {
 		t.Fatal("Implement me")
@@ -257,11 +262,11 @@ func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
 		t.Fatal("Implement me")
 	})
 
-	SharedTearDown(t, alliance, corporation, character, user)
+	SharedTearDown(t, alliance, corporation, character, user, authCode)
 }
 
 func TestCreateAndRetrieveCharactersThroughREPO(t *testing.T) {
-	alliance, corporation, character, user := SharedSetup(t)
+	alliance, corporation, character, user, authCode := SharedSetup(t)
 
 	t.Run("RetrieveByCharacterId", func(t *testing.T) {
 		characterAsRetrieved := CharacterRepo.FindByCharacterId(character.CharacterId)
@@ -331,6 +336,7 @@ func TestCreateAndRetrieveCharactersThroughREPO(t *testing.T) {
 		}
 
 		DB.Where("character_id = 3").Find(&characterAsRetrieved)
+		DB.Model(&characterAsRetrieved).Association("Users").Find(&characterAsRetrieved.Users)
 
 		if characterAsRetrieved.CharacterId != characterAsCreated.CharacterId {
 			t.Fatalf("Retrieved characters id: (%d) does not equal the created one: (%d)",
@@ -358,12 +364,12 @@ func TestCreateAndRetrieveCharactersThroughREPO(t *testing.T) {
 		}
 	})
 
-	SharedTearDown(t, alliance, corporation, character, user)
+	SharedTearDown(t, alliance, corporation, character, user, authCode)
 }
 
 //TODO: Implement Me
 func TestCreateAndRetrieveUsersThroughREPO(t *testing.T) {
-	alliance, corporation, character, user := SharedSetup(t)
+	alliance, corporation, character, user, authCode := SharedSetup(t)
 
 	t.Run("RetrieveByChatId", func(t *testing.T) {
 		t.Fatal("Implement me")
@@ -377,23 +383,23 @@ func TestCreateAndRetrieveUsersThroughREPO(t *testing.T) {
 		t.Fatal("Implement me")
 	})
 
-	SharedTearDown(t, alliance, corporation, character, user)
+	SharedTearDown(t, alliance, corporation, character, user, authCode)
 }
 
 //TODO: Implement Me
 func TestCreateRolesThroughREPO(t *testing.T) {
-	alliance, corporation, character, user := SharedSetup(t)
+	alliance, corporation, character, user, authCode := SharedSetup(t)
 
 	t.Run("Create", func(t *testing.T) {
 		t.Fatal("Implement me")
 	})
 
-	SharedTearDown(t, alliance, corporation, character, user)
+	SharedTearDown(t, alliance, corporation, character, user, authCode)
 }
 
 //TODO: Implement Me
 func TestCreateAndRetrieveAuthenticationCodesThroughREPO(t *testing.T) {
-	alliance, corporation, character, user := SharedSetup(t)
+	alliance, corporation, character, user, authCode := SharedSetup(t)
 
 	t.Run("Create", func(t *testing.T) {
 		t.Fatal("Implement me")
@@ -403,7 +409,7 @@ func TestCreateAndRetrieveAuthenticationCodesThroughREPO(t *testing.T) {
 		t.Fatal("Implement me")
 	})
 
-	SharedTearDown(t, alliance, corporation, character, user)
+	SharedTearDown(t, alliance, corporation, character, user, authCode)
 }
 
 

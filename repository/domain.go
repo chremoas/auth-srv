@@ -17,8 +17,8 @@ type CorporationRepository interface {
 
 type CharacterRepository interface {
 	Save(character model.Character) error
-	FindByCharacterId(characterId int64) model.Character
-	FindByAutenticationCode(authCode string) model.Character
+	FindByCharacterId(characterId int64) *model.Character
+	FindByAutenticationCode(authCode string) *model.Character
 }
 
 type UserRepository interface {
@@ -86,15 +86,34 @@ func (corp *corporation) FindByCorporationId(corporationId int64) model.Corporat
 
 //BGN Character accessor methods
 func (chr *character) Save(character model.Character) error {
-	return nil
+	err := chr.db.Save(character).Error
+	return err
 }
 
-func (chr *character) FindByCharacterId(characterId int64) model.Character {
-	return model.Character{}
+func (chr *character) FindByCharacterId(characterId int64) *model.Character {
+	var character model.Character
+
+	chr.db.Where("character_id = ?", characterId).Find(&character)
+	chr.db.Model(&character).Association("Corporation").Find(&character.Corporation)
+	chr.db.Model(&character).Association("Users").Find(&character.Users)
+	chr.db.Model(&character).Association("AuthCodes").Find(&character.AuthCodes)
+
+	return &character
 }
 
-func (chr *character) FindByAutenticationCode(authCode string) model.Character {
-	return model.Character{}
+func (chr *character) FindByAutenticationCode(authCode string) *model.Character {
+	var authCodeModel model.AuthenticationCode
+	var character model.Character
+
+	chr.db.Where("authentication_code = ?", authCode).Find(&authCodeModel)
+
+	if authCodeModel.CharacterId != 0 {
+		chr.db.Model(&authCodeModel).Association("Character").Find(&character)
+	}
+
+	//character.AuthCodes = []model.AuthenticationCode{authCodeModel}
+
+	return &character
 }
 
 func (chr *character) findByCharacterName ( characterName string ) model.Character {
