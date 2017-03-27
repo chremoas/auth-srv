@@ -8,7 +8,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, model.Character, model.User, model.AuthenticationCode) {
+func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, [2]model.Character, model.User, [2]model.AuthenticationCode) {
 	//<editor-fold desc="Setup code">
 	err := Setup("sqlite3", "file:../test/authSrv.db?loc=auto")
 	/*err := Setup("mysql", "root@tcp(localhost:3306)/microservices")*/
@@ -22,28 +22,34 @@ func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, model.Charact
 	alliance := model.Alliance{AllianceId: 1, AllianceTicker: "TST", AllianceName: "Test AllianceRepo 1"}
 	corporation := model.Corporation{CorporationId: 1, AllianceId: 1, CorporationName: "Test Corporation 1", CorporationTicker: "TST", Alliance: alliance}
 	character := model.Character{CharacterId: 1, CharacterName: "Test Character 1", CorporationId: 1, Corporation: corporation, Token: ""}
+	character10k := model.Character{CharacterId: 10000, CharacterName: "I'm lonely, auth me", CorporationId: 1, Corporation: corporation, Token: ""}
 	user := model.User{UserId: 1, ChatId: "1234567890", Characters: []model.Character{character}}
 	authCode := model.AuthenticationCode{CharacterId: 1, Character: character, AuthenticationCode: "123456789012345678901"}
+	authCode2 := model.AuthenticationCode{CharacterId: 10000, Character: character10k, AuthenticationCode: "abcdefghijk"}
 
 	DB.Create(&alliance)
 	DB.Create(&corporation)
 	DB.Create(&character)
+	DB.Create(&character10k)
 	DB.Create(&user)
 	DB.Create(&authCode)
+	DB.Create(&authCode2)
 	//</editor-fold>
 
-	return alliance, corporation, character, user, authCode
+	return alliance, corporation, [2]model.Character{character, character10k}, user, [2]model.AuthenticationCode{authCode, authCode2}
 }
 
-func SharedTearDown(t *testing.T, alliance model.Alliance, corporation model.Corporation, character model.Character, user model.User, authCode model.AuthenticationCode) {
+func SharedTearDown(t *testing.T, alliance model.Alliance, corporation model.Corporation, character [2]model.Character, user model.User, authCode [2]model.AuthenticationCode) {
 	//<editor-fold desc="Teardown Code">
 	/*TODO: WTF?*/
 	/*
 	This works...
-	DB.Delete(&authCode)
+	DB.Delete(&authCode[0])
+	DB.Delete(&authCode[1])
 	DB.Model(&user).Association("Characters").Delete(&character)
 	DB.Delete(&user)
-	DB.Delete(&character)
+	DB.Delete(&character[0])
+	DB.Delete(&character[1])
 	DB.Delete(&corporation)
 	DB.Delete(&alliance)
 	*/
@@ -77,14 +83,14 @@ func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 
 		tx.First(&characterAsRetrieved).Related(&corporationAsRetrieved)
 
-		if character.Corporation.CorporationId != corporationAsRetrieved.CorporationId {
+		if character[0].Corporation.CorporationId != corporationAsRetrieved.CorporationId {
 			t.Fatalf("Retrieved character's corporation (%d) doesn't equal original characters corporation: (%d)",
-				corporationAsRetrieved.CorporationId, character.Corporation.CorporationId)
+				corporationAsRetrieved.CorporationId, character[0].Corporation.CorporationId)
 		}
 
-		if character.CorporationId != characterAsRetrieved.CorporationId {
+		if character[0].CorporationId != characterAsRetrieved.CorporationId {
 			t.Fatalf("Retrieved character's corporation id: (%d) doesn't equal origin characters corporation: (%d)",
-				characterAsRetrieved.CorporationId, character.CorporationId)
+				characterAsRetrieved.CorporationId, character[0].CorporationId)
 		}
 
 		tx.Rollback()
@@ -395,17 +401,17 @@ func TestCreateAndRetrieveCharactersThroughREPO(t *testing.T) {
 	alliance, corporation, character, user, authCode := SharedSetup(t)
 
 	t.Run("RetrieveByCharacterId", func(t *testing.T) {
-		characterAsRetrieved := CharacterRepo.FindByCharacterId(character.CharacterId)
+		characterAsRetrieved := CharacterRepo.FindByCharacterId(character[0].CharacterId)
 		corporationAsRetrieved := characterAsRetrieved.Corporation
 
-		if character.Corporation.CorporationId != corporationAsRetrieved.CorporationId {
+		if character[0].Corporation.CorporationId != corporationAsRetrieved.CorporationId {
 			t.Fatalf("Retrieved character's corporation (%d) doesn't equal original characters corporation: (%d)",
-				corporationAsRetrieved.CorporationId, character.Corporation.CorporationId)
+				corporationAsRetrieved.CorporationId, character[0].Corporation.CorporationId)
 		}
 
-		if character.CorporationId != characterAsRetrieved.CorporationId {
+		if character[0].CorporationId != characterAsRetrieved.CorporationId {
 			t.Fatalf("Retrieved character's corporation id: (%d) doesn't equal origin characters corporation: (%d)",
-				characterAsRetrieved.CorporationId, character.CorporationId)
+				characterAsRetrieved.CorporationId, character[0].CorporationId)
 		}
 	})
 
@@ -414,7 +420,7 @@ func TestCreateAndRetrieveCharactersThroughREPO(t *testing.T) {
 
 		if characterAsRetrieved.CharacterId != 1 {
 			t.Fatalf("Retrieved characters character id: (%d) doesn't equal original: (%d)",
-				characterAsRetrieved.CharacterId, character.CharacterId)
+				characterAsRetrieved.CharacterId, character[0].CharacterId)
 		}
 	})
 
@@ -493,20 +499,79 @@ func TestCreateAndRetrieveCharactersThroughREPO(t *testing.T) {
 	SharedTearDown(t, alliance, corporation, character, user, authCode)
 }
 
-//TODO: Implement Me
 func TestCreateAndRetrieveUsersThroughREPO(t *testing.T) {
 	alliance, corporation, character, user, authCode := SharedSetup(t)
 
 	t.Run("RetrieveByChatId", func(t *testing.T) {
-		t.Fatal("Implement me")
+		userAsRetrieved := UserRepo.FindByChatId(user.ChatId)
+
+		if userAsRetrieved.ChatId != user.ChatId {
+			t.Fatalf("Retrieved user's chat id: (%s) does not equal original: (%s)",
+				userAsRetrieved.ChatId, user.ChatId)
+		}
+
+		if userAsRetrieved.UserId != user.UserId {
+			t.Fatalf("Retrieved user's user id: (%d) does not equal original: (%d)",
+				userAsRetrieved.UserId, user.UserId)
+		}
+
+		if len(userAsRetrieved.Characters) != len(user.Characters) {
+			t.Fatalf("Retrieved user's character list size: (%d) does not equal original: (%d)",
+				len(userAsRetrieved.Characters), len(user.Characters))
+		}
 	})
 
 	t.Run("LinkCharacterToUserByAuthCode", func(t *testing.T) {
-		t.Fatal("Implement me")
+		err := UserRepo.LinkCharacterToUserByAuthCode(authCode[1].AuthenticationCode, &user)
+
+		if err != nil {
+			t.Fatalf("Had an error while linking a character to a user: %s", err)
+		}
+
+		var linkedUser []model.User
+		var authCodeAsRetrieved model.AuthenticationCode
+		DB.Model(&character[1]).Association("Users").Find(&linkedUser)
+		DB.Where("character_id = ?", character[1].CharacterId).Find(&authCodeAsRetrieved)
+
+		if len(linkedUser) == 0 {
+			t.Fatal("Expected at least one linked user")
+		}
+
+		if len(user.Characters) != 2 {
+			t.Fatal("User should have 2 characters")
+		}
+
+		if linkedUser[0].UserId != user.UserId {
+			t.Fatalf("Linked user's user id: (%d) does not equal original: (%d)",
+				linkedUser[0].UserId, user.UserId)
+		}
+
+		if authCodeAsRetrieved.IsUsed == false {
+			t.Fatal("Auth code was not used up")
+		}
 	})
 
 	t.Run("Create", func(t *testing.T) {
-		t.Fatal("Implement me")
+		var userAsRetrieved model.User
+		userAsCreated := model.User{ChatId: "01234567890"}
+
+		err := UserRepo.Save(&userAsCreated)
+
+		if err != nil {
+			t.Fatalf("Had an error while saving the user: %s", err)
+		}
+
+		DB.Where("user_id = ?", userAsCreated.UserId).Find(&userAsRetrieved)
+
+		if userAsCreated.ChatId != userAsRetrieved.ChatId {
+			t.Fatalf("Retrieved user's chat id: (%s) does not equal original: (%s)",
+				userAsCreated.ChatId, userAsRetrieved.ChatId)
+		}
+
+		if userAsCreated.UserId != userAsRetrieved.UserId {
+			t.Fatalf("Retrieved user's user id: (%d) does not equal original: (%d)",
+				userAsCreated.UserId, userAsRetrieved.UserId)
+		}
 	})
 
 	SharedTearDown(t, alliance, corporation, character, user, authCode)

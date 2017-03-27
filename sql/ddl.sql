@@ -79,6 +79,7 @@ CREATE TABLE authentication_codes
 (
   character_id        BIGINT(20) PRIMARY KEY NOT NULL,
   authentication_code VARCHAR(20)            NOT NULL,
+  is_used             BOOLEAN                NOT NULL DEFAULT FALSE,
   CONSTRAINT authentication_code_character_character_id_fk FOREIGN KEY (character_id) REFERENCES characters (character_id)
 );
 

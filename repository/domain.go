@@ -148,14 +148,52 @@ func (chr *character) findByCharacterName(characterName string) *model.Character
 
 //BGN User accessor methods
 func (usr *user) Save(user *model.User) error {
-	return nil
+	err := usr.db.Save(&user).Error
+
+	return err
 }
 
 func (usr *user) FindByChatId(chatId string) *model.User {
-	return &model.User{}
+	var user model.User
+
+	usr.db.Where("chat_id = ?", chatId).Find(&user)
+	usr.db.Model(&user).Association("Characters").Find(&user.Characters)
+
+	return &user
 }
 
 func (usr *user) LinkCharacterToUserByAuthCode(authCode string, user *model.User) error {
+	foundCharacter := CharacterRepo.FindByAutenticationCode(authCode)
+
+	if foundCharacter == nil {
+		return &daoError{message: "No user with that auth code found"}
+	}
+
+	//Ensure we have all the current associations
+	usr.db.Model(&user).Association("Characters").Find(&user.Characters)
+
+	//BGN Do I really have to do this to grow the size of an array?
+	characters := user.Characters
+	user.Characters = make([]model.Character, len(characters)+1)
+
+	for idx, character := range characters {
+		user.Characters[idx] = character
+	}
+
+	user.Characters[len(user.Characters)-1] = *foundCharacter
+	//END Do I really have to do this to grow the size of an array?
+
+	usr.db.Save(&user)
+
+	//Now use up the auth code
+	var authCodeModel model.AuthenticationCode
+	//TODO: Refactor this into the auth code repo?
+	usr.db.Where("authentication_code = ?", authCode).Find(&authCodeModel)
+
+	authCodeModel.IsUsed = true
+
+	usr.db.Save(&authCodeModel)
+
 	return nil
 }
 //END User accessor methods
