@@ -25,13 +25,13 @@ func Setup ( dialect string, connectionString string ) error {
 
 	hackJoinTableHandlerData(DB)
 
-	AllianceRepo = &alliance{db: DB}
-	CorporationRepo = &corporation{db: DB}
-	CharacterRepo = &character{db: DB}
-	UserRepo = &user{db: DB}
-	RoleRepo = &role{db: DB}
+	AllianceRepo = &allianceRepository{db: DB}
+	CorporationRepo = &corporationRepository{db: DB}
+	CharacterRepo = &characterRepository{db: DB}
+	UserRepo = &userRepository{db: DB}
+	RoleRepo = &roleRepository{db: DB}
 	Accesses = &accesses{db: DB.DB()}
-	AuthenticationCodeRepo = &authCodes{db: DB}
+	AuthenticationCodeRepo = &authCodeRepository{db: DB}
 
 	return nil
 }

@@ -74,6 +74,7 @@ func SharedTearDown() {
 	var characters []model.Character
 	var corporations []model.Corporation
 	var alliances []model.Alliance
+	var roles []model.Role
 
 	tx := DB.Begin()
 
@@ -82,6 +83,7 @@ func SharedTearDown() {
 	tx.Find(&characters)
 	tx.Find(&corporations)
 	tx.Find(&alliances)
+	tx.Find(&roles)
 
 	for _, authCode := range authCodes {
 		tx.Delete(&authCode)
@@ -107,6 +109,10 @@ func SharedTearDown() {
 
 	for _, alliance := range alliances {
 		tx.Delete(&alliance)
+	}
+
+	for _, role := range roles {
+		tx.Delete(&role)
 	}
 
 	tx.Commit()
@@ -285,6 +291,8 @@ func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 
 func TestCreateAndRetrieveAlliancesThroughREPO(t *testing.T) {
 	alliance, _, _, _, _ := SharedSetup(t)
+	allianceRepo := AllianceRepo.(*allianceRepository)
+	allianceRepo.db = allianceRepo.db.Begin()
 
 	t.Run("RetrieveByAllianceId", func(t *testing.T) {
 		var allianceAsRetrieved *model.Alliance
@@ -317,7 +325,7 @@ func TestCreateAndRetrieveAlliancesThroughREPO(t *testing.T) {
 			t.Fatalf("Had an error while saving test alliance: %s", err)
 		}
 
-		DB.Where("alliance_id = 2").Find(&allianceAsRetrieved)
+		allianceRepo.db.Where("alliance_id = 2").Find(&allianceAsRetrieved)
 
 		if allianceAsRetrieved.AllianceId != allianceAsCreated.AllianceId {
 			t.Fatalf("Retrieved alliance's alliance id: (%d) does not equal original: (%d)",
@@ -345,11 +353,14 @@ func TestCreateAndRetrieveAlliancesThroughREPO(t *testing.T) {
 		}
 	})
 
+	allianceRepo.db.Rollback()
 	SharedTearDown()
 }
 
 func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
 	alliance, corporation, _, _, _ := SharedSetup(t)
+	corpRepo := CorporationRepo.(*corporationRepository)
+	corpRepo.db = corpRepo.db.Begin()
 
 	t.Run("RetrieveByCorporationId", func(t *testing.T) {
 		var corporationAsRetrieved *model.Corporation
@@ -398,7 +409,7 @@ func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
 			t.Fatalf("Had an error while saving the test corporation: %s", err)
 		}
 
-		DB.Where("corporation_id = 2").Find(&corporationAsRetrieved)
+		corpRepo.db.Where("corporation_id = 2").Find(&corporationAsRetrieved)
 
 		if corporationAsRetrieved.CorporationId != corporationAsCreated.CorporationId {
 			t.Fatalf("Retrieved corporation's id: (%d) does not equal original: (%d)",
@@ -436,11 +447,14 @@ func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
 		}
 	})
 
+	corpRepo.db.Rollback()
 	SharedTearDown()
 }
 
 func TestCreateAndRetrieveCharactersThroughREPO(t *testing.T) {
 	_, _, character, user, _ := SharedSetup(t)
+	charRepo := CharacterRepo.(*characterRepository)
+	charRepo.db = charRepo.db.Begin()
 
 	t.Run("RetrieveByCharacterId", func(t *testing.T) {
 		characterAsRetrieved := CharacterRepo.FindByCharacterId(character[0].CharacterId)
@@ -476,7 +490,7 @@ func TestCreateAndRetrieveCharactersThroughREPO(t *testing.T) {
 			t.Fatalf("Had an error saving the character: %s", err)
 		}
 
-		DB.Where("character_id = 2").Find(&characterAsRetrieved)
+		charRepo.db.Where("character_id = 2").Find(&characterAsRetrieved)
 
 		if characterAsRetrieved.CharacterId != characterAsCreated.CharacterId {
 			t.Fatalf("Retrieved characters id: (%d) does not equal the created one: (%d)",
@@ -509,8 +523,8 @@ func TestCreateAndRetrieveCharactersThroughREPO(t *testing.T) {
 			t.Fatalf("Had an error while saving the character: (s)", err)
 		}
 
-		DB.Where("character_id = 3").Find(&characterAsRetrieved)
-		DB.Model(&characterAsRetrieved).Association("Users").Find(&characterAsRetrieved.Users)
+		charRepo.db.Where("character_id = 3").Find(&characterAsRetrieved)
+		charRepo.db.Model(&characterAsRetrieved).Association("Users").Find(&characterAsRetrieved.Users)
 
 		if characterAsRetrieved.CharacterId != characterAsCreated.CharacterId {
 			t.Fatalf("Retrieved characters id: (%d) does not equal the created one: (%d)",
@@ -538,11 +552,14 @@ func TestCreateAndRetrieveCharactersThroughREPO(t *testing.T) {
 		}
 	})
 
+	charRepo.db.Rollback()
 	SharedTearDown()
 }
 
 func TestCreateAndRetrieveUsersThroughREPO(t *testing.T) {
 	_, _, character, user, authCode := SharedSetup(t)
+	usersRepo := UserRepo.(*userRepository)
+	usersRepo.db = usersRepo.db.Begin()
 
 	t.Run("RetrieveByChatId", func(t *testing.T) {
 		userAsRetrieved := UserRepo.FindByChatId(user.ChatId)
@@ -572,8 +589,8 @@ func TestCreateAndRetrieveUsersThroughREPO(t *testing.T) {
 
 		var linkedUser []model.User
 		var authCodeAsRetrieved model.AuthenticationCode
-		DB.Model(&character[1]).Association("Users").Find(&linkedUser)
-		DB.Where("character_id = ?", character[1].CharacterId).Find(&authCodeAsRetrieved)
+		usersRepo.db.Model(&character[1]).Association("Users").Find(&linkedUser)
+		usersRepo.db.Where("character_id = ?", character[1].CharacterId).Find(&authCodeAsRetrieved)
 
 		if len(linkedUser) == 0 {
 			t.Fatal("Expected at least one linked user")
@@ -603,7 +620,7 @@ func TestCreateAndRetrieveUsersThroughREPO(t *testing.T) {
 			t.Fatalf("Had an error while saving the user: %s", err)
 		}
 
-		DB.Where("user_id = ?", userAsCreated.UserId).Find(&userAsRetrieved)
+		usersRepo.db.Where("user_id = ?", userAsCreated.UserId).Find(&userAsRetrieved)
 
 		if userAsCreated.ChatId != userAsRetrieved.ChatId {
 			t.Fatalf("Retrieved user's chat id: (%s) does not equal original: (%s)",
@@ -616,11 +633,14 @@ func TestCreateAndRetrieveUsersThroughREPO(t *testing.T) {
 		}
 	})
 
+	usersRepo.db.Rollback()
 	SharedTearDown()
 }
 
 func TestCreateRolesThroughREPO(t *testing.T) {
 	SharedSetup(t)
+	rolesRepo := RoleRepo.(*roleRepository)
+	rolesRepo.db = rolesRepo.db.Begin()
 
 	t.Run("CreateNoChatServiceGroup", func(t *testing.T) {
 		var roleAsRetrieved model.Role
@@ -631,7 +651,7 @@ func TestCreateRolesThroughREPO(t *testing.T) {
 			t.Fatalf("Had an error while saving the role: %s", err)
 		}
 
-		DB.Where("role_name = 'TEST_ROLE_FOR_TESTING'").Find(&roleAsRetrieved)
+		rolesRepo.db.Where("role_name = 'TEST_ROLE_FOR_TESTING'").Find(&roleAsRetrieved)
 
 		if roleAsRetrieved.RoleName != newRole.RoleName {
 			t.Fatalf("Retrieved role's name: (%s) does not match original: (%s)",
@@ -653,7 +673,7 @@ func TestCreateRolesThroughREPO(t *testing.T) {
 			t.Fatalf("Had an error while saving the role: %s", err)
 		}
 
-		DB.Where("role_name = 'TEST_ROLE_FOR_TESTING2'").Find(&roleAsRetrieved)
+		rolesRepo.db.Where("role_name = 'TEST_ROLE_FOR_TESTING2'").Find(&roleAsRetrieved)
 
 		if roleAsRetrieved.RoleName != newRole.RoleName {
 			t.Fatalf("Retrieved role's name: (%s) does not match original: (%s)",
@@ -666,18 +686,21 @@ func TestCreateRolesThroughREPO(t *testing.T) {
 		}
 	})
 
+	rolesRepo.db.Rollback()
 	SharedTearDown()
 }
 
 func TestCreateAndRetrieveAuthenticationCodesThroughREPO(t *testing.T) {
 	_, _, characters, _, _ := SharedSetup(t)
+	authCodeRepo := AuthenticationCodeRepo.(*authCodeRepository)
+	authCodeRepo.db = authCodeRepo.db.Begin()
 
 	t.Run("Create", func(t *testing.T) {
 		var authCodesAsRetrieved []model.AuthenticationCode
 
 		AuthenticationCodeRepo.Save(&characters[0], "testtest123")
 
-		DB.Where("character_id = ?", characters[0].CharacterId).Find(&authCodesAsRetrieved)
+		authCodeRepo.db.Where("character_id = ?", characters[0].CharacterId).Find(&authCodesAsRetrieved)
 
 		aMatchFound := false
 		aMatchFoundIdx := -1
@@ -698,6 +721,7 @@ func TestCreateAndRetrieveAuthenticationCodesThroughREPO(t *testing.T) {
 		}
 	})
 
+	authCodeRepo.db.Rollback()
 	SharedTearDown()
 }
 

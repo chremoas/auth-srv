@@ -38,27 +38,27 @@ type AuthenticationCodeRepository interface {
 	*/
 }
 
-type alliance struct {
+type allianceRepository struct {
 	db *gorm.DB
 }
 
-type corporation struct {
+type corporationRepository struct {
 	db *gorm.DB
 }
 
-type character struct {
+type characterRepository struct {
 	db *gorm.DB
 }
 
-type user struct {
+type userRepository struct {
 	db *gorm.DB
 }
 
-type role struct {
+type roleRepository struct {
 	db *gorm.DB
 }
 
-type authCodes struct {
+type authCodeRepository struct {
 	db *gorm.DB
 }
 
@@ -67,7 +67,7 @@ type daoError struct {
 }
 
 //BGN AllianceRepo accessor methods
-func (all *alliance) Save(alliance *model.Alliance) error {
+func (all *allianceRepository) Save(alliance *model.Alliance) error {
 	//Apparently GORM sends no error back when a primary key isn't populated?  GARBAGE!
 	if alliance.AllianceId == 0 {
 		return &daoError{message: "Primary key must not be 0"}
@@ -78,7 +78,7 @@ func (all *alliance) Save(alliance *model.Alliance) error {
 	return err
 }
 
-func (all *alliance) FindByAllianceId(allianceId int64) *model.Alliance {
+func (all *allianceRepository) FindByAllianceId(allianceId int64) *model.Alliance {
 	var alliance model.Alliance
 
 	all.db.Where("alliance_id = ?", allianceId).Find(&alliance)
@@ -86,13 +86,13 @@ func (all *alliance) FindByAllianceId(allianceId int64) *model.Alliance {
 	return &alliance
 }
 
-func (all *alliance) findByAllianceName(allianceName string) *model.Alliance {
+func (all *allianceRepository) findByAllianceName(allianceName string) *model.Alliance {
 	return &model.Alliance{}
 }
 //END AllianceRepo accessor methods
 
 //BGN Corporation accessor methods
-func (corp *corporation) Save(corporation *model.Corporation) error {
+func (corp *corporationRepository) Save(corporation *model.Corporation) error {
 	if corporation.CorporationId == 0 {
 		return &daoError{message: "Primary key must not be 0"}
 	}
@@ -101,7 +101,7 @@ func (corp *corporation) Save(corporation *model.Corporation) error {
 	return err
 }
 
-func (corp *corporation) FindByCorporationId(corporationId int64) *model.Corporation {
+func (corp *corporationRepository) FindByCorporationId(corporationId int64) *model.Corporation {
 	var corporation model.Corporation
 
 	corp.db.Where("corporation_id = ?", corporationId).Find(&corporation)
@@ -112,12 +112,12 @@ func (corp *corporation) FindByCorporationId(corporationId int64) *model.Corpora
 //END Corporation accessor methods
 
 //BGN Character accessor methods
-func (chr *character) Save(character *model.Character) error {
+func (chr *characterRepository) Save(character *model.Character) error {
 	err := chr.db.Save(character).Error
 	return err
 }
 
-func (chr *character) FindByCharacterId(characterId int64) *model.Character {
+func (chr *characterRepository) FindByCharacterId(characterId int64) *model.Character {
 	var character model.Character
 
 	chr.db.Where("character_id = ?", characterId).Find(&character)
@@ -128,7 +128,7 @@ func (chr *character) FindByCharacterId(characterId int64) *model.Character {
 	return &character
 }
 
-func (chr *character) FindByAutenticationCode(authCode string) *model.Character {
+func (chr *characterRepository) FindByAutenticationCode(authCode string) *model.Character {
 	var authCodeModel model.AuthenticationCode
 	var character model.Character
 
@@ -143,19 +143,19 @@ func (chr *character) FindByAutenticationCode(authCode string) *model.Character 
 	return &character
 }
 
-func (chr *character) findByCharacterName(characterName string) *model.Character {
+func (chr *characterRepository) findByCharacterName(characterName string) *model.Character {
 	return &model.Character{}
 }
 //END Character accessor methods
 
 //BGN User accessor methods
-func (usr *user) Save(user *model.User) error {
+func (usr *userRepository) Save(user *model.User) error {
 	err := usr.db.Save(&user).Error
 
 	return err
 }
 
-func (usr *user) FindByChatId(chatId string) *model.User {
+func (usr *userRepository) FindByChatId(chatId string) *model.User {
 	var user model.User
 
 	usr.db.Where("chat_id = ?", chatId).Find(&user)
@@ -164,7 +164,7 @@ func (usr *user) FindByChatId(chatId string) *model.User {
 	return &user
 }
 
-func (usr *user) LinkCharacterToUserByAuthCode(authCode string, user *model.User) error {
+func (usr *userRepository) LinkCharacterToUserByAuthCode(authCode string, user *model.User) error {
 	foundCharacter := CharacterRepo.FindByAutenticationCode(authCode)
 
 	if foundCharacter == nil {
@@ -201,14 +201,14 @@ func (usr *user) LinkCharacterToUserByAuthCode(authCode string, user *model.User
 //END User accessor methods
 
 //BGN Role accessor methods
-func (rle *role) Save(role *model.Role) error {
+func (rle *roleRepository) Save(role *model.Role) error {
 	err := rle.db.Save(&role).Error
 	return err
 }
 //END Role accessor methods
 
 //BGN Authentication Code methods
-func (ac *authCodes) Save(character *model.Character, authCode string) error {
+func (ac *authCodeRepository) Save(character *model.Character, authCode string) error {
 	newAuthCode := model.AuthenticationCode{AuthenticationCode: authCode, CharacterId: character.CharacterId, Character: *character, IsUsed: false}
 
 	err := ac.db.Save(&newAuthCode).Error
@@ -216,7 +216,7 @@ func (ac *authCodes) Save(character *model.Character, authCode string) error {
 	return err
 }
 
-func (ac *authCodes) findByCharacterId(characterId int64) *model.AuthenticationCode {
+func (ac *authCodeRepository) findByCharacterId(characterId int64) *model.AuthenticationCode {
 	return &model.AuthenticationCode{}
 }
 //END Authentication Code methods
