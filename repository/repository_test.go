@@ -235,16 +235,56 @@ func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 	SharedTearDown(t, alliance, corporation, character, user, authCode)
 }
 
-//TODO: Implement Me
 func TestCreateAndRetrieveAlliancesThroughREPO(t *testing.T) {
 	alliance, corporation, character, user, authCode := SharedSetup(t)
 
-	t.Run("RetrieveByAllianeId", func(t *testing.T) {
-		t.Fatal("Implement me")
+	t.Run("RetrieveByAllianceId", func(t *testing.T) {
+		var allianceAsRetrieved *model.Alliance
+
+		allianceAsRetrieved = AllianceRepo.FindByAllianceId(alliance.AllianceId)
+
+		if allianceAsRetrieved.AllianceId != alliance.AllianceId {
+			t.Fatalf("Retrieved alliance's alliance id: (%d) does not equal original: (%d)",
+				allianceAsRetrieved.AllianceId, alliance.AllianceId)
+		}
+
+		if allianceAsRetrieved.AllianceTicker != alliance.AllianceTicker {
+			t.Fatalf("Retrieved alliance's ticker: (%s) does not equal original: (%s)",
+				allianceAsRetrieved.AllianceTicker, alliance.AllianceTicker)
+		}
+
+		if allianceAsRetrieved.AllianceName != alliance.AllianceName {
+			t.Fatalf("Retrieved alliance's name: (%s) does not equal original: (%s)",
+				allianceAsRetrieved.AllianceName, alliance.AllianceName)
+		}
 	})
 
 	t.Run("Create", func(t *testing.T) {
-		t.Fatal("Implement me")
+		var allianceAsRetrieved model.Alliance
+		allianceAsCreated := model.Alliance{AllianceId: 2, AllianceName: "Test Alliacnce 2", AllianceTicker: "TST2"}
+
+		err := AllianceRepo.Save(&allianceAsCreated)
+
+		if err != nil {
+			t.Fatalf("Had an error while saving test alliance: %s", err)
+		}
+
+		DB.Where("alliance_id = 2").Find(&allianceAsRetrieved)
+
+		if allianceAsRetrieved.AllianceId != allianceAsCreated.AllianceId {
+			t.Fatalf("Retrieved alliance's alliance id: (%d) does not equal original: (%d)",
+				allianceAsRetrieved.AllianceId, allianceAsCreated.AllianceId)
+		}
+
+		if allianceAsRetrieved.AllianceTicker != allianceAsCreated.AllianceTicker {
+			t.Fatalf("Retrieved alliance's ticker: (%s) does not equal original: (%s)",
+				allianceAsRetrieved.AllianceTicker, allianceAsCreated.AllianceTicker)
+		}
+
+		if allianceAsRetrieved.AllianceName != allianceAsCreated.AllianceName {
+			t.Fatalf("Retrieved alliance's name: (%s) does not equal original: (%s)",
+				allianceAsRetrieved.AllianceName, allianceAsCreated.AllianceName)
+		}
 	})
 
 	SharedTearDown(t, alliance, corporation, character, user, authCode)
@@ -296,7 +336,7 @@ func TestCreateAndRetrieveCharactersThroughREPO(t *testing.T) {
 		characterAsCreated := model.Character{CharacterId: 2, CorporationId: 1, Token: "123456", CharacterName: "Test Character 2"}
 		var characterAsRetrieved model.Character
 
-		err := CharacterRepo.Save(characterAsCreated)
+		err := CharacterRepo.Save(&characterAsCreated)
 
 		if err != nil {
 			t.Fatalf("Had an error saving the character: %s", err)
@@ -329,7 +369,7 @@ func TestCreateAndRetrieveCharactersThroughREPO(t *testing.T) {
 		characterAsCreated := model.Character{CharacterId: 3, CorporationId: 1, Token: "12345678901234567891", Users: []model.User{user}}
 		var characterAsRetrieved model.Character
 
-		err := CharacterRepo.Save(characterAsCreated)
+		err := CharacterRepo.Save(&characterAsCreated)
 
 		if err != nil {
 			t.Fatalf("Had an error while saving the character: (s)", err)

@@ -6,34 +6,34 @@ import (
 )
 
 type AllianceRepository interface {
-	Save(alliance model.Alliance) error
-	FindByAllianceId(allianceId int64) model.Alliance
+	Save(alliance *model.Alliance) error
+	FindByAllianceId(allianceId int64) *model.Alliance
 }
 
 type CorporationRepository interface {
-	Save(corporation model.Corporation) error
-	FindByCorporationId(corporationId int64) model.Corporation
+	Save(corporation *model.Corporation) error
+	FindByCorporationId(corporationId int64) *model.Corporation
 }
 
 type CharacterRepository interface {
-	Save(character model.Character) error
+	Save(character *model.Character) error
 	FindByCharacterId(characterId int64) *model.Character
 	FindByAutenticationCode(authCode string) *model.Character
 }
 
 type UserRepository interface {
-	Save(user model.User) error
-	FindByChatId(chatId string) model.User
-	LinkCharacterToUserByAuthCode(authCode string, user model.User) error
+	Save(user *model.User) error
+	FindByChatId(chatId string) *model.User
+	LinkCharacterToUserByAuthCode(authCode string, user *model.User) error
 }
 
 type RoleRepository interface {
-	Save(role model.Role) error
+	Save(role *model.Role) error
 }
 
 type AuthenticationCodeRepository interface {
-	Save(character model.Character, authCode string) error
-	FindByCharacterId(characterId int64) model.AuthenticationCode
+	Save(character *model.Character, authCode string) error
+	FindByCharacterId(characterId int64) *model.AuthenticationCode
 }
 
 type alliance struct {
@@ -61,31 +61,36 @@ type authCodes struct {
 }
 
 //BGN AllianceRepo accessor methods
-func (all *alliance) Save(alliance model.Alliance) error {
-	return nil
+func (all *alliance) Save(alliance *model.Alliance) error {
+	err := all.db.Save(alliance).Error
+	return err
 }
 
-func (all *alliance) FindByAllianceId(allianceId int64) model.Alliance {
-	return model.Alliance{}
+func (all *alliance) FindByAllianceId(allianceId int64) *model.Alliance {
+	var alliance model.Alliance
+
+	all.db.Where("alliance_id = ?", allianceId).Find(&alliance)
+
+	return &alliance
 }
 
-func (all *alliance) findByAllianceName ( allianceName string ) model.Alliance {
-	return model.Alliance{}
+func (all *alliance) findByAllianceName(allianceName string) *model.Alliance {
+	return &model.Alliance{}
 }
 //END AllianceRepo accessor methods
 
 //BGN Corporation accessor methods
-func (corp *corporation) Save(corporation model.Corporation) error {
+func (corp *corporation) Save(corporation *model.Corporation) error {
 	return nil
 }
 
-func (corp *corporation) FindByCorporationId(corporationId int64) model.Corporation {
-	return model.Corporation{}
+func (corp *corporation) FindByCorporationId(corporationId int64) *model.Corporation {
+	return &model.Corporation{}
 }
 //END Corporation accessor methods
 
 //BGN Character accessor methods
-func (chr *character) Save(character model.Character) error {
+func (chr *character) Save(character *model.Character) error {
 	err := chr.db.Save(character).Error
 	return err
 }
@@ -116,37 +121,37 @@ func (chr *character) FindByAutenticationCode(authCode string) *model.Character 
 	return &character
 }
 
-func (chr *character) findByCharacterName ( characterName string ) model.Character {
-	return model.Character{}
+func (chr *character) findByCharacterName(characterName string) *model.Character {
+	return &model.Character{}
 }
 //END Character accessor methods
 
 //BGN User accessor methods
-func (usr *user) Save(user model.User) error {
+func (usr *user) Save(user *model.User) error {
 	return nil
 }
 
-func (usr *user) FindByChatId(chatId string) model.User {
-	return model.User{}
+func (usr *user) FindByChatId(chatId string) *model.User {
+	return &model.User{}
 }
 
-func (usr *user) LinkCharacterToUserByAuthCode(authCode string, user model.User) error {
+func (usr *user) LinkCharacterToUserByAuthCode(authCode string, user *model.User) error {
 	return nil
 }
 //END User accessor methods
 
 //BGN Role accessor methods
-func (rle *role) Save(role model.Role) error {
+func (rle *role) Save(role *model.Role) error {
 	return nil
 }
 //END Role accessor methods
 
 //BGN Authentication Code methods
-func (ac *authCodes) Save(character model.Character, authCode string) error {
+func (ac *authCodes) Save(character *model.Character, authCode string) error {
 	return nil
 }
-func (ac *authCodes) FindByCharacterId(characterId int64) model.AuthenticationCode {
-	return model.AuthenticationCode{}
+func (ac *authCodes) FindByCharacterId(characterId int64) *model.AuthenticationCode {
+	return &model.AuthenticationCode{}
 }
 
 //END Authentication Code methods
