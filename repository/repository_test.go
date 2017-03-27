@@ -577,12 +577,51 @@ func TestCreateAndRetrieveUsersThroughREPO(t *testing.T) {
 	SharedTearDown(t, alliance, corporation, character, user, authCode)
 }
 
-//TODO: Implement Me
 func TestCreateRolesThroughREPO(t *testing.T) {
 	alliance, corporation, character, user, authCode := SharedSetup(t)
 
-	t.Run("Create", func(t *testing.T) {
-		t.Fatal("Implement me")
+	t.Run("CreateNoChatServiceGroup", func(t *testing.T) {
+		var roleAsRetrieved model.Role
+		newRole := model.Role{RoleName: "TEST_ROLE_FOR_TESTING"}
+		err := RoleRepo.Save(&newRole)
+
+		if err != nil {
+			t.Fatalf("Had an error while saving the role: %s", err)
+		}
+
+		DB.Where("role_name = 'TEST_ROLE_FOR_TESTING'").Find(&roleAsRetrieved)
+
+		if roleAsRetrieved.RoleName != newRole.RoleName {
+			t.Fatalf("Retrieved role's name: (%s) does not match original: (%s)",
+				roleAsRetrieved.RoleName, newRole.RoleName)
+		}
+
+		if roleAsRetrieved.ChatServiceGroup != newRole.ChatServiceGroup {
+			t.Fatalf("Retrieved role's chatservice group: (%s) does not match original: (%s)",
+				roleAsRetrieved.ChatServiceGroup, newRole.ChatServiceGroup)
+		}
+	})
+
+	t.Run("CreateWithChatServiceGroup", func(t *testing.T) {
+		var roleAsRetrieved model.Role
+		newRole := model.Role{RoleName: "TEST_ROLE_FOR_TESTING2", ChatServiceGroup: "SUPER_COOL_CHAT"}
+		err := RoleRepo.Save(&newRole)
+
+		if err != nil {
+			t.Fatalf("Had an error while saving the role: %s", err)
+		}
+
+		DB.Where("role_name = 'TEST_ROLE_FOR_TESTING2'").Find(&roleAsRetrieved)
+
+		if roleAsRetrieved.RoleName != newRole.RoleName {
+			t.Fatalf("Retrieved role's name: (%s) does not match original: (%s)",
+				roleAsRetrieved.RoleName, newRole.RoleName)
+		}
+
+		if roleAsRetrieved.ChatServiceGroup != newRole.ChatServiceGroup {
+			t.Fatalf("Retrieved role's chatservice group: (%s) does not match original: (%s)",
+				roleAsRetrieved.ChatServiceGroup, newRole.ChatServiceGroup)
+		}
 	})
 
 	SharedTearDown(t, alliance, corporation, character, user, authCode)

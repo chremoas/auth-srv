@@ -200,7 +200,8 @@ func (usr *user) LinkCharacterToUserByAuthCode(authCode string, user *model.User
 
 //BGN Role accessor methods
 func (rle *role) Save(role *model.Role) error {
-	return nil
+	err := rle.db.Save(&role).Error
+	return err
 }
 //END Role accessor methods
 
