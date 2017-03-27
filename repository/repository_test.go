@@ -287,19 +287,105 @@ func TestCreateAndRetrieveAlliancesThroughREPO(t *testing.T) {
 		}
 	})
 
+	t.Run("CreateWithoutId", func(t *testing.T) {
+		allianceAsCreated := model.Alliance{AllianceName: "Test Alliance No ID", AllianceTicker: "TST3"}
+
+		err := AllianceRepo.Save(&allianceAsCreated)
+
+		if err == nil {
+			t.Fatal("Expected error but got none.")
+		}
+	})
+
 	SharedTearDown(t, alliance, corporation, character, user, authCode)
 }
 
-//TODO: Implement Me
 func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
 	alliance, corporation, character, user, authCode := SharedSetup(t)
 
 	t.Run("RetrieveByCorporationId", func(t *testing.T) {
-		t.Fatal("Implement me")
+		var corporationAsRetrieved *model.Corporation
+
+		corporationAsRetrieved = CorporationRepo.FindByCorporationId(corporation.CorporationId)
+
+		if corporationAsRetrieved.CorporationId != corporation.CorporationId {
+			t.Fatalf("Retrieved corporation's id: (%d) does not equal original: (%d)",
+				corporationAsRetrieved.CorporationId, corporation.CorporationId)
+		}
+
+		if corporationAsRetrieved.CorporationName != corporation.CorporationName {
+			t.Fatalf("Retrieved corporation's name: (%s) does not equal original: (%s)",
+				corporationAsRetrieved.CorporationName, corporation.CorporationName)
+		}
+
+		if corporationAsRetrieved.CorporationTicker != corporation.CorporationTicker {
+			t.Fatalf("Retrieved corporation's ticket: (%s) does not equal original: (%s)",
+				corporationAsRetrieved.CorporationTicker, corporation.CorporationTicker)
+		}
+
+		if corporationAsRetrieved.AllianceId != corporation.AllianceId {
+			t.Fatalf("Retrieved corporation's alliance id: (%d) does not equal original: (%d)",
+				corporationAsRetrieved.AllianceId, corporation.AllianceId)
+		}
+
+		if corporationAsRetrieved.Alliance.AllianceId != corporation.Alliance.AllianceId {
+			t.Fatalf("Retrieved corporation's alliance/alliance id: (%d) does not equal original: (%d)",
+				corporationAsRetrieved.Alliance.AllianceId, corporation.Alliance.AllianceId)
+		}
 	})
 
 	t.Run("Create", func(t *testing.T) {
-		t.Fatal("Implement me")
+		var corporationAsRetrieved model.Corporation
+		corporationAsCreated := model.Corporation{
+			CorporationId:     2,
+			CorporationName:   "Test Corporation 2",
+			CorporationTicker: "TST2",
+			AllianceId:        alliance.AllianceId,
+			Alliance:          alliance,
+		}
+
+		err := CorporationRepo.Save(&corporationAsCreated)
+
+		if err != nil {
+			t.Fatalf("Had an error while saving the test corporation")
+		}
+
+		DB.Where("corporation_id = 2").Find(&corporationAsRetrieved)
+
+		if corporationAsRetrieved.CorporationId != corporationAsCreated.CorporationId {
+			t.Fatalf("Retrieved corporation's id: (%d) does not equal original: (%d)",
+				corporationAsRetrieved.CorporationId, corporationAsCreated.CorporationId)
+		}
+
+		if corporationAsRetrieved.CorporationName != corporationAsCreated.CorporationName {
+			t.Fatalf("Retrieved corporation's name: (%s) does not equal original: (%s)",
+				corporationAsRetrieved.CorporationName, corporationAsCreated.CorporationName)
+		}
+
+		if corporationAsRetrieved.CorporationTicker != corporationAsCreated.CorporationTicker {
+			t.Fatalf("Retrieved corporation's ticket: (%s) does not equal original: (%s)",
+				corporationAsRetrieved.CorporationTicker, corporation.CorporationTicker)
+		}
+
+		if corporationAsRetrieved.AllianceId != corporationAsCreated.AllianceId {
+			t.Fatalf("Retrieved corporation's alliance id: (%d) does not equal original: (%d)",
+				corporationAsRetrieved.AllianceId, corporationAsCreated.AllianceId)
+		}
+	})
+
+	t.Run("CreateWithoutId", func(t *testing.T) {
+		corporationAsCreated := model.Corporation{
+			CorporationName:   "Test Corporation 2",
+			CorporationTicker: "TST2",
+			AllianceId:        alliance.AllianceId,
+			Alliance:          alliance,
+		}
+
+		err := CorporationRepo.Save(&corporationAsCreated)
+
+		if err == nil {
+			t.Fatal("Expected error but got none.")
+		}
 	})
 
 	SharedTearDown(t, alliance, corporation, character, user, authCode)
