@@ -33,7 +33,9 @@ type RoleRepository interface {
 
 type AuthenticationCodeRepository interface {
 	Save(character *model.Character, authCode string) error
+	/*Excluding this from the interface for now, maybe we will need it later?
 	FindByCharacterId(characterId int64) *model.AuthenticationCode
+	*/
 }
 
 type alliance struct {
@@ -207,9 +209,14 @@ func (rle *role) Save(role *model.Role) error {
 
 //BGN Authentication Code methods
 func (ac *authCodes) Save(character *model.Character, authCode string) error {
-	return nil
+	newAuthCode := model.AuthenticationCode{AuthenticationCode: authCode, CharacterId: character.CharacterId, Character: *character, IsUsed: false}
+
+	err := ac.db.Save(&newAuthCode).Error
+
+	return err
 }
-func (ac *authCodes) FindByCharacterId(characterId int64) *model.AuthenticationCode {
+
+func (ac *authCodes) findByCharacterId(characterId int64) *model.AuthenticationCode {
 	return &model.AuthenticationCode{}
 }
 //END Authentication Code methods
