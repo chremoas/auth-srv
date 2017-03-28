@@ -2,6 +2,12 @@ syntax = "proto3";
 
 package abaeve.auth;
 
+enum EntityType {
+    ALLIANCE = 0;
+    CORPORATION = 1;
+    CHARACTER = 2;
+}
+
 service UserAuthentication {
     //Called by the auth-web to state someone has started the auth process
     rpc Create (AuthCreateRequest) returns (AuthCreateResponse) {
@@ -12,9 +18,9 @@ service UserAuthentication {
 }
 
 service UserAuthenticationAdmin {
-    rpc UserRoleAdd (AuthAdminRequest) returns (AuthAdminResponse) {
+    rpc CharacterRoleAdd (AuthAdminRequest) returns (AuthAdminResponse) {
     };
-    rpc UserRoleRemove (AuthAdminRequest) returns (AuthAdminResponse) {
+    rpc CharacterRoleRemove (AuthAdminRequest) returns (AuthAdminResponse) {
     };
     rpc CorporationAllianceRoleAdd (AuthAdminRequest) returns (AuthAdminResponse) {
     };
@@ -27,6 +33,14 @@ service UserAuthenticationAdmin {
     rpc AllianceRoleAdd (AuthAdminRequest) returns (AuthAdminResponse) {
     };
     rpc AllianceRoleRemove (AuthAdminRequest) returns (AuthAdminResponse) {
+    };
+    rpc AllianceCharacterLeadershipRoleAdd (AuthAdminRequest) returns (AuthAdminResponse) {
+    };
+    rpc AllianceCharacterLeadershipRoleRemove (AuthAdminRequest) returns (AuthAdminResponse) {
+    };
+    rpc CorporationCharacterLeadershipRoleAdd (AuthAdminRequest) returns (AuthAdminResponse) {
+    };
+    rpc CorporationCharacterLeadershipRoleRemove (AuthAdminRequest) returns (AuthAdminResponse) {
     };
 }
 
@@ -54,15 +68,17 @@ message AuthConfirmResponse {
 }
 
 message AuthAdminRequest {
-    int64 EntityId = 1;
-    string EntityName = 2;
-    string Role = 3;
+    repeated int64 EntityId = 1;
+    repeated string EntityName = 2;
+    repeated EntityType EntityType = 3;
+    string Role = 4;
 }
 
 message AuthAdminResponse {
-    int64 EntityId = 1;
-    string EntityName = 2;
-    bool Success = 3;
+    repeated int64 EntityId = 1;
+    repeated string EntityName = 2;
+    repeated EntityType EntityType = 3;
+    bool Success = 4;
 }
 
 message Character {

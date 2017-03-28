@@ -30,7 +30,7 @@ func Setup ( dialect string, connectionString string ) error {
 	CharacterRepo = &characterRepository{db: DB}
 	UserRepo = &userRepository{db: DB}
 	RoleRepo = &roleRepository{db: DB}
-	Accesses = &accesses{db: DB.DB()}
+	Accesses = &accessesRepo{db: DB.DB()}
 	AuthenticationCodeRepo = &authCodeRepository{db: DB}
 
 	return nil

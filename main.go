@@ -6,6 +6,8 @@ import (
 	"github.com/micro/go-micro"
 	"io/ioutil"
 	"gopkg.in/yaml.v2"
+	"github.com/abaeve/auth-srv/proto"
+	"github.com/abaeve/auth-srv/handler"
 )
 
 type Configuration struct {
@@ -77,5 +79,7 @@ func main() {
 	//</editor-fold>
 
 	service.Init()
+	abaeve_auth.RegisterUserAuthenticationAdminHandler(service.Server(), &handler.AdminHandler{service.Client()})
+	abaeve_auth.RegisterUserAuthenticationHandler(service.Server(), &handler.AuthHandler{service.Client()})
 	service.Run()
 }

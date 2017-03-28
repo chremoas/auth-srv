@@ -6,12 +6,17 @@ import (
 )
 
 type AccessesRepository interface {
-	SaveAllianceAndCorpLevelRole(allianceId int64, corporationId int64, role model.Role) error
-	SaveAllianceRole(allianceId int64, corporationId int64, role model.Role) error
+	SaveAllianceAndCorpRole(allianceId int64, corporationId int64, role model.Role) error
+	SaveAllianceRole(allianceId int64, role model.Role) error
+	SaveCorporationRole(corporationId int64, role model.Role) error
+	SaveCharacterRole(characterId int64, role model.Role) error
+	SaveAllianceCharacterLeadershipRole(allianceId int64, role model.Role) error
+	SaveCorporationCharacterLeadershipRole(corporationId int64, role model.Role) error
+
 	FindByChatId(chatId string) []string
 }
 
-type accesses struct {
+type accessesRepo struct {
 	db *sql.DB
 }
 
@@ -32,7 +37,7 @@ UNION
 SELECT
   role.*,
   'alliance' AS role_from
-FROM users user
+  FROM users user
   JOIN user_character_map ucm ON (user.user_id = ucm.user_id)
   JOIN characters chars ON (ucm.character_id = chars.character_id)
   JOIN corporations corp ON (chars.corporation_id = corp.corporation_id)
@@ -44,7 +49,7 @@ UNION
 SELECT
   role.*,
   'corp' AS role_from
-FROM users user
+  FROM users user
   JOIN user_character_map ucm ON (user.user_id = ucm.user_id)
   JOIN characters chars ON (ucm.character_id = chars.character_id)
   JOIN corporations corp ON (chars.corporation_id = corp.corporation_id)
@@ -55,7 +60,7 @@ UNION
 SELECT
   role.*,
   'character' AS role_from
-FROM users user
+  FROM users user
   JOIN user_character_map ucm ON (user.user_id = ucm.user_id)
   JOIN characters chars ON (ucm.character_id = chars.character_id)
   JOIN character_role_map crm ON (chars.corporation_id = crm.character_id)
@@ -65,7 +70,7 @@ UNION
 SELECT
   role.*,
   'alliance_corporation_leadership' AS role_from
-FROM users user
+  FROM users user
   JOIN user_character_map ucm ON (user.user_id = ucm.user_id)
   JOIN characters chars ON (ucm.character_id = chars.character_id)
   JOIN corporations corp ON (chars.corporation_id = corp.corporation_id)
@@ -78,7 +83,7 @@ UNION
 SELECT
   role.*,
   'corporation_character_leadership' AS role_from
-FROM users user
+  FROM users user
   JOIN user_character_map ucm ON (user.user_id = ucm.user_id)
   JOIN characters chars ON (ucm.character_id = chars.character_id)
   JOIN corp_character_leadership_role_map cclrm
@@ -87,26 +92,53 @@ FROM users user
 WHERE user.chat_id = '%s'
 `
 
-func (acc *accesses) findByUserId ( userId int64 ) []string {
-	return nil
-}
-
 // Saves a role that is linked to an alliance AND a corporation
-func (acc *accesses) SaveAllianceAndCorpLevelRole(allianceId int64, corporationId int64, role model.Role) error {
+// alliance_coporation_role_map table
+func (acc *accessesRepo) SaveAllianceAndCorpRole(allianceId int64, corporationId int64, role model.Role) error {
 	return nil
 }
 
-func (acc *accesses) SaveAllianceRole(allianceId int64, corporationId int64, role model.Role) error {
+// Saves a role that is linked to an alliance
+// alliance_role_map table
+func (acc *accessesRepo) SaveAllianceRole(allianceId int64, role model.Role) error {
+	return nil
+}
+
+// Saves a role that is linked to a corporation
+// corporation_role_map table
+func (acc *accessesRepo) SaveCorporationRole(corporationId int64, role model.Role) error {
+	return nil
+}
+
+// Saves a role that is linked to a character
+// character_role_map table
+func (acc *accessesRepo) SaveCharacterRole(characterId int64, role model.Role) error {
+	return nil
+}
+
+// Saves a role that is linked to an alliance and a character in an alliance leadership position
+// alliance_character_leadership_role_map table
+func (acc *accessesRepo) SaveAllianceCharacterLeadershipRole(allianceId int64, role model.Role) error {
+	return nil
+}
+
+// Saves a role that is linked to a corporation and a character in a corporation leadership position
+// corp_character_leadership_role_map table
+func (acc *accessesRepo) SaveCorporationCharacterLeadershipRole(corporationId int64, role model.Role) error {
 	return nil
 }
 
 // Will be the main usage in anything automated.  This method will lookup all the available roles for the given
 // Chat user id and return them as a map[string]string where the key is the role and the value is the chat
 // group to apply.
-func (acc *accesses) FindByChatId(chatId string) []string {
+func (acc *accessesRepo) FindByChatId(chatId string) []string {
 	return nil
 }
 
-func (acc *accesses) findByCharacter ( character model.Character ) map[string]string {
+func (acc *accessesRepo) findByCharacter(character model.Character) map[string]string {
+	return nil
+}
+
+func (acc *accessesRepo) findByUserId(userId int64) []string {
 	return nil
 }
