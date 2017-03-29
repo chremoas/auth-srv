@@ -250,6 +250,14 @@ func (_mr *_MockAuthenticationCodeRepositoryRecorder) Save(arg0, arg1 interface{
 
 //</editor-fold>
 
+type testError struct {
+	message string
+}
+
+func (te *testError) Error() string {
+	return te.message
+}
+
 func SharedSetup(t *testing.T) (*gomock.Controller,
 	*MockAuthenticationCodeRepository,
 	*MockUserRepository,
@@ -636,6 +644,102 @@ func TestAllianceAndCorpAndCharExist(t *testing.T) {
 
 	if authCreateResponse.AuthenticationCode == "" {
 		t.Fatal("Expected at least something as an authentication code, got nothing")
+	}
+}
+
+func TestAllianceErrorCondition(t *testing.T) {
+	mockCtrl, _, _, _, _, mockAlliRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	authCreateRequest := proto.AuthCreateRequest{
+		Token:       "mytoken",
+		Alliance:    &proto.Alliance{Name: "Test Alliance", Id: 1, Ticker: "TSTA"},
+		Corporation: &proto.Corporation{Name: "Test Corp", Id: 1, Ticker: "TSTC"},
+		Character:   &proto.Character{Name: "Test Character", Id: 1},
+		AuthScope:   []string{"scope1", "scope2"},
+	}
+	var authCreateResponse proto.AuthCreateResponse
+	var context context.Context
+
+	authHandler := AuthHandler{}
+
+	//Set our expectations
+	gomock.InOrder(
+		mockAlliRepo.EXPECT().FindByAllianceId(authCreateRequest.Alliance.Id).Return(nil),
+		mockAlliRepo.EXPECT().Save(gomock.Any()).Return(&testError{message: "Don't do that"}),
+	)
+
+	err := authHandler.Create(context, &authCreateRequest, &authCreateResponse)
+
+	if err == nil && err.Error() == "Don't do that" {
+		t.Fatal("Expected an error but got nothing")
+	}
+}
+
+func TestCorporationErrorCondition(t *testing.T) {
+	mockCtrl, _, _, _, mockCorpRepo, mockAlliRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	authCreateRequest := proto.AuthCreateRequest{
+		Token:       "mytoken",
+		Alliance:    &proto.Alliance{Name: "Test Alliance", Id: 1, Ticker: "TSTA"},
+		Corporation: &proto.Corporation{Name: "Test Corp", Id: 1, Ticker: "TSTC"},
+		Character:   &proto.Character{Name: "Test Character", Id: 1},
+		AuthScope:   []string{"scope1", "scope2"},
+	}
+	var authCreateResponse proto.AuthCreateResponse
+	var context context.Context
+
+	authHandler := AuthHandler{}
+
+	//Set our expectations
+	gomock.InOrder(
+		mockAlliRepo.EXPECT().FindByAllianceId(gomock.Any()).Return(nil),
+		mockAlliRepo.EXPECT().Save(gomock.Any()).Times(1),
+
+		mockCorpRepo.EXPECT().FindByCorporationId(gomock.Any()).Return(nil),
+		mockCorpRepo.EXPECT().Save(gomock.Any()).Return(&testError{message: "Don't do that"}),
+	)
+
+	err := authHandler.Create(context, &authCreateRequest, &authCreateResponse)
+
+	if err == nil && err.Error() == "Don't do that" {
+		t.Fatal("Expected an error but got nothing")
+	}
+}
+
+func TestCharacterErrorCondition(t *testing.T) {
+	mockCtrl, _, _, mockCharRepo, mockCorpRepo, mockAlliRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	authCreateRequest := proto.AuthCreateRequest{
+		Token:       "mytoken",
+		Alliance:    &proto.Alliance{Name: "Test Alliance", Id: 1, Ticker: "TSTA"},
+		Corporation: &proto.Corporation{Name: "Test Corp", Id: 1, Ticker: "TSTC"},
+		Character:   &proto.Character{Name: "Test Character", Id: 1},
+		AuthScope:   []string{"scope1", "scope2"},
+	}
+	var authCreateResponse proto.AuthCreateResponse
+	var context context.Context
+
+	authHandler := AuthHandler{}
+
+	//Set our expectations
+	gomock.InOrder(
+		mockAlliRepo.EXPECT().FindByAllianceId(gomock.Any()).Return(nil),
+		mockAlliRepo.EXPECT().Save(gomock.Any()).Times(1),
+
+		mockCorpRepo.EXPECT().FindByCorporationId(gomock.Any()).Return(nil),
+		mockCorpRepo.EXPECT().Save(gomock.Any()).Times(1),
+
+		mockCharRepo.EXPECT().FindByCharacterId(gomock.Any()).Return(nil),
+		mockCharRepo.EXPECT().Save(gomock.Any()).Return(&testError{message: "Don't do that"}),
+	)
+
+	err := authHandler.Create(context, &authCreateRequest, &authCreateResponse)
+
+	if err == nil && err.Error() == "Don't do that" {
+		t.Fatal("Expected an error but got nothing")
 	}
 }
 
