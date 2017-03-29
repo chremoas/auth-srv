@@ -7,7 +7,7 @@ import (
 )
 
 type AdminHandler struct {
-	client client.Client
+	Client client.Client
 }
 
 func (ah *AdminHandler) CharacterRoleAdd(context context.Context, request *abaeve_auth.AuthAdminRequest, response *abaeve_auth.AuthAdminResponse) error {
