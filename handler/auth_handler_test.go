@@ -14,6 +14,95 @@ import (
  * Source: github.com/abaeve/auth-srv/repository (interfaces: AllianceRepository,CorporationRepository,CharacterRepository,UserRepository,RoleRepository,AuthenticationCodeRepository)
  */
 
+type MockAccessesRepository struct {
+	ctrl     *gomock.Controller
+	recorder *_MockAccessesRepositoryRecorder
+}
+
+type _MockAccessesRepositoryRecorder struct {
+	mock *MockAccessesRepository
+}
+
+func NewMockAccessesRepository(ctrl *gomock.Controller) *MockAccessesRepository {
+	mock := &MockAccessesRepository{ctrl: ctrl}
+	mock.recorder = &_MockAccessesRepositoryRecorder{mock}
+	return mock
+}
+
+func (_m *MockAccessesRepository) EXPECT() *_MockAccessesRepositoryRecorder {
+	return _m.recorder
+}
+
+func (_m *MockAccessesRepository) FindByChatId(_param0 string) []string {
+	ret := _m.ctrl.Call(_m, "FindByChatId", _param0)
+	ret0, _ := ret[0].([]string)
+	return ret0
+}
+
+func (_mr *_MockAccessesRepositoryRecorder) FindByChatId(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "FindByChatId", arg0)
+}
+
+func (_m *MockAccessesRepository) SaveAllianceAndCorpRole(_param0 int64, _param1 int64, _param2 model.Role) error {
+	ret := _m.ctrl.Call(_m, "SaveAllianceAndCorpRole", _param0, _param1, _param2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+func (_mr *_MockAccessesRepositoryRecorder) SaveAllianceAndCorpRole(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "SaveAllianceAndCorpRole", arg0, arg1, arg2)
+}
+
+func (_m *MockAccessesRepository) SaveAllianceCharacterLeadershipRole(_param0 int64, _param1 model.Role) error {
+	ret := _m.ctrl.Call(_m, "SaveAllianceCharacterLeadershipRole", _param0, _param1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+func (_mr *_MockAccessesRepositoryRecorder) SaveAllianceCharacterLeadershipRole(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "SaveAllianceCharacterLeadershipRole", arg0, arg1)
+}
+
+func (_m *MockAccessesRepository) SaveAllianceRole(_param0 int64, _param1 model.Role) error {
+	ret := _m.ctrl.Call(_m, "SaveAllianceRole", _param0, _param1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+func (_mr *_MockAccessesRepositoryRecorder) SaveAllianceRole(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "SaveAllianceRole", arg0, arg1)
+}
+
+func (_m *MockAccessesRepository) SaveCharacterRole(_param0 int64, _param1 model.Role) error {
+	ret := _m.ctrl.Call(_m, "SaveCharacterRole", _param0, _param1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+func (_mr *_MockAccessesRepositoryRecorder) SaveCharacterRole(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "SaveCharacterRole", arg0, arg1)
+}
+
+func (_m *MockAccessesRepository) SaveCorporationCharacterLeadershipRole(_param0 int64, _param1 model.Role) error {
+	ret := _m.ctrl.Call(_m, "SaveCorporationCharacterLeadershipRole", _param0, _param1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+func (_mr *_MockAccessesRepositoryRecorder) SaveCorporationCharacterLeadershipRole(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "SaveCorporationCharacterLeadershipRole", arg0, arg1)
+}
+
+func (_m *MockAccessesRepository) SaveCorporationRole(_param0 int64, _param1 model.Role) error {
+	ret := _m.ctrl.Call(_m, "SaveCorporationRole", _param0, _param1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+func (_mr *_MockAccessesRepositoryRecorder) SaveCorporationRole(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "SaveCorporationRole", arg0, arg1)
+}
+
 type MockAllianceRepository struct {
 	ctrl     *gomock.Controller
 	recorder *_MockAllianceRepositoryRecorder
@@ -263,7 +352,8 @@ func SharedSetup(t *testing.T) (*gomock.Controller,
 	*MockUserRepository,
 	*MockCharacterRepository,
 	*MockCorporationRepository,
-	*MockAllianceRepository) {
+	*MockAllianceRepository,
+	*MockAccessesRepository) {
 	mockCtrl := gomock.NewController(t)
 
 	repository.AuthenticationCodeRepo = NewMockAuthenticationCodeRepository(mockCtrl)
@@ -271,18 +361,20 @@ func SharedSetup(t *testing.T) (*gomock.Controller,
 	repository.CharacterRepo = NewMockCharacterRepository(mockCtrl)
 	repository.CorporationRepo = NewMockCorporationRepository(mockCtrl)
 	repository.AllianceRepo = NewMockAllianceRepository(mockCtrl)
+	repository.Accesses = NewMockAccessesRepository(mockCtrl)
 
 	mockAuthRepo := repository.AuthenticationCodeRepo.(*MockAuthenticationCodeRepository)
 	mockUserRepo := repository.UserRepo.(*MockUserRepository)
 	mockCharRepo := repository.CharacterRepo.(*MockCharacterRepository)
 	mockCorpRepo := repository.CorporationRepo.(*MockCorporationRepository)
 	mockAlliRepo := repository.AllianceRepo.(*MockAllianceRepository)
+	mockAcceRepo := repository.Accesses.(*MockAccessesRepository)
 
-	return mockCtrl, mockAuthRepo, mockUserRepo, mockCharRepo, mockCorpRepo, mockAlliRepo
+	return mockCtrl, mockAuthRepo, mockUserRepo, mockCharRepo, mockCorpRepo, mockAlliRepo, mockAcceRepo
 }
 
 func TestCreateEmptyDb(t *testing.T) {
-	mockCtrl, mockAuthRepo, _ /*mockUserRepo*/ , mockCharRepo, mockCorpRepo, mockAlliRepo := SharedSetup(t)
+	mockCtrl, mockAuthRepo, _, mockCharRepo, mockCorpRepo, mockAlliRepo, _ := SharedSetup(t)
 	defer mockCtrl.Finish()
 
 	authCreateRequest := proto.AuthCreateRequest{
@@ -293,7 +385,7 @@ func TestCreateEmptyDb(t *testing.T) {
 		AuthScope:   []string{"scope1", "scope2"},
 	}
 	var authCreateResponse proto.AuthCreateResponse
-	var context context.Context
+	var ctx context.Context
 
 	authHandler := AuthHandler{}
 
@@ -366,7 +458,7 @@ func TestCreateEmptyDb(t *testing.T) {
 		).Return(nil),
 	)
 
-	err := authHandler.Create(context, &authCreateRequest, &authCreateResponse)
+	err := authHandler.Create(ctx, &authCreateRequest, &authCreateResponse)
 
 	if err != nil {
 		t.Fatalf("Received an error on Create call, expected nothing: %s", err)
@@ -378,7 +470,7 @@ func TestCreateEmptyDb(t *testing.T) {
 }
 
 func TestAllianceExistsNoCorpOrChar(t *testing.T) {
-	mockCtrl, mockAuthRepo, _ /*mockUserRepo*/ , mockCharRepo, mockCorpRepo, mockAlliRepo := SharedSetup(t)
+	mockCtrl, mockAuthRepo, _, mockCharRepo, mockCorpRepo, mockAlliRepo, _ := SharedSetup(t)
 	defer mockCtrl.Finish()
 
 	authCreateRequest := proto.AuthCreateRequest{
@@ -389,7 +481,7 @@ func TestAllianceExistsNoCorpOrChar(t *testing.T) {
 		AuthScope:   []string{"scope1", "scope2"},
 	}
 	var authCreateResponse proto.AuthCreateResponse
-	var context context.Context
+	var ctx context.Context
 
 	authHandler := AuthHandler{}
 
@@ -460,7 +552,7 @@ func TestAllianceExistsNoCorpOrChar(t *testing.T) {
 		).Return(nil),
 	)
 
-	err := authHandler.Create(context, &authCreateRequest, &authCreateResponse)
+	err := authHandler.Create(ctx, &authCreateRequest, &authCreateResponse)
 
 	if err != nil {
 		t.Fatalf("Received an error on Create call, expected nothing: %s", err)
@@ -472,7 +564,7 @@ func TestAllianceExistsNoCorpOrChar(t *testing.T) {
 }
 
 func TestAllianceAndCorpExistButNoChar(t *testing.T) {
-	mockCtrl, mockAuthRepo, _ /*mockUserRepo*/ , mockCharRepo, mockCorpRepo, mockAlliRepo := SharedSetup(t)
+	mockCtrl, mockAuthRepo, _, mockCharRepo, mockCorpRepo, mockAlliRepo, _ := SharedSetup(t)
 	defer mockCtrl.Finish()
 
 	authCreateRequest := proto.AuthCreateRequest{
@@ -483,7 +575,7 @@ func TestAllianceAndCorpExistButNoChar(t *testing.T) {
 		AuthScope:   []string{"scope1", "scope2"},
 	}
 	var authCreateResponse proto.AuthCreateResponse
-	var context context.Context
+	var ctx context.Context
 
 	authHandler := AuthHandler{}
 
@@ -552,7 +644,7 @@ func TestAllianceAndCorpExistButNoChar(t *testing.T) {
 		).Return(nil),
 	)
 
-	err := authHandler.Create(context, &authCreateRequest, &authCreateResponse)
+	err := authHandler.Create(ctx, &authCreateRequest, &authCreateResponse)
 
 	if err != nil {
 		t.Fatalf("Received an error on Create call, expected nothing: %s", err)
@@ -564,7 +656,7 @@ func TestAllianceAndCorpExistButNoChar(t *testing.T) {
 }
 
 func TestAllianceAndCorpAndCharExist(t *testing.T) {
-	mockCtrl, mockAuthRepo, _ /*mockUserRepo*/ , mockCharRepo, mockCorpRepo, mockAlliRepo := SharedSetup(t)
+	mockCtrl, mockAuthRepo, _, mockCharRepo, mockCorpRepo, mockAlliRepo, _ := SharedSetup(t)
 	defer mockCtrl.Finish()
 
 	authCreateRequest := proto.AuthCreateRequest{
@@ -575,7 +667,7 @@ func TestAllianceAndCorpAndCharExist(t *testing.T) {
 		AuthScope:   []string{"scope1", "scope2"},
 	}
 	var authCreateResponse proto.AuthCreateResponse
-	var context context.Context
+	var ctx context.Context
 
 	authHandler := AuthHandler{}
 
@@ -636,7 +728,7 @@ func TestAllianceAndCorpAndCharExist(t *testing.T) {
 		).Return(nil),
 	)
 
-	err := authHandler.Create(context, &authCreateRequest, &authCreateResponse)
+	err := authHandler.Create(ctx, &authCreateRequest, &authCreateResponse)
 
 	if err != nil {
 		t.Fatalf("Received an error on Create call, expected nothing: %s", err)
@@ -648,7 +740,7 @@ func TestAllianceAndCorpAndCharExist(t *testing.T) {
 }
 
 func TestAllianceErrorCondition(t *testing.T) {
-	mockCtrl, _, _, _, _, mockAlliRepo := SharedSetup(t)
+	mockCtrl, _, _, _, _, mockAlliRepo, _ := SharedSetup(t)
 	defer mockCtrl.Finish()
 
 	authCreateRequest := proto.AuthCreateRequest{
@@ -659,7 +751,7 @@ func TestAllianceErrorCondition(t *testing.T) {
 		AuthScope:   []string{"scope1", "scope2"},
 	}
 	var authCreateResponse proto.AuthCreateResponse
-	var context context.Context
+	var ctx context.Context
 
 	authHandler := AuthHandler{}
 
@@ -669,7 +761,7 @@ func TestAllianceErrorCondition(t *testing.T) {
 		mockAlliRepo.EXPECT().Save(gomock.Any()).Return(&testError{message: "Don't do that"}),
 	)
 
-	err := authHandler.Create(context, &authCreateRequest, &authCreateResponse)
+	err := authHandler.Create(ctx, &authCreateRequest, &authCreateResponse)
 
 	if err == nil && err.Error() == "Don't do that" {
 		t.Fatal("Expected an error but got nothing")
@@ -677,7 +769,7 @@ func TestAllianceErrorCondition(t *testing.T) {
 }
 
 func TestCorporationErrorCondition(t *testing.T) {
-	mockCtrl, _, _, _, mockCorpRepo, mockAlliRepo := SharedSetup(t)
+	mockCtrl, _, _, _, mockCorpRepo, mockAlliRepo, _ := SharedSetup(t)
 	defer mockCtrl.Finish()
 
 	authCreateRequest := proto.AuthCreateRequest{
@@ -688,7 +780,7 @@ func TestCorporationErrorCondition(t *testing.T) {
 		AuthScope:   []string{"scope1", "scope2"},
 	}
 	var authCreateResponse proto.AuthCreateResponse
-	var context context.Context
+	var ctx context.Context
 
 	authHandler := AuthHandler{}
 
@@ -701,7 +793,7 @@ func TestCorporationErrorCondition(t *testing.T) {
 		mockCorpRepo.EXPECT().Save(gomock.Any()).Return(&testError{message: "Don't do that"}),
 	)
 
-	err := authHandler.Create(context, &authCreateRequest, &authCreateResponse)
+	err := authHandler.Create(ctx, &authCreateRequest, &authCreateResponse)
 
 	if err == nil && err.Error() == "Don't do that" {
 		t.Fatal("Expected an error but got nothing")
@@ -709,7 +801,7 @@ func TestCorporationErrorCondition(t *testing.T) {
 }
 
 func TestCharacterErrorCondition(t *testing.T) {
-	mockCtrl, _, _, mockCharRepo, mockCorpRepo, mockAlliRepo := SharedSetup(t)
+	mockCtrl, _, _, mockCharRepo, mockCorpRepo, mockAlliRepo, _ := SharedSetup(t)
 	defer mockCtrl.Finish()
 
 	authCreateRequest := proto.AuthCreateRequest{
@@ -720,7 +812,7 @@ func TestCharacterErrorCondition(t *testing.T) {
 		AuthScope:   []string{"scope1", "scope2"},
 	}
 	var authCreateResponse proto.AuthCreateResponse
-	var context context.Context
+	var ctx context.Context
 
 	authHandler := AuthHandler{}
 
@@ -736,13 +828,93 @@ func TestCharacterErrorCondition(t *testing.T) {
 		mockCharRepo.EXPECT().Save(gomock.Any()).Return(&testError{message: "Don't do that"}),
 	)
 
-	err := authHandler.Create(context, &authCreateRequest, &authCreateResponse)
+	err := authHandler.Create(ctx, &authCreateRequest, &authCreateResponse)
 
 	if err == nil && err.Error() == "Don't do that" {
 		t.Fatal("Expected an error but got nothing")
 	}
 }
 
-func TestConfirm(t *testing.T) {
+func TestConfirmWithNoChar(t *testing.T) {
+	mockCtrl, _, mockUserRepo, mockCharRepo, _, _, mockAcceRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
 
+	var ctx context.Context
+	var authConfirmResponse proto.AuthConfirmResponse
+	authConfirmRequest := proto.AuthConfirmRequest{
+		UserId:             "1234567890",
+		AuthenticationCode: "123456789012",
+	}
+
+	authHandler := AuthHandler{}
+
+	gomock.InOrder(
+		mockCharRepo.EXPECT().FindByAutenticationCode(authConfirmRequest.AuthenticationCode).Return(nil),
+		mockUserRepo.EXPECT().FindByChatId(authConfirmRequest.UserId).Times(0),
+		mockUserRepo.EXPECT().Save(gomock.Any()).Times(0),
+		mockUserRepo.EXPECT().LinkCharacterToUserByAuthCode(gomock.Any(), gomock.Any()).Times(0),
+		mockAcceRepo.EXPECT().FindByChatId(gomock.Any()).Times(0),
+	)
+
+	err := authHandler.Confirm(ctx, &authConfirmRequest, &authConfirmResponse)
+
+	if err == nil || err.Error() != "Invalid Auth Attempt" {
+		t.Errorf("Expected a specific error but received: %s", err)
+	}
 }
+
+func TestConfirmWithAuthNoUser(t *testing.T) {
+	mockCtrl, _, mockUserRepo, mockCharRepo, _, _, mockAcceRepo := SharedSetup(t)
+
+	defer mockCtrl.Finish()
+
+	var ctx context.Context
+	var authConfirmResponse proto.AuthConfirmResponse
+	authConfirmRequest := proto.AuthConfirmRequest{
+		UserId:             "1234567890",
+		AuthenticationCode: "123456789012",
+	}
+
+	authHandler := AuthHandler{}
+
+	gomock.InOrder(
+		mockCharRepo.EXPECT().FindByAutenticationCode(authConfirmRequest.AuthenticationCode).Return(
+			&model.Character{
+				CharacterId:   1,
+				CharacterName: "Test Character Result",
+				CorporationId: 1,
+				Corporation: model.Corporation{
+					CorporationId:     1,
+					CorporationName:   "Test Corporation Result",
+					CorporationTicker: "TSTC",
+					AllianceId:        1,
+					Alliance: model.Alliance{
+						AllianceId:     1,
+						AllianceName:   "Test Alliance Result",
+						AllianceTicker: "TSTA",
+					},
+				},
+			},
+		),
+		mockUserRepo.EXPECT().FindByChatId(authConfirmRequest.UserId).Return(nil),
+		mockUserRepo.EXPECT().Save(
+			&model.User{
+				ChatId: authConfirmRequest.UserId,
+			},
+		),
+		mockUserRepo.EXPECT().LinkCharacterToUserByAuthCode(authConfirmRequest.AuthenticationCode,
+			&model.User{
+				ChatId: authConfirmRequest.UserId,
+			},
+		).Return(nil),
+		mockAcceRepo.EXPECT().FindByChatId(authConfirmRequest.UserId).Return([]string{"ROLE1", "ROLE2", "ROLE3"}),
+	)
+
+	err := authHandler.Confirm(ctx, &authConfirmRequest, &authConfirmResponse)
+
+	if err != nil {
+		t.Errorf("Expected no error but received: %s", err)
+	}
+}
+
+//TODO: Create test case for AuthWithUserAndChar?  Should overwrite or create new auth record?  DB Model supports multiple auths per character... by why?  Was a drunk?

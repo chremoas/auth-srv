@@ -10,6 +10,14 @@ import (
 	"encoding/hex"
 )
 
+type authError struct {
+	message string
+}
+
+func (ae *authError) Error() string {
+	return ae.message
+}
+
 type AuthHandler struct {
 	Client client.Client
 }
@@ -91,5 +99,33 @@ func (ah *AuthHandler) Create(context context.Context, request *abaeve_auth.Auth
 }
 
 func (ah *AuthHandler) Confirm(context context.Context, request *abaeve_auth.AuthConfirmRequest, response *abaeve_auth.AuthConfirmResponse) error {
+	character := repository.CharacterRepo.FindByAutenticationCode(request.AuthenticationCode)
+
+	if character == nil {
+		return &authError{message: "Invalid Auth Attempt"}
+	}
+
+	user := repository.UserRepo.FindByChatId(request.UserId)
+
+	if user == nil {
+		user = &model.User{ChatId: request.UserId}
+		err := repository.UserRepo.Save(user)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	err := repository.UserRepo.LinkCharacterToUserByAuthCode(request.AuthenticationCode, user)
+
+	if err != nil {
+		return err
+	}
+
+	roles := repository.Accesses.FindByChatId(user.ChatId)
+
+	response.Roles = roles
+	response.Success = true
+
 	return nil
 }
