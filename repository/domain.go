@@ -33,6 +33,7 @@ type RoleRepository interface {
 
 type AuthenticationCodeRepository interface {
 	Save(character *model.Character, authCode string) error
+	//FindByAuthenticationCode(authCode string) *model.AuthenticationCode
 	/*Excluding this from the interface for now, maybe we will need it later?
 	FindByCharacterId(characterId int64) *model.AuthenticationCode
 	*/
@@ -189,8 +190,12 @@ func (usr *userRepository) LinkCharacterToUserByAuthCode(authCode string, user *
 
 	//Now use up the auth code
 	var authCodeModel model.AuthenticationCode
-	//TODO: Refactor this into the auth code repo?
+	//TODO: Refactor this into the auth code repo?usr.db.Where("authentication_code = ? and is_used = ?", authCode, false).Find(&authCodeModel)
 	usr.db.Where("authentication_code = ?", authCode).Find(&authCodeModel)
+
+	if authCodeModel.IsUsed {
+		return &daoError{"Authentication Code is invalid or used."}
+	}
 
 	authCodeModel.IsUsed = true
 
@@ -215,6 +220,10 @@ func (ac *authCodeRepository) Save(character *model.Character, authCode string) 
 
 	return err
 }
+
+//func (ac *authCodeRepository) FindByAuthenticationCode(authCode string) *model.AuthenticationCode {
+//	return nil
+//}
 
 func (ac *authCodeRepository) findByCharacterId(characterId int64) *model.AuthenticationCode {
 	return &model.AuthenticationCode{}
