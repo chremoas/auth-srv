@@ -33,10 +33,11 @@ func (_m *MockAccessesRepository) EXPECT() *_MockAccessesRepositoryRecorder {
 	return _m.recorder
 }
 
-func (_m *MockAccessesRepository) FindByChatId(_param0 string) []string {
+func (_m *MockAccessesRepository) FindByChatId(_param0 string) ([]string, error) {
 	ret := _m.ctrl.Call(_m, "FindByChatId", _param0)
 	ret0, _ := ret[0].([]string)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 func (_mr *_MockAccessesRepositoryRecorder) FindByChatId(arg0 interface{}) *gomock.Call {
@@ -361,14 +362,14 @@ func SharedSetup(t *testing.T) (*gomock.Controller,
 	repository.CharacterRepo = NewMockCharacterRepository(mockCtrl)
 	repository.CorporationRepo = NewMockCorporationRepository(mockCtrl)
 	repository.AllianceRepo = NewMockAllianceRepository(mockCtrl)
-	repository.Accesses = NewMockAccessesRepository(mockCtrl)
+	repository.AccessRepo = NewMockAccessesRepository(mockCtrl)
 
 	mockAuthRepo := repository.AuthenticationCodeRepo.(*MockAuthenticationCodeRepository)
 	mockUserRepo := repository.UserRepo.(*MockUserRepository)
 	mockCharRepo := repository.CharacterRepo.(*MockCharacterRepository)
 	mockCorpRepo := repository.CorporationRepo.(*MockCorporationRepository)
 	mockAlliRepo := repository.AllianceRepo.(*MockAllianceRepository)
-	mockAcceRepo := repository.Accesses.(*MockAccessesRepository)
+	mockAcceRepo := repository.AccessRepo.(*MockAccessesRepository)
 
 	return mockCtrl, mockAuthRepo, mockUserRepo, mockCharRepo, mockCorpRepo, mockAlliRepo, mockAcceRepo
 }
@@ -907,7 +908,7 @@ func TestConfirmWithAuthNoUser(t *testing.T) {
 				ChatId: authConfirmRequest.UserId,
 			},
 		).Return(nil),
-		mockAcceRepo.EXPECT().FindByChatId(authConfirmRequest.UserId).Return([]string{"ROLE1", "ROLE2", "ROLE3"}),
+		mockAcceRepo.EXPECT().FindByChatId(authConfirmRequest.UserId).Return([]string{"ROLE1", "ROLE2", "ROLE3"}, nil),
 	)
 
 	err := authHandler.Confirm(ctx, &authConfirmRequest, &authConfirmResponse)

@@ -122,7 +122,11 @@ func (ah *AuthHandler) Confirm(context context.Context, request *abaeve_auth.Aut
 		return err
 	}
 
-	roles := repository.Accesses.FindByChatId(user.ChatId)
+	roles, err := repository.AccessRepo.FindByChatId(user.ChatId)
+
+	if err != nil {
+		return err
+	}
 
 	response.Roles = roles
 	response.Success = true

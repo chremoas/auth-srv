@@ -11,7 +11,7 @@ var CorporationRepo CorporationRepository
 var CharacterRepo CharacterRepository
 var UserRepo UserRepository
 var RoleRepo RoleRepository
-var Accesses AccessesRepository
+var AccessRepo AccessesRepository
 var AuthenticationCodeRepo AuthenticationCodeRepository
 
 func Setup ( dialect string, connectionString string ) error {
@@ -30,7 +30,7 @@ func Setup ( dialect string, connectionString string ) error {
 	CharacterRepo = &characterRepository{db: DB}
 	UserRepo = &userRepository{db: DB}
 	RoleRepo = &roleRepository{db: DB}
-	Accesses = &accessesRepo{db: DB.DB()}
+	AccessRepo = &accessesRepo{db: DB.DB()}
 	AuthenticationCodeRepo = &authCodeRepository{db: DB}
 
 	return nil
