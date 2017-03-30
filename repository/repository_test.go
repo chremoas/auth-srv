@@ -613,39 +613,6 @@ func TestCreateAndRetrieveUsersThroughREPO(t *testing.T) {
 		}
 	})
 
-	t.Run("LinkCharacterToUserByAuthCodeInvalidAuth", func(t *testing.T) {
-		err := UserRepo.LinkCharacterToUserByAuthCode(authCode[0].AuthenticationCode, &user)
-
-		if err == nil {
-			t.Fatal("Expected an error while linking a character to a user")
-		}
-
-		var linkedUser []model.User
-		var authCodeAsRetrieved model.AuthenticationCode
-		var userAsRetrieved model.User
-		usersRepo.db.Where("user_id = ?", user.UserId).Find(&userAsRetrieved)
-		usersRepo.db.Model(&userAsRetrieved).Association("Characters").Find(&userAsRetrieved.Characters)
-		usersRepo.db.Model(&character[0]).Association("Users").Find(&linkedUser)
-		usersRepo.db.Where("character_id = ?", character[0].CharacterId).Find(&authCodeAsRetrieved)
-
-		if len(linkedUser) == 0 {
-			t.Fatal("Expected at least one linked user")
-		}
-
-		if len(userAsRetrieved.Characters) != 1 {
-			t.Fatalf("User should have 1 characters instead they have: %d", len(userAsRetrieved.Characters))
-		}
-
-		if linkedUser[0].UserId != user.UserId {
-			t.Fatalf("Linked user's user id: (%d) does not equal original: (%d)",
-				linkedUser[0].UserId, user.UserId)
-		}
-
-		if authCodeAsRetrieved.IsUsed == false {
-			t.Fatal("Auth code was not used up")
-		}
-	})
-
 	t.Run("Create", func(t *testing.T) {
 		var userAsRetrieved model.User
 		userAsCreated := model.User{ChatId: "01234567890"}
@@ -668,6 +635,45 @@ func TestCreateAndRetrieveUsersThroughREPO(t *testing.T) {
 				userAsCreated.UserId, userAsRetrieved.UserId)
 		}
 	})
+
+	usersRepo.db.Rollback()
+	SharedTearDown()
+}
+
+func TestLinkCharacterToUserWithInvalidAuthCode(t *testing.T) {
+	_, _, character, user, authCode := SharedSetup(t)
+	usersRepo := UserRepo.(*userRepository)
+	usersRepo.db = usersRepo.db.Begin()
+	err := UserRepo.LinkCharacterToUserByAuthCode(authCode[0].AuthenticationCode, &user)
+
+	if err == nil {
+		t.Fatal("Expected an error while linking a character to a user")
+	}
+
+	var linkedUser []model.User
+	var authCodeAsRetrieved model.AuthenticationCode
+	var userAsRetrieved model.User
+	usersRepo.db.Where("user_id = ?", user.UserId).Find(&userAsRetrieved)
+	usersRepo.db.Model(&userAsRetrieved).Association("Characters").Find(&userAsRetrieved.Characters)
+	usersRepo.db.Model(&character[0]).Association("Users").Find(&linkedUser)
+	usersRepo.db.Where("character_id = ?", character[0].CharacterId).Find(&authCodeAsRetrieved)
+
+	if len(linkedUser) == 0 {
+		t.Fatal("Expected at least one linked user")
+	}
+
+	if len(userAsRetrieved.Characters) != 1 {
+		t.Fatalf("User should have 1 characters instead they have: %d", len(userAsRetrieved.Characters))
+	}
+
+	if linkedUser[0].UserId != user.UserId {
+		t.Fatalf("Linked user's user id: (%d) does not equal original: (%d)",
+			linkedUser[0].UserId, user.UserId)
+	}
+
+	if authCodeAsRetrieved.IsUsed == false {
+		t.Fatal("Auth code was not used up")
+	}
 
 	usersRepo.db.Rollback()
 	SharedTearDown()
