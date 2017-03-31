@@ -130,6 +130,7 @@ func (ah *AuthHandler) Confirm(context context.Context, request *abaeve_auth.Aut
 
 	response.Roles = roles
 	response.Success = true
+	response.CharacterName = character.CharacterName
 
 	return nil
 }

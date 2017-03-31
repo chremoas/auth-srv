@@ -64,7 +64,8 @@ message AuthConfirmRequest {
 
 message AuthConfirmResponse {
     bool Success = 1;
-    repeated string Roles = 2;
+    string CharacterName = 2;
+    repeated string Roles = 3;
 }
 
 message AuthAdminRequest {
