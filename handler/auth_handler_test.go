@@ -877,12 +877,13 @@ func TestConfirmWithAuthNoUser(t *testing.T) {
 	}
 
 	authHandler := AuthHandler{}
+	expectedCharName := "Test Character Result"
 
 	gomock.InOrder(
 		mockCharRepo.EXPECT().FindByAutenticationCode(authConfirmRequest.AuthenticationCode).Return(
 			&model.Character{
 				CharacterId:   1,
-				CharacterName: "Test Character Result",
+				CharacterName: expectedCharName,
 				CorporationId: 1,
 				Corporation: model.Corporation{
 					CorporationId:     1,
@@ -915,6 +916,10 @@ func TestConfirmWithAuthNoUser(t *testing.T) {
 
 	if err != nil {
 		t.Errorf("Expected no error but received: %s", err)
+	}
+
+	if len(authConfirmResponse.CharacterName) == 0 || authConfirmResponse.CharacterName == "" {
+		t.Errorf("Response character name: (%s) doesn't match expected: (%s)", authConfirmResponse.CharacterName, expectedCharName)
 	}
 }
 
