@@ -561,6 +561,14 @@ func TestCreateAndRetrieveUsersThroughREPO(t *testing.T) {
 	usersRepo := UserRepo.(*userRepository)
 	usersRepo.db = usersRepo.db.Begin()
 
+	t.Run("RetrieveByChatIdNoUser", func(t *testing.T) {
+		userAsRetrieved := UserRepo.FindByChatId("123456")
+
+		if userAsRetrieved != nil {
+			t.Fatalf("Expected a nil user but instead got: %+v", user)
+		}
+	})
+
 	t.Run("RetrieveByChatId", func(t *testing.T) {
 		userAsRetrieved := UserRepo.FindByChatId(user.ChatId)
 

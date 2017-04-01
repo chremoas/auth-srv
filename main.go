@@ -8,6 +8,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"github.com/abaeve/auth-srv/proto"
 	"github.com/abaeve/auth-srv/handler"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type Configuration struct {
@@ -71,7 +72,7 @@ func main() {
 	err = repository.Setup(configuration.Application.Database.Driver, connectionString)
 
 	if err != nil {
-		panic("Could not open database connection using: " + connectionString)
+		panic("Could not open database connection using: " + connectionString + " received error: " + err.Error())
 	}
 	repository.DB.DB().Ping()
 	repository.DB.DB().SetMaxOpenConns(configuration.Application.Database.MaxConnections)

@@ -160,6 +160,11 @@ func (usr *userRepository) FindByChatId(chatId string) *model.User {
 	var user model.User
 
 	usr.db.Where("chat_id = ?", chatId).Find(&user)
+
+	if user.UserId == 0 {
+		return nil
+	}
+
 	usr.db.Model(&user).Association("Characters").Find(&user.Characters)
 
 	return &user
