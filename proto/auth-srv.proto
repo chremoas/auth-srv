@@ -15,6 +15,9 @@ service UserAuthentication {
     //Called by the auth-bot or another system to state that they've linked a character to their account
     rpc Confirm (AuthConfirmRequest) returns (AuthConfirmResponse) {
     };
+    //Called to get all roles for an already authed user
+    rpc GetRoles (GetRolesRequest) returns (AuthConfirmResponse) {
+    };
 }
 
 service UserAuthenticationAdmin {
@@ -66,6 +69,10 @@ message AuthConfirmResponse {
     bool Success = 1;
     string CharacterName = 2;
     repeated string Roles = 3;
+}
+
+message GetRolesRequest {
+    string UserId = 1;
 }
 
 message AuthAdminRequest {

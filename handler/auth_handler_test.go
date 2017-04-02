@@ -923,4 +923,64 @@ func TestConfirmWithAuthNoUser(t *testing.T) {
 	}
 }
 
+func TestGetRoles(t *testing.T) {
+	mockCtrl, _, mockUserRepo, _, _, _, mockAcceRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	authHandler := AuthHandler{}
+
+	gomock.InOrder(
+		mockUserRepo.EXPECT().FindByChatId("1234567890").Return(&model.User{UserId: 1, ChatId: "1234567890"}),
+		mockAcceRepo.EXPECT().FindByChatId("1234567890").Return([]string{"ROLE1", "ROLE2"}, nil),
+	)
+
+	response := proto.AuthConfirmResponse{}
+
+	err := authHandler.GetRoles(context.Background(), &proto.GetRolesRequest{UserId: "1234567890"}, &response)
+
+	if err != nil {
+		t.Fatal("Received an error when none were expected.")
+	}
+
+	if !response.Success {
+		t.Fatal("Received false success when true was expected")
+	}
+
+	if len(response.CharacterName) != 0 {
+		t.Fatalf("Received: (%s) for character name when empty was expected", response.CharacterName)
+	}
+
+	if len(response.Roles) != 2 {
+		t.Fatalf("Expected 2 response but %d were received", len(response.Roles))
+	}
+}
+
+func TestGetRolesNoUser(t *testing.T) {
+	mockCtrl, _, mockUserRepo, _, _, _, mockAcceRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	authHandler := AuthHandler{}
+
+	gomock.InOrder(
+		mockUserRepo.EXPECT().FindByChatId("1234567890").Return(nil),
+		mockAcceRepo.EXPECT().FindByChatId("1234567890").Return([]string{"ROLE1", "ROLE2"}, nil).Times(0),
+	)
+
+	response := proto.AuthConfirmResponse{}
+
+	err := authHandler.GetRoles(context.Background(), &proto.GetRolesRequest{UserId: "1234567890"}, &response)
+
+	if err != nil {
+		t.Fatal("Received an error when none were expected.")
+	}
+
+	if response.Success {
+		t.Fatal("Received true success when false was expected")
+	}
+
+	if len(response.Roles) > 0 {
+		t.Fatal("Received some roles when we should have errored out")
+	}
+}
+
 //TODO: Create test case for AuthWithUserAndChar?  Should overwrite or create new auth record?  DB Model supports multiple auths per character... by why?  Was a drunk?
