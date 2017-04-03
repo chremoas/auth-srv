@@ -2,52 +2,19 @@ package main
 
 import (
 	"fmt"
+	"github.com/abaeve/auth-common/config"
 	"github.com/abaeve/auth-srv/repository"
 	"github.com/micro/go-micro"
-	"io/ioutil"
-	"gopkg.in/yaml.v2"
 	"github.com/abaeve/auth-srv/proto"
 	"github.com/abaeve/auth-srv/handler"
 	_ "github.com/go-sql-driver/mysql"
+	"io/ioutil"
 )
-
-type Configuration struct {
-	Application struct {
-		Namespace string
-		Name      string
-		Database  struct {
-			Driver         string
-			Protocol       string
-			Host           string
-			Port           uint
-			Database       string
-			Username       string
-			Password       string
-			Options        string
-			MaxConnections int `yaml:"maxConnections"`
-		}
-	}
-}
 
 var version string = "1.0.0"
 
 func main() {
-	configuration := Configuration{}
-
-	data, err := ioutil.ReadFile("application.yaml")
-
-	//<editor-fold desc="Configuration Launch Sanity check">
-	//TODO: Candidate for shared function for all my services.
-	if err != nil {
-		panic("Could not read application.yaml for configuration data.")
-	}
-
-	err = yaml.Unmarshal([]byte(data), &configuration)
-
-	if err != nil {
-		panic("Could not unmarshall application.yaml as yaml")
-	}
-	//</editor-fold>
+	configuration := config.Configuration{}
 
 	//TODO: Candidate for shared function for all my services
 	service := micro.NewService(
