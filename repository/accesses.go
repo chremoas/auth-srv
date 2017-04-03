@@ -23,8 +23,7 @@ type accessesRepo struct {
 var roleQuery string = `
 SELECT
   role.role_name,
-  role.chatservice_group,
-  'alliance_corp' AS role_from
+  role.chatservice_group
 FROM users user
   JOIN user_character_map ucm ON (user.user_id = ucm.user_id)
   JOIN characters chars ON (ucm.character_id = chars.character_id)
@@ -37,8 +36,7 @@ WHERE user.chat_id = ?
 UNION
 SELECT
   role.role_name,
-  role.chatservice_group,
-  'alliance' AS role_from
+  role.chatservice_group
   FROM users user
   JOIN user_character_map ucm ON (user.user_id = ucm.user_id)
   JOIN characters chars ON (ucm.character_id = chars.character_id)
@@ -50,8 +48,7 @@ WHERE user.chat_id = ?
 UNION
 SELECT
   role.role_name,
-  role.chatservice_group,
-  'corp' AS role_from
+  role.chatservice_group
   FROM users user
   JOIN user_character_map ucm ON (user.user_id = ucm.user_id)
   JOIN characters chars ON (ucm.character_id = chars.character_id)
@@ -62,8 +59,7 @@ WHERE user.chat_id = ?
 UNION
 SELECT
   role.role_name,
-  role.chatservice_group,
-  'character' AS role_from
+  role.chatservice_group
   FROM users user
   JOIN user_character_map ucm ON (user.user_id = ucm.user_id)
   JOIN characters chars ON (ucm.character_id = chars.character_id)
@@ -73,8 +69,7 @@ WHERE user.chat_id = ?
 UNION
 SELECT
   role.role_name,
-  role.chatservice_group,
-  'alliance_corporation_leadership' AS role_from
+  role.chatservice_group
   FROM users user
   JOIN user_character_map ucm ON (user.user_id = ucm.user_id)
   JOIN characters chars ON (ucm.character_id = chars.character_id)
@@ -87,8 +82,7 @@ WHERE user.chat_id = ?
 UNION
 SELECT
   role.role_name,
-  role.chatservice_group,
-  'corporation_character_leadership' AS role_from
+  role.chatservice_group
   FROM users user
   JOIN user_character_map ucm ON (user.user_id = ucm.user_id)
   JOIN characters chars ON (ucm.character_id = chars.character_id)
@@ -151,9 +145,9 @@ func (acc *accessesRepo) FindByChatId(chatId string) ([]string, error) {
 	}
 	defer rows.Close()
 
-	roleName, chatRoleName, from := "", "", ""
+	roleName, chatRoleName := "", ""
 	for idx := 0; rows.Next(); idx++ {
-		rows.Scan(&roleName, &chatRoleName, &from)
+		rows.Scan(&roleName, &chatRoleName)
 
 		//TODO: Is this innefficient?  Should I be going about growing my array differently?
 		roles = append(roles, chatRoleName)

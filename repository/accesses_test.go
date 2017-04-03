@@ -37,9 +37,8 @@ func TestAccessesWithAllianceRoleAndCorpRole(t *testing.T) {
 			[]string{
 				"role_name",
 				"chatservice_group",
-				"role_from",
 			},
-		).AddRow("ABA", "ABA", "alliance").AddRow("VSKY", "VSKY", "corp"))
+		).AddRow("ABA", "ABA").AddRow("VSKY", "VSKY"))
 
 	roles, err := AccessRepo.FindByChatId("1234567890")
 
@@ -83,48 +82,47 @@ func TestAccessesWith20Roles(t *testing.T) {
 			[]string{
 				"role_name",
 				"chatservice_group",
-				"role_from",
 			},
 		).AddRow(
-			"ROLE1", "ROLE1", "alliance",
+			"ROLE1", "ROLE1",
 		).AddRow(
-			"ROLE2", "ROLE2", "corp",
+			"ROLE2", "ROLE2",
 		).AddRow(
-			"ROLE3", "ROLE3", "corp",
+			"ROLE3", "ROLE3",
 		).AddRow(
-			"ROLE4", "ROLE4", "corp",
+			"ROLE4", "ROLE4",
 		).AddRow(
-			"ROLE5", "ROLE5", "corp",
+			"ROLE5", "ROLE5",
 		).AddRow(
-			"ROLE6", "ROLE6", "corp",
+			"ROLE6", "ROLE6",
 		).AddRow(
-			"ROLE7", "ROLE7", "corp",
+			"ROLE7", "ROLE7",
 		).AddRow(
-			"ROLE8", "ROLE8", "corp",
+			"ROLE8", "ROLE8",
 		).AddRow(
-			"ROLE9", "ROLE9", "corp",
+			"ROLE9", "ROLE9",
 		).AddRow(
-			"ROLE10", "ROLE10", "corp",
+			"ROLE10", "ROLE10",
 		).AddRow(
-			"ROLE11", "ROLE11", "corp",
+			"ROLE11", "ROLE11",
 		).AddRow(
-			"ROLE12", "ROLE12", "corp",
+			"ROLE12", "ROLE12",
 		).AddRow(
-			"ROLE13", "ROLE13", "corp",
+			"ROLE13", "ROLE13",
 		).AddRow(
-			"ROLE14", "ROLE14", "corp",
+			"ROLE14", "ROLE14",
 		).AddRow(
-			"ROLE15", "ROLE15", "corp",
+			"ROLE15", "ROLE15",
 		).AddRow(
-			"ROLE16", "ROLE16", "corp",
+			"ROLE16", "ROLE16",
 		).AddRow(
-			"ROLE17", "ROLE17", "corp",
+			"ROLE17", "ROLE17",
 		).AddRow(
-			"ROLE18", "ROLE18", "corp",
+			"ROLE18", "ROLE18",
 		).AddRow(
-			"ROLE19", "ROLE19", "corp",
+			"ROLE19", "ROLE19",
 		).AddRow(
-			"ROLE20", "ROLE20", "corp",
+			"ROLE20", "ROLE20",
 		),
 	)
 
