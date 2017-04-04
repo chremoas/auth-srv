@@ -14,34 +14,36 @@ var version string = "1.0.0"
 
 func main() {
 	configuration := config.Configuration{}
+	// These needs to be a commandline argument eventually
+	configuration.Load("application.yaml")
 
 	//TODO: Candidate for shared function for all my services
 	service := micro.NewService(
-		micro.Name(configuration.Application.Namespace+"."+configuration.Application.Name),
+		micro.Name(configuration.Namespace+"."+configuration.Name),
 		micro.Version(version),
 	)
 
 	//<editor-fold desc="DB Initialization">
 	//TODO: Candidate for shared function for all my services.
-	connectionString := configuration.Application.Database.Username +
+	connectionString := configuration.Database.Username +
 		":" +
-		configuration.Application.Database.Password +
+		configuration.Database.Password +
 		"@" +
-		configuration.Application.Database.Protocol +
+		configuration.Database.Protocol +
 		"(" +
-		configuration.Application.Database.Host +
+		configuration.Database.Host +
 		":" +
-		fmt.Sprintf("%d", configuration.Application.Database.Port) +
+		fmt.Sprintf("%d", configuration.Database.Port) +
 		")/" +
-		configuration.Application.Database.Database
+		configuration.Database.Database
 
-	err = repository.Setup(configuration.Application.Database.Driver, connectionString)
+	err := repository.Setup(configuration.Database.Driver, connectionString)
 
 	if err != nil {
 		panic("Could not open database connection using: " + connectionString + " received error: " + err.Error())
 	}
 	repository.DB.DB().Ping()
-	repository.DB.DB().SetMaxOpenConns(configuration.Application.Database.MaxConnections)
+	repository.DB.DB().SetMaxOpenConns(configuration.Database.MaxConnections)
 	defer repository.DB.Close()
 	//</editor-fold>
 
