@@ -1,10 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"github.com/abaeve/auth-common/config"
 	"github.com/abaeve/auth-srv/repository"
-	"github.com/micro/go-micro"
 	"github.com/abaeve/auth-srv/proto"
 	"github.com/abaeve/auth-srv/handler"
 	_ "github.com/go-sql-driver/mysql"
@@ -16,26 +14,14 @@ func main() {
 	configuration := config.Configuration{}
 	// These needs to be a commandline argument eventually
 	configuration.Load("application.yaml")
-
-	//TODO: Candidate for shared function for all my services
-	service := micro.NewService(
-		micro.Name(configuration.Namespace+"."+configuration.Name),
-		micro.Version(version),
-	)
-
-	//<editor-fold desc="DB Initialization">
-	//TODO: Candidate for shared function for all my services.
-	connectionString := configuration.Database.Username +
-		":" +
-		configuration.Database.Password +
-		"@" +
-		configuration.Database.Protocol +
-		"(" +
-		configuration.Database.Host +
-		":" +
-		fmt.Sprintf("%d", configuration.Database.Port) +
-		")/" +
-		configuration.Database.Database
+	service, serr := configuration.NewService(version)
+	if serr != nil {
+		panic(serr)
+	}
+	connectionString, cerr := configuration.NewConnectionString()
+	if cerr != nil {
+		panic(cerr)
+	}
 
 	err := repository.Setup(configuration.Database.Driver, connectionString)
 
@@ -45,7 +31,6 @@ func main() {
 	repository.DB.DB().Ping()
 	repository.DB.DB().SetMaxOpenConns(configuration.Database.MaxConnections)
 	defer repository.DB.Close()
-	//</editor-fold>
 
 	service.Init()
 	abaeve_auth.RegisterUserAuthenticationAdminHandler(service.Server(), &handler.AdminHandler{service.Client()})
