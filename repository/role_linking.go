@@ -3,7 +3,6 @@ package repository
 import "github.com/jinzhu/gorm"
 
 type RoleLinkingRepository interface {
-
 }
 
 type roleLinker struct {

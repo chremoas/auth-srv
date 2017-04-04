@@ -2,8 +2,8 @@ package repository
 
 import (
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
-	"testing"
 	"strings"
+	"testing"
 )
 
 type accessError struct {
