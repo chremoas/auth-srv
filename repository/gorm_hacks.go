@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"github.com/jinzhu/gorm"
 	"github.com/abaeve/auth-srv/model"
+	"github.com/jinzhu/gorm"
 )
 
 //TODO: Make this generic enough that it won't only hack one specific many2many relationship

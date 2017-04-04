@@ -3,9 +3,9 @@ package repository
 import (
 	_ "github.com/mattn/go-sqlite3"
 	//_ "github.com/go-sql-driver/mysql"
-	"testing"
 	"github.com/abaeve/auth-srv/model"
 	"github.com/jinzhu/gorm"
+	"testing"
 )
 
 func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, [2]model.Character, model.User, [2]model.AuthenticationCode) {
@@ -43,15 +43,15 @@ func SharedTearDown() {
 	//<editor-fold desc="Teardown Code">
 	/*TODO: WTF?*/
 	/*
-	This works... but doesn't take into account all the data created by whatever test calls this teardown
-	DB.Delete(&authCode[0])
-	DB.Delete(&authCode[1])
-	DB.Model(&user).Association("Characters").Delete(&character)
-	DB.Delete(&user)
-	DB.Delete(&character[0])
-	DB.Delete(&character[1])
-	DB.Delete(&corporation)
-	DB.Delete(&alliance)
+		This works... but doesn't take into account all the data created by whatever test calls this teardown
+		DB.Delete(&authCode[0])
+		DB.Delete(&authCode[1])
+		DB.Model(&user).Association("Characters").Delete(&character)
+		DB.Delete(&user)
+		DB.Delete(&character[0])
+		DB.Delete(&character[1])
+		DB.Delete(&corporation)
+		DB.Delete(&alliance)
 	*/
 	/*This doesn't?  I need this to work to clean up the other testing cases... or do I?
 	tx, _ := DB.DB().Begin()
@@ -181,7 +181,7 @@ func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 
 		charCount := tx.Model(&user).Association("Characters").Count()
 
-		if charCount != 2{
+		if charCount != 2 {
 			t.Fatalf("Expected 2 characters, only got %d", charCount)
 		}
 
@@ -774,5 +774,3 @@ func TestCreateAndRetrieveAuthenticationCodesThroughREPO(t *testing.T) {
 	authCodeRepo.db.Rollback()
 	SharedTearDown()
 }
-
-
