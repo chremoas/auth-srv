@@ -8,7 +8,6 @@ import (
 	"github.com/abaeve/auth-srv/proto"
 	"github.com/abaeve/auth-srv/handler"
 	_ "github.com/go-sql-driver/mysql"
-	"io/ioutil"
 )
 
 var version string = "1.0.0"
