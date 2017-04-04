@@ -14,8 +14,8 @@ func main() {
 	configuration := config.Configuration{}
 	// These needs to be a commandline argument eventually
 	configuration.Load("application.yaml")
-	service, err := configuration.NewService(version)
-	connectionString, err := configuration.NewConnectionString()
+	service, _ := configuration.NewService(version)
+	connectionString, _ := configuration.NewConnectionString()
 
 	err := repository.Setup(configuration.Database.Driver, connectionString)
 
