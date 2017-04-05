@@ -14,7 +14,7 @@ func main() {
 	configuration := config.Configuration{}
 	// These needs to be a commandline argument eventually
 	configuration.Load("application.yaml")
-	service, serr := configuration.NewService(version)
+	service, serr := configuration.NewService(version, "auth-srv")
 	if serr != nil {
 		panic(serr)
 	}
