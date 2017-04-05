@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/abaeve/auth-common/config"
+	"github.com/abaeve/services-common/config"
 	"github.com/abaeve/auth-srv/handler"
 	"github.com/abaeve/auth-srv/proto"
 	"github.com/abaeve/auth-srv/repository"
