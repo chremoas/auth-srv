@@ -3,6 +3,8 @@ package repository
 import (
 	"github.com/abaeve/auth-srv/model"
 	"github.com/jinzhu/gorm"
+	"fmt"
+	"time"
 )
 
 type AllianceRepository interface {
@@ -74,6 +76,14 @@ func (all *allianceRepository) Save(alliance *model.Alliance) error {
 		return &daoError{message: "Primary key must not be 0"}
 	}
 
+	if beforeEpoc(alliance.InsertedDt) {
+		alliance.InsertedDt = time.Now()
+	}
+
+	alliance.UpdatedDt = time.Now()
+
+	fmt.Printf("Alliance: (%+v)\n", alliance)
+
 	err := all.db.Save(alliance).Error
 
 	return err
@@ -102,7 +112,16 @@ func (corp *corporationRepository) Save(corporation *model.Corporation) error {
 		return &daoError{message: "Primary key must not be 0"}
 	}
 
+	if beforeEpoc(corporation.InsertedDt) {
+		corporation.InsertedDt = time.Now()
+	}
+
+	corporation.UpdatedDt = time.Now()
+
+	fmt.Printf("Corporation: (%+v)\n", corporation)
+
 	err := corp.db.Save(corporation).Error
+
 	return err
 }
 
@@ -122,6 +141,18 @@ func (corp *corporationRepository) FindByCorporationId(corporationId int64) *mod
 
 //BGN Character accessor methods
 func (chr *characterRepository) Save(character *model.Character) error {
+	if character.CharacterId == 0 {
+		return &daoError{message: "Primary key must not be 0"}
+	}
+
+	if beforeEpoc(character.InsertedDt) {
+		character.InsertedDt = time.Now()
+	}
+
+	character.UpdatedDt = time.Now()
+
+	fmt.Printf("Character: (%+v)\n", character)
+
 	err := chr.db.Save(character).Error
 	return err
 }
@@ -256,4 +287,10 @@ func (ac *authCodeRepository) findByCharacterId(characterId int64) *model.Authen
 //Make daoError implement error
 func (err *daoError) Error() string {
 	return err.message
+}
+
+func beforeEpoc(timeToCheck time.Time) bool {
+	epoch, _ := time.Parse(time.RFC822, "01 Jan 70 00:01 UTC")
+
+	return timeToCheck.Before(epoch)
 }

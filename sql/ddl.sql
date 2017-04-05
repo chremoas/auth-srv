@@ -15,9 +15,9 @@ CREATE TABLE users
 
 CREATE TABLE roles
 (
-  role_name         VARCHAR(70)                        NOT NULL,
-  inserted_dt       DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-  updated_dt        DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  role_name         VARCHAR(70)                         NOT NULL,
+  inserted_dt       TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  updated_dt        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   role_id           BIGINT(20) PRIMARY KEY             NOT NULL AUTO_INCREMENT,
   chatservice_group VARCHAR(70)
 );
@@ -30,19 +30,19 @@ CREATE TABLE alliances
   alliance_id     BIGINT(20) PRIMARY KEY             NOT NULL,
   alliance_name   VARCHAR(100)                       NOT NULL,
   alliance_ticker VARCHAR(5)                         NOT NULL,
-  inserted_dt     DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-  updated_dt      DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
+  inserted_dt     TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  updated_dt      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
 CREATE TABLE corporations
 (
   corporation_id     BIGINT(20) PRIMARY KEY             NOT NULL,
-  corporation_name   VARCHAR(100)                       NOT NULL,
+  corporation_name   VARCHAR(100) NOT NULL,
   alliance_id        BIGINT(20),
-  inserted_dt        DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-  updated_dt         DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-  corporation_ticker VARCHAR(5)                         NOT NULL,
+  inserted_dt        TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  updated_dt         TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  corporation_ticker VARCHAR(5) NOT NULL,
   CONSTRAINT corporation_alliance_alliance_id_fk FOREIGN KEY (alliance_id) REFERENCES alliances (alliance_id)
 );
 CREATE INDEX corporation_alliance_alliance_id_fk
@@ -65,10 +65,10 @@ CREATE TABLE characters
 (
   character_id   BIGINT(20) PRIMARY KEY             NOT NULL,
   character_name VARCHAR(100)                       NOT NULL,
-  inserted_dt    DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-  udpated_dt     DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-  corporation_id BIGINT(20)                         NOT NULL,
-  token          VARCHAR(255)                       NOT NULL,
+  inserted_dt    TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  updated_dt     TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  corporation_id BIGINT(20) NOT NULL,
+  token          VARCHAR(255) NOT NULL,
   CONSTRAINT character_corporation_corporation_id_fk FOREIGN KEY (corporation_id) REFERENCES corporations (corporation_id)
 );
 CREATE INDEX character_corporation_corporation_id_fk

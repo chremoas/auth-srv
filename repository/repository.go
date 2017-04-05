@@ -24,6 +24,7 @@ func Setup(dialect string, connectionString string) error {
 	DB = db
 
 	hackJoinTableHandlerData(DB)
+	DB.LogMode(true)
 
 	AllianceRepo = &allianceRepository{db: DB}
 	CorporationRepo = &corporationRepository{db: DB}
