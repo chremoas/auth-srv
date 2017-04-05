@@ -1,13 +1,12 @@
-application:
-  namespace: your.namespace.to.register
-  name: yourappname
-  database:
-    driver: mysql
-    protocol: tcp
-    host: hostname
-    port: 3306
-    database: database
-    username: username
-    password: password
-    options: someoptions using Pear DB like options or nothing
-    maxConnections: 5
+namespace: your.namespace.to.register
+name: yourappname
+database:
+  driver: mysql
+  protocol: tcp
+  host: hostname
+  port: 3306
+  database: database
+  username: username
+  password: password
+  options: someoptions using Pear DB like options or nothing
+  maxConnections: 5

@@ -107,11 +107,14 @@ func (corp *corporationRepository) FindByCorporationId(corporationId int64) *mod
 	var corporation model.Corporation
 
 	corp.db.Where("corporation_id = ?", corporationId).Find(&corporation)
-	corp.db.Model(&corporation).Association("Alliance").Find(&corporation.Alliance)
+	if corporation.CorporationId != 0 {
+		corp.db.Model(&corporation).Association("Alliance").Find(&corporation.Alliance)
+	} else {
+		return nil
+	}
 
 	return &corporation
 }
-
 //END Corporation accessor methods
 
 //BGN Character accessor methods
@@ -124,9 +127,13 @@ func (chr *characterRepository) FindByCharacterId(characterId int64) *model.Char
 	var character model.Character
 
 	chr.db.Where("character_id = ?", characterId).Find(&character)
-	chr.db.Model(&character).Association("Corporation").Find(&character.Corporation)
-	chr.db.Model(&character).Association("Users").Find(&character.Users)
-	chr.db.Model(&character).Association("AuthCodes").Find(&character.AuthCodes)
+	if character.CharacterId != 0 {
+		chr.db.Model(&character).Association("Corporation").Find(&character.Corporation)
+		chr.db.Model(&character).Association("Users").Find(&character.Users)
+		chr.db.Model(&character).Association("AuthCodes").Find(&character.AuthCodes)
+	} else {
+		return nil
+	}
 
 	return &character
 }
@@ -139,6 +146,8 @@ func (chr *characterRepository) FindByAutenticationCode(authCode string) *model.
 
 	if authCodeModel.CharacterId != 0 {
 		chr.db.Model(&authCodeModel).Association("Character").Find(&character)
+	} else {
+		return nil
 	}
 
 	//character.AuthCodes = []model.AuthenticationCode{authCodeModel}
