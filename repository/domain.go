@@ -83,6 +83,9 @@ func (all *allianceRepository) FindByAllianceId(allianceId int64) *model.Allianc
 	var alliance model.Alliance
 
 	all.db.Where("alliance_id = ?", allianceId).Find(&alliance)
+	if alliance.AllianceId == 0 {
+		return nil
+	}
 
 	return &alliance
 }
