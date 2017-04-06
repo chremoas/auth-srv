@@ -257,6 +257,12 @@ func (usr *userRepository) LinkCharacterToUserByAuthCode(authCode string, user *
 
 //BGN Role accessor methods
 func (rle *roleRepository) Save(role *model.Role) error {
+	if beforeEpoc(role.InsertedDt) {
+		role.InsertedDt = newTimeNow()
+	}
+
+	role.UpdatedDt = newTimeNow()
+
 	err := rle.db.Save(&role).Error
 	return err
 }

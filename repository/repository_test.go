@@ -1,10 +1,10 @@
 package repository
 
 import (
-	_ "github.com/mattn/go-sqlite3"
-	//_ "github.com/go-sql-driver/mysql"
 	"github.com/abaeve/auth-srv/model"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
+	_ "github.com/mattn/go-sqlite3"
 	"testing"
 )
 
@@ -19,8 +19,6 @@ func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, [2]model.Char
 
 	DB.LogMode(true)
 
-	allianceId := int64(1)
-
 	alliance := model.Alliance{
 		AllianceId:     1,
 		AllianceTicker: "TST",
@@ -30,7 +28,7 @@ func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, [2]model.Char
 	}
 	corporation := model.Corporation{
 		CorporationId:     1,
-		AllianceId:        &allianceId,
+		AllianceId:        1,
 		CorporationName:   "Test Corporation 1",
 		CorporationTicker: "TST",
 		Alliance:          alliance,
@@ -56,7 +54,7 @@ func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, [2]model.Char
 		UpdatedDt:     newTimeNow(),
 	}
 	user := model.User{UserId: 1, ChatId: "1234567890", Characters: []model.Character{character}}
-	authCode := model.AuthenticationCode{CharacterId: 1, Character: character, AuthenticationCode: "123456789012345678901", IsUsed: true}
+	authCode := model.AuthenticationCode{CharacterId: 1, Character: character, AuthenticationCode: "123456789", IsUsed: true}
 	authCode2 := model.AuthenticationCode{CharacterId: 10000, Character: character10k, AuthenticationCode: "abcdefghijk", IsUsed: false}
 
 	DB.Create(&alliance)
@@ -423,7 +421,7 @@ func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
 		}
 
 		if corporationAsRetrieved.AllianceId != corporation.AllianceId {
-			t.Fatalf("Retrieved corporation's alliance id: (%d) does not equal original: (%d)",
+			t.Fatalf("Retrieved corporation's alliance id: (%+v) does not equal original: (%+v)",
 				corporationAsRetrieved.AllianceId, corporation.AllianceId)
 		}
 
@@ -439,7 +437,7 @@ func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
 			CorporationId:     2,
 			CorporationName:   "Test Corporation 2",
 			CorporationTicker: "TST2",
-			AllianceId:        &alliance.AllianceId,
+			AllianceId:        alliance.AllianceId,
 			Alliance:          alliance,
 		}
 
@@ -467,7 +465,7 @@ func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
 		}
 
 		if corporationAsRetrieved.AllianceId != corporationAsCreated.AllianceId {
-			t.Fatalf("Retrieved corporation's alliance id: (%d) does not equal original: (%d)",
+			t.Fatalf("Retrieved corporation's alliance id: (%+v) does not equal original: (%+v)",
 				corporationAsRetrieved.AllianceId, corporationAsCreated.AllianceId)
 		}
 	})
@@ -476,7 +474,7 @@ func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
 		corporationAsCreated := model.Corporation{
 			CorporationName:   "Test Corporation 2",
 			CorporationTicker: "TST2",
-			AllianceId:        &alliance.AllianceId,
+			AllianceId:        alliance.AllianceId,
 			Alliance:          alliance,
 		}
 
@@ -512,7 +510,7 @@ func TestCreateAndRetrieveCharactersThroughREPO(t *testing.T) {
 	})
 
 	t.Run("RetrieveByAuthenticationCode", func(t *testing.T) {
-		characterAsRetrieved := CharacterRepo.FindByAutenticationCode("123456789012345678901")
+		characterAsRetrieved := CharacterRepo.FindByAutenticationCode("123456789")
 
 		if characterAsRetrieved.CharacterId != 1 {
 			t.Fatalf("Retrieved characters character id: (%d) doesn't equal original: (%d)",
@@ -560,7 +558,7 @@ func TestCreateAndRetrieveCharactersThroughREPO(t *testing.T) {
 		err := CharacterRepo.Save(&characterAsCreated)
 
 		if err != nil {
-			t.Fatalf("Had an error while saving the character: (s)", err)
+			t.Fatalf("Had an error while saving the character: (%s)", err)
 		}
 
 		charRepo.db.Where("character_id = 3").Find(&characterAsRetrieved)

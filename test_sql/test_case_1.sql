@@ -291,6 +291,7 @@ Starting over
  */
 /*
  */
+DELETE FROM authentication_codes;
 DELETE FROM alliance_corporation_role_map;
 DELETE FROM alliance_role_map;
 DELETE FROM corporation_role_map;
