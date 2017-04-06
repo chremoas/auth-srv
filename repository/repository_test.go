@@ -19,6 +19,9 @@ func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, [2]model.Char
 
 	DB.LogMode(true)
 
+	var allianceId int64
+	allianceId = 1
+
 	alliance := model.Alliance{
 		AllianceId:     1,
 		AllianceTicker: "TST",
@@ -28,7 +31,7 @@ func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, [2]model.Char
 	}
 	corporation := model.Corporation{
 		CorporationId:     1,
-		AllianceId:        1,
+		AllianceId:        &allianceId,
 		CorporationName:   "Test Corporation 1",
 		CorporationTicker: "TST",
 		Alliance:          alliance,
@@ -420,9 +423,9 @@ func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
 				corporationAsRetrieved.CorporationTicker, corporation.CorporationTicker)
 		}
 
-		if corporationAsRetrieved.AllianceId != corporation.AllianceId {
+		if *corporationAsRetrieved.AllianceId != *corporation.AllianceId {
 			t.Fatalf("Retrieved corporation's alliance id: (%+v) does not equal original: (%+v)",
-				corporationAsRetrieved.AllianceId, corporation.AllianceId)
+				*corporationAsRetrieved.AllianceId, *corporation.AllianceId)
 		}
 
 		if corporationAsRetrieved.Alliance.AllianceId != corporation.Alliance.AllianceId {
@@ -437,7 +440,7 @@ func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
 			CorporationId:     2,
 			CorporationName:   "Test Corporation 2",
 			CorporationTicker: "TST2",
-			AllianceId:        alliance.AllianceId,
+			AllianceId:        &alliance.AllianceId,
 			Alliance:          alliance,
 		}
 
@@ -464,9 +467,9 @@ func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
 				corporationAsRetrieved.CorporationTicker, corporation.CorporationTicker)
 		}
 
-		if corporationAsRetrieved.AllianceId != corporationAsCreated.AllianceId {
+		if *corporationAsRetrieved.AllianceId != *corporationAsCreated.AllianceId {
 			t.Fatalf("Retrieved corporation's alliance id: (%+v) does not equal original: (%+v)",
-				corporationAsRetrieved.AllianceId, corporationAsCreated.AllianceId)
+				*corporationAsRetrieved.AllianceId, *corporationAsCreated.AllianceId)
 		}
 	})
 
@@ -474,7 +477,7 @@ func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
 		corporationAsCreated := model.Corporation{
 			CorporationName:   "Test Corporation 2",
 			CorporationTicker: "TST2",
-			AllianceId:        alliance.AllianceId,
+			AllianceId:        &alliance.AllianceId,
 			Alliance:          alliance,
 		}
 
