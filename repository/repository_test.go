@@ -4,14 +4,14 @@ import (
 	"github.com/abaeve/auth-srv/model"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
-	_ "github.com/mattn/go-sqlite3"
+	//_ "github.com/mattn/go-sqlite3"
 	"testing"
 )
 
 func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, [2]model.Character, model.User, [2]model.AuthenticationCode) {
 	//<editor-fold desc="Setup code">
-	err := Setup("sqlite3", "file:../test/authSrv.db?loc=auto")
-	/*err := Setup("mysql", "root@tcp(localhost:3306)/microservices")*/
+	/*err := Setup("sqlite3", "file:../test/authSrv.db?loc=auto")*/
+	err := Setup("mysql", "root@tcp(localhost:3306)/authservices?parseTime=true")
 
 	if err != nil {
 		t.Fatalf("Could not open database connection: %s", err)
@@ -490,7 +490,7 @@ func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
 }
 
 func TestCreateAndRetrieveCharactersThroughREPO(t *testing.T) {
-	_, _, character, user, _ := SharedSetup(t)
+	_, _, character, _, _ := SharedSetup(t)
 	charRepo := CharacterRepo.(*characterRepository)
 	charRepo.db = charRepo.db.Begin()
 
@@ -548,45 +548,6 @@ func TestCreateAndRetrieveCharactersThroughREPO(t *testing.T) {
 		if characterAsRetrieved.CorporationId != characterAsCreated.CorporationId {
 			t.Fatalf("Retrieved characters corporation id: (%d) does not equal the created one: (%d)",
 				characterAsRetrieved.CorporationId, characterAsCreated.CorporationId)
-		}
-	})
-
-	t.Run("CreateAndAttachToUser", func(t *testing.T) {
-		characterAsCreated := model.Character{CharacterId: 3, CorporationId: 1, Token: "12345678901234567891", Users: []model.User{user}}
-		var characterAsRetrieved model.Character
-
-		err := CharacterRepo.Save(&characterAsCreated)
-
-		if err != nil {
-			t.Fatalf("Had an error while saving the character: (%s)", err)
-		}
-
-		charRepo.db.Where("character_id = 3").Find(&characterAsRetrieved)
-		charRepo.db.Model(&characterAsRetrieved).Association("Users").Find(&characterAsRetrieved.Users)
-
-		if characterAsRetrieved.CharacterId != characterAsCreated.CharacterId {
-			t.Fatalf("Retrieved characters id: (%d) does not equal the created one: (%d)",
-				characterAsRetrieved.CharacterId, characterAsCreated.CharacterId)
-		}
-
-		if characterAsRetrieved.CharacterName != characterAsCreated.CharacterName {
-			t.Fatalf("Retrieved characters name: (%s) does not equal the created one: (%s)",
-				characterAsRetrieved.CharacterName, characterAsCreated.CharacterName)
-		}
-
-		if characterAsRetrieved.Token != characterAsCreated.Token {
-			t.Fatalf("Retrieved characters token: (%s) does not equal the created one: (%s)",
-				characterAsRetrieved.Token, characterAsCreated.Token)
-		}
-
-		if characterAsRetrieved.CorporationId != characterAsCreated.CorporationId {
-			t.Fatalf("Retrieved characters corporation id: (%d) does not equal the created one: (%d)",
-				characterAsRetrieved.CorporationId, characterAsCreated.CorporationId)
-		}
-
-		if characterAsRetrieved.Users[0].UserId != user.UserId {
-			t.Fatalf("Retrieved characters user id: (%s) does not equal the created one: (%s)",
-				characterAsRetrieved.Users[0].UserId, user.UserId)
 		}
 	})
 
