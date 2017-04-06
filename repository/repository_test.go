@@ -4,13 +4,11 @@ import (
 	"github.com/abaeve/auth-srv/model"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
-	//_ "github.com/mattn/go-sqlite3"
 	"testing"
 )
 
 func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, [2]model.Character, model.User, [2]model.AuthenticationCode) {
 	//<editor-fold desc="Setup code">
-	/*err := Setup("sqlite3", "file:../test/authSrv.db?loc=auto")*/
 	err := Setup("mysql", "root@tcp(localhost:3306)/authservices?parseTime=true")
 
 	if err != nil {

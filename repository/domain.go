@@ -96,11 +96,6 @@ func (all *allianceRepository) FindByAllianceId(allianceId int64) *model.Allianc
 
 	return &alliance
 }
-
-//func (all *allianceRepository) findByAllianceName(allianceName string) *model.Alliance {
-//	return &model.Alliance{}
-//}
-
 //END AllianceRepo accessor methods
 
 //BGN Corporation accessor methods
@@ -134,7 +129,6 @@ func (corp *corporationRepository) FindByCorporationId(corporationId int64) *mod
 
 	return &corporation
 }
-
 //END Corporation accessor methods
 
 //BGN Character accessor methods
@@ -186,11 +180,6 @@ func (chr *characterRepository) FindByAutenticationCode(authCode string) *model.
 
 	return &character
 }
-
-//func (chr *characterRepository) findByCharacterName(characterName string) *model.Character {
-//	return &model.Character{}
-//}
-
 //END Character accessor methods
 
 //BGN User accessor methods
@@ -252,7 +241,6 @@ func (usr *userRepository) LinkCharacterToUserByAuthCode(authCode string, user *
 
 	return nil
 }
-
 //END User accessor methods
 
 //BGN Role accessor methods
@@ -266,7 +254,6 @@ func (rle *roleRepository) Save(role *model.Role) error {
 	err := rle.db.Save(&role).Error
 	return err
 }
-
 //END Role accessor methods
 
 //BGN Authentication Code methods
@@ -280,10 +267,6 @@ func (ac *authCodeRepository) Save(character *model.Character, authCode string) 
 
 //func (ac *authCodeRepository) FindByAuthenticationCode(authCode string) *model.AuthenticationCode {
 //	return nil
-//}
-
-//func (ac *authCodeRepository) findByCharacterId(characterId int64) *model.AuthenticationCode {
-//	return &model.AuthenticationCode{}
 //}
 //END Authentication Code methods
 
