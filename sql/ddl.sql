@@ -45,8 +45,6 @@ CREATE TABLE corporations
   corporation_ticker VARCHAR(5)                         NOT NULL,
   CONSTRAINT corporation_alliance_alliance_id_fk FOREIGN KEY (alliance_id) REFERENCES alliances (alliance_id)
 );
-CREATE INDEX corporation_alliance_alliance_id_fk
-  ON corporations (alliance_id);
 
 
 CREATE TABLE corporation_role_map
@@ -57,8 +55,6 @@ CREATE TABLE corporation_role_map
   CONSTRAINT corporation_role_map__role_fk FOREIGN KEY (role_id) REFERENCES roles (role_id),
   CONSTRAINT corporation_role_map__corporation_fk FOREIGN KEY (corporation_id) REFERENCES corporations (corporation_id)
 );
-CREATE INDEX corporation_role_map__corporation_fk
-  ON corporation_role_map (corporation_id);
 
 
 CREATE TABLE characters
@@ -71,8 +67,6 @@ CREATE TABLE characters
   token          VARCHAR(255)                       NOT NULL,
   CONSTRAINT character_corporation_corporation_id_fk FOREIGN KEY (corporation_id) REFERENCES corporations (corporation_id)
 );
-CREATE INDEX character_corporation_corporation_id_fk
-  ON characters (corporation_id);
 
 
 CREATE TABLE authentication_codes
@@ -92,8 +86,6 @@ CREATE TABLE user_character_map
   CONSTRAINT user_character_map__user_fk FOREIGN KEY (user_id) REFERENCES users (user_id),
   CONSTRAINT user_character_map__character_fk FOREIGN KEY (character_id) REFERENCES characters (character_id)
 );
-CREATE INDEX user_character_map__character_fk
-  ON user_character_map (character_id);
 
 
 CREATE TABLE authentication_scope_character_map
@@ -104,8 +96,6 @@ CREATE TABLE authentication_scope_character_map
   CONSTRAINT scope_character_map__character_fk FOREIGN KEY (character_id) REFERENCES characters (character_id),
   CONSTRAINT scope_character_map__scope_fk FOREIGN KEY (authentication_scope_id) REFERENCES authentication_scopes (authentication_scope_id)
 );
-CREATE INDEX scope_character_map__scope_fk
-  ON authentication_scope_character_map (authentication_scope_id);
 
 
 CREATE TABLE alliance_role_map
@@ -116,8 +106,6 @@ CREATE TABLE alliance_role_map
   CONSTRAINT alliance_role_map__role_fk FOREIGN KEY (role_id) REFERENCES roles (role_id),
   CONSTRAINT alliance_role_map__alliance_fk FOREIGN KEY (alliance_id) REFERENCES alliances (alliance_id)
 );
-CREATE INDEX alliance_role_map__alliance_fk
-  ON alliance_role_map (alliance_id);
 
 
 CREATE TABLE alliance_corporation_role_map
@@ -130,10 +118,6 @@ CREATE TABLE alliance_corporation_role_map
   CONSTRAINT alliance_corporation_role_map__corporation_fk FOREIGN KEY (corporation_id) REFERENCES corporations (corporation_id),
   CONSTRAINT alliance_corporation_role_map__role_fk FOREIGN KEY (role_id) REFERENCES roles (role_id)
 );
-CREATE INDEX alliance_corporation_role_map__corporation_fk
-  ON alliance_corporation_role_map (corporation_id);
-CREATE INDEX alliance_corporation_role_map__role_fk
-  ON alliance_corporation_role_map (role_id);
 
 
 CREATE TABLE corp_character_leadership_role_map
@@ -146,10 +130,6 @@ CREATE TABLE corp_character_leadership_role_map
   CONSTRAINT leadership_role__character_fk FOREIGN KEY (character_id) REFERENCES characters (character_id),
   CONSTRAINT leadership_role__role_fk FOREIGN KEY (role_id) REFERENCES roles (role_id)
 );
-CREATE INDEX leadership_role__character_fk
-  ON corp_character_leadership_role_map (character_id);
-CREATE INDEX leadership_role__role_fk
-  ON corp_character_leadership_role_map (role_id);
 
 
 CREATE TABLE character_role_map
@@ -160,8 +140,6 @@ CREATE TABLE character_role_map
   CONSTRAINT character_role_map__character_fk FOREIGN KEY (character_id) REFERENCES characters (character_id),
   CONSTRAINT character_role_map__role_fk FOREIGN KEY (role_id) REFERENCES roles (role_id)
 );
-CREATE INDEX character_role_map__role_fk
-  ON character_role_map (role_id);
 
 
 CREATE TABLE alliance_character_leadership_role_map
@@ -174,7 +152,3 @@ CREATE TABLE alliance_character_leadership_role_map
   CONSTRAINT alliance_leadership__character_fk FOREIGN KEY (character_id) REFERENCES characters (character_id),
   CONSTRAINT alliance_leadership__role_fk FOREIGN KEY (role_id) REFERENCES roles (role_id)
 );
-CREATE INDEX alliance_leadership__character_fk
-  ON alliance_character_leadership_role_map (character_id);
-CREATE INDEX alliance_leadership__role_fk
-  ON alliance_character_leadership_role_map (role_id);
