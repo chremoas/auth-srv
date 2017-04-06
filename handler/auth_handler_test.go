@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"github.com/abaeve/auth-srv/model"
 	proto "github.com/abaeve/auth-srv/proto"
 	"github.com/abaeve/auth-srv/repository"
@@ -407,7 +408,7 @@ func TestCreateEmptyDb(t *testing.T) {
 				CorporationId:     authCreateRequest.Corporation.Id,
 				CorporationName:   authCreateRequest.Corporation.Name,
 				CorporationTicker: authCreateRequest.Corporation.Ticker,
-				AllianceId:        authCreateRequest.Alliance.Id,
+				AllianceId:        &authCreateRequest.Alliance.Id,
 				Alliance: model.Alliance{
 					AllianceId:     authCreateRequest.Alliance.Id,
 					AllianceName:   authCreateRequest.Alliance.Name,
@@ -427,7 +428,7 @@ func TestCreateEmptyDb(t *testing.T) {
 					CorporationId:     authCreateRequest.Corporation.Id,
 					CorporationName:   authCreateRequest.Corporation.Name,
 					CorporationTicker: authCreateRequest.Corporation.Ticker,
-					AllianceId:        authCreateRequest.Alliance.Id,
+					AllianceId:        &authCreateRequest.Alliance.Id,
 					Alliance: model.Alliance{
 						AllianceId:     authCreateRequest.Alliance.Id,
 						AllianceName:   authCreateRequest.Alliance.Name,
@@ -447,7 +448,103 @@ func TestCreateEmptyDb(t *testing.T) {
 					CorporationId:     authCreateRequest.Corporation.Id,
 					CorporationName:   authCreateRequest.Corporation.Name,
 					CorporationTicker: authCreateRequest.Corporation.Ticker,
-					AllianceId:        authCreateRequest.Alliance.Id,
+					AllianceId:        &authCreateRequest.Alliance.Id,
+					Alliance: model.Alliance{
+						AllianceId:     authCreateRequest.Alliance.Id,
+						AllianceName:   authCreateRequest.Alliance.Name,
+						AllianceTicker: authCreateRequest.Alliance.Ticker,
+					},
+				},
+			},
+			gomock.Any(),
+		).Return(nil),
+	)
+
+	err := authHandler.Create(ctx, &authCreateRequest, &authCreateResponse)
+
+	if err != nil {
+		t.Fatalf("Received an error on Create call, expected nothing: %s", err)
+	}
+
+	if authCreateResponse.AuthenticationCode == "" {
+		t.Fatal("Expected at least something as an authentication code, got nothing")
+	}
+}
+
+func TestCreateNoAllianceCorporation(t *testing.T) {
+	mockCtrl, mockAuthRepo, _, mockCharRepo, mockCorpRepo, mockAlliRepo, _ := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	authCreateRequest := proto.AuthCreateRequest{
+		Token:       "mytoken",
+		Alliance:    &proto.Alliance{Name: "Test Alliance", Id: 1, Ticker: "TSTA"},
+		Corporation: &proto.Corporation{Name: "Test Corp", Id: 1, Ticker: "TSTC"},
+		Character:   &proto.Character{Name: "Test Character", Id: 1},
+		AuthScope:   []string{"scope1", "scope2"},
+	}
+	var authCreateResponse proto.AuthCreateResponse
+	var ctx context.Context
+
+	authHandler := AuthHandler{}
+
+	//Set our expectations
+	gomock.InOrder(
+		mockAlliRepo.EXPECT().FindByAllianceId(authCreateRequest.Alliance.Id).Return(nil),
+		mockAlliRepo.EXPECT().Save(
+			&model.Alliance{
+				AllianceId:     authCreateRequest.Alliance.Id,
+				AllianceName:   authCreateRequest.Alliance.Name,
+				AllianceTicker: authCreateRequest.Alliance.Ticker,
+			},
+		).Return(nil),
+
+		mockCorpRepo.EXPECT().FindByCorporationId(authCreateRequest.Corporation.Id).Return(nil),
+		mockCorpRepo.EXPECT().Save(
+			&model.Corporation{
+				CorporationId:     authCreateRequest.Corporation.Id,
+				CorporationName:   authCreateRequest.Corporation.Name,
+				CorporationTicker: authCreateRequest.Corporation.Ticker,
+				AllianceId:        &authCreateRequest.Alliance.Id,
+				Alliance: model.Alliance{
+					AllianceId:     authCreateRequest.Alliance.Id,
+					AllianceName:   authCreateRequest.Alliance.Name,
+					AllianceTicker: authCreateRequest.Alliance.Ticker,
+				},
+			},
+		).Return(nil),
+
+		mockCharRepo.EXPECT().FindByCharacterId(authCreateRequest.Character.Id).Return(nil),
+		mockCharRepo.EXPECT().Save(
+			&model.Character{
+				CharacterId:   authCreateRequest.Character.Id,
+				CharacterName: authCreateRequest.Character.Name,
+				Token:         authCreateRequest.Token,
+				CorporationId: authCreateRequest.Corporation.Id,
+				Corporation: model.Corporation{
+					CorporationId:     authCreateRequest.Corporation.Id,
+					CorporationName:   authCreateRequest.Corporation.Name,
+					CorporationTicker: authCreateRequest.Corporation.Ticker,
+					AllianceId:        &authCreateRequest.Alliance.Id,
+					Alliance: model.Alliance{
+						AllianceId:     authCreateRequest.Alliance.Id,
+						AllianceName:   authCreateRequest.Alliance.Name,
+						AllianceTicker: authCreateRequest.Alliance.Ticker,
+					},
+				},
+			},
+		).Return(nil),
+
+		mockAuthRepo.EXPECT().Save(
+			&model.Character{
+				CharacterId:   authCreateRequest.Character.Id,
+				CharacterName: authCreateRequest.Character.Name,
+				Token:         authCreateRequest.Token,
+				CorporationId: authCreateRequest.Corporation.Id,
+				Corporation: model.Corporation{
+					CorporationId:     authCreateRequest.Corporation.Id,
+					CorporationName:   authCreateRequest.Corporation.Name,
+					CorporationTicker: authCreateRequest.Corporation.Ticker,
+					AllianceId:        &authCreateRequest.Alliance.Id,
 					Alliance: model.Alliance{
 						AllianceId:     authCreateRequest.Alliance.Id,
 						AllianceName:   authCreateRequest.Alliance.Name,
@@ -501,7 +598,7 @@ func TestAllianceExistsNoCorpOrChar(t *testing.T) {
 				CorporationId:     authCreateRequest.Corporation.Id,
 				CorporationName:   authCreateRequest.Corporation.Name,
 				CorporationTicker: authCreateRequest.Corporation.Ticker,
-				AllianceId:        authCreateRequest.Alliance.Id,
+				AllianceId:        &authCreateRequest.Alliance.Id,
 				Alliance: model.Alliance{
 					AllianceId:     authCreateRequest.Alliance.Id,
 					AllianceName:   authCreateRequest.Alliance.Name,
@@ -521,7 +618,7 @@ func TestAllianceExistsNoCorpOrChar(t *testing.T) {
 					CorporationId:     authCreateRequest.Corporation.Id,
 					CorporationName:   authCreateRequest.Corporation.Name,
 					CorporationTicker: authCreateRequest.Corporation.Ticker,
-					AllianceId:        authCreateRequest.Alliance.Id,
+					AllianceId:        &authCreateRequest.Alliance.Id,
 					Alliance: model.Alliance{
 						AllianceId:     authCreateRequest.Alliance.Id,
 						AllianceName:   authCreateRequest.Alliance.Name,
@@ -541,7 +638,7 @@ func TestAllianceExistsNoCorpOrChar(t *testing.T) {
 					CorporationId:     authCreateRequest.Corporation.Id,
 					CorporationName:   authCreateRequest.Corporation.Name,
 					CorporationTicker: authCreateRequest.Corporation.Ticker,
-					AllianceId:        authCreateRequest.Alliance.Id,
+					AllianceId:        &authCreateRequest.Alliance.Id,
 					Alliance: model.Alliance{
 						AllianceId:     authCreateRequest.Alliance.Id,
 						AllianceName:   authCreateRequest.Alliance.Name,
@@ -593,7 +690,7 @@ func TestAllianceAndCorpExistButNoChar(t *testing.T) {
 			CorporationId:     authCreateRequest.Corporation.Id,
 			CorporationName:   authCreateRequest.Corporation.Name,
 			CorporationTicker: authCreateRequest.Corporation.Ticker,
-			AllianceId:        authCreateRequest.Alliance.Id,
+			AllianceId:        &authCreateRequest.Alliance.Id,
 			Alliance: model.Alliance{
 				AllianceId:     authCreateRequest.Alliance.Id,
 				AllianceName:   authCreateRequest.Alliance.Name,
@@ -613,7 +710,7 @@ func TestAllianceAndCorpExistButNoChar(t *testing.T) {
 					CorporationId:     authCreateRequest.Corporation.Id,
 					CorporationName:   authCreateRequest.Corporation.Name,
 					CorporationTicker: authCreateRequest.Corporation.Ticker,
-					AllianceId:        authCreateRequest.Alliance.Id,
+					AllianceId:        &authCreateRequest.Alliance.Id,
 					Alliance: model.Alliance{
 						AllianceId:     authCreateRequest.Alliance.Id,
 						AllianceName:   authCreateRequest.Alliance.Name,
@@ -633,7 +730,7 @@ func TestAllianceAndCorpExistButNoChar(t *testing.T) {
 					CorporationId:     authCreateRequest.Corporation.Id,
 					CorporationName:   authCreateRequest.Corporation.Name,
 					CorporationTicker: authCreateRequest.Corporation.Ticker,
-					AllianceId:        authCreateRequest.Alliance.Id,
+					AllianceId:        &authCreateRequest.Alliance.Id,
 					Alliance: model.Alliance{
 						AllianceId:     authCreateRequest.Alliance.Id,
 						AllianceName:   authCreateRequest.Alliance.Name,
@@ -697,7 +794,7 @@ func TestAllianceAndCorpAndCharExist(t *testing.T) {
 				CorporationId:     authCreateRequest.Corporation.Id,
 				CorporationName:   authCreateRequest.Corporation.Name,
 				CorporationTicker: authCreateRequest.Corporation.Ticker,
-				AllianceId:        authCreateRequest.Alliance.Id,
+				AllianceId:        &authCreateRequest.Alliance.Id,
 				Alliance: model.Alliance{
 					AllianceId:     authCreateRequest.Alliance.Id,
 					AllianceName:   authCreateRequest.Alliance.Name,
@@ -717,7 +814,7 @@ func TestAllianceAndCorpAndCharExist(t *testing.T) {
 					CorporationId:     authCreateRequest.Corporation.Id,
 					CorporationName:   authCreateRequest.Corporation.Name,
 					CorporationTicker: authCreateRequest.Corporation.Ticker,
-					AllianceId:        authCreateRequest.Alliance.Id,
+					AllianceId:        &authCreateRequest.Alliance.Id,
 					Alliance: model.Alliance{
 						AllianceId:     authCreateRequest.Alliance.Id,
 						AllianceName:   authCreateRequest.Alliance.Name,
@@ -759,12 +856,12 @@ func TestAllianceErrorCondition(t *testing.T) {
 	//Set our expectations
 	gomock.InOrder(
 		mockAlliRepo.EXPECT().FindByAllianceId(authCreateRequest.Alliance.Id).Return(nil),
-		mockAlliRepo.EXPECT().Save(gomock.Any()).Return(&testError{message: "Don't do that"}),
+		mockAlliRepo.EXPECT().Save(gomock.Any()).Return(&testError{message: "Don't do that alliance"}),
 	)
 
 	err := authHandler.Create(ctx, &authCreateRequest, &authCreateResponse)
 
-	if err == nil && err.Error() == "Don't do that" {
+	if err == nil && err.Error() == "Don't do that alliance" {
 		t.Fatal("Expected an error but got nothing")
 	}
 }
@@ -791,12 +888,12 @@ func TestCorporationErrorCondition(t *testing.T) {
 		mockAlliRepo.EXPECT().Save(gomock.Any()).Times(1),
 
 		mockCorpRepo.EXPECT().FindByCorporationId(gomock.Any()).Return(nil),
-		mockCorpRepo.EXPECT().Save(gomock.Any()).Return(&testError{message: "Don't do that"}),
+		mockCorpRepo.EXPECT().Save(gomock.Any()).Return(&testError{message: "Don't do that corp"}),
 	)
 
 	err := authHandler.Create(ctx, &authCreateRequest, &authCreateResponse)
 
-	if err == nil && err.Error() == "Don't do that" {
+	if err == nil && err.Error() == "Don't do that corp" {
 		t.Fatal("Expected an error but got nothing")
 	}
 }
@@ -826,12 +923,48 @@ func TestCharacterErrorCondition(t *testing.T) {
 		mockCorpRepo.EXPECT().Save(gomock.Any()).Times(1),
 
 		mockCharRepo.EXPECT().FindByCharacterId(gomock.Any()).Return(nil),
-		mockCharRepo.EXPECT().Save(gomock.Any()).Return(&testError{message: "Don't do that"}),
+		mockCharRepo.EXPECT().Save(gomock.Any()).Return(&testError{message: "Don't do that char"}),
 	)
 
 	err := authHandler.Create(ctx, &authCreateRequest, &authCreateResponse)
 
-	if err == nil && err.Error() == "Don't do that" {
+	if err == nil && err.Error() == "Don't do that char" {
+		t.Fatal("Expected an error but got nothing")
+	}
+}
+
+func TestAuthCodeErrorCondition(t *testing.T) {
+	mockCtrl, mockAuthRepo, _, mockCharRepo, mockCorpRepo, mockAlliRepo, _ := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	authCreateRequest := proto.AuthCreateRequest{
+		Token:       "mytoken",
+		Alliance:    &proto.Alliance{Name: "Test Alliance", Id: 1, Ticker: "TSTA"},
+		Corporation: &proto.Corporation{Name: "Test Corp", Id: 1, Ticker: "TSTC"},
+		Character:   &proto.Character{Name: "Test Character", Id: 1},
+		AuthScope:   []string{"scope1", "scope2"},
+	}
+	var authCreateResponse proto.AuthCreateResponse
+	var ctx context.Context
+
+	authHandler := AuthHandler{}
+
+	//Set our expectations
+	gomock.InOrder(
+		mockAlliRepo.EXPECT().FindByAllianceId(gomock.Any()).Return(nil),
+		mockAlliRepo.EXPECT().Save(gomock.Any()).Times(1),
+
+		mockCorpRepo.EXPECT().FindByCorporationId(gomock.Any()).Return(nil),
+		mockCorpRepo.EXPECT().Save(gomock.Any()).Times(1),
+
+		mockCharRepo.EXPECT().FindByCharacterId(gomock.Any()).Return(nil),
+		mockCharRepo.EXPECT().Save(gomock.Any()).Return(nil),
+		mockAuthRepo.EXPECT().Save(gomock.Any(), gomock.Any()).Return(errors.New("Don't do that auth")),
+	)
+
+	err := authHandler.Create(ctx, &authCreateRequest, &authCreateResponse)
+
+	if err == nil && err.Error() == "Don't do that auth" {
 		t.Fatal("Expected an error but got nothing")
 	}
 }
@@ -879,6 +1012,8 @@ func TestConfirmWithAuthNoUser(t *testing.T) {
 	authHandler := AuthHandler{}
 	expectedCharName := "Test Character Result"
 
+	allianceId := int64(1)
+
 	gomock.InOrder(
 		mockCharRepo.EXPECT().FindByAutenticationCode(authConfirmRequest.AuthenticationCode).Return(
 			&model.Character{
@@ -889,7 +1024,7 @@ func TestConfirmWithAuthNoUser(t *testing.T) {
 					CorporationId:     1,
 					CorporationName:   "Test Corporation Result",
 					CorporationTicker: "TSTC",
-					AllianceId:        1,
+					AllianceId:        &allianceId,
 					Alliance: model.Alliance{
 						AllianceId:     1,
 						AllianceName:   "Test Alliance Result",

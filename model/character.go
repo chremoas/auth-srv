@@ -12,6 +12,6 @@ type Character struct {
 	// which I didn't want to use
 	Users      []User               `gorm:"many2many:user_character_map;"` //AssociationForeignKey:user_id;ForeignKey:character_id;"`
 	AuthCodes  []AuthenticationCode `gorm:"ForeignKey:character_id"`
-	InsertedDt time.Time
-	UpdatedDt  time.Time
+	InsertedDt *time.Time
+	UpdatedDt  *time.Time
 }

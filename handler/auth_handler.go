@@ -53,7 +53,7 @@ func (ah *AuthHandler) Create(context context.Context, request *abaeve_auth.Auth
 		}
 
 		if alliance != nil {
-			corporation.AllianceId = request.Alliance.Id
+			corporation.AllianceId = &request.Alliance.Id
 			corporation.Alliance = *alliance
 		}
 

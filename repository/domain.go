@@ -1,9 +1,10 @@
 package repository
 
 import (
+	"errors"
+	"fmt"
 	"github.com/abaeve/auth-srv/model"
 	"github.com/jinzhu/gorm"
-	"fmt"
 	"time"
 )
 
@@ -65,22 +66,18 @@ type authCodeRepository struct {
 	db *gorm.DB
 }
 
-type daoError struct {
-	message string
-}
-
 //BGN AllianceRepo accessor methods
 func (all *allianceRepository) Save(alliance *model.Alliance) error {
 	//Apparently GORM sends no error back when a primary key isn't populated?  GARBAGE!
 	if alliance.AllianceId == 0 {
-		return &daoError{message: "Primary key must not be 0"}
+		return errors.New("Primary key must not be 0")
 	}
 
 	if beforeEpoc(alliance.InsertedDt) {
-		alliance.InsertedDt = time.Now()
+		alliance.InsertedDt = newTimeNow()
 	}
 
-	alliance.UpdatedDt = time.Now()
+	alliance.UpdatedDt = newTimeNow()
 
 	fmt.Printf("Alliance: (%+v)\n", alliance)
 
@@ -100,23 +97,23 @@ func (all *allianceRepository) FindByAllianceId(allianceId int64) *model.Allianc
 	return &alliance
 }
 
-func (all *allianceRepository) findByAllianceName(allianceName string) *model.Alliance {
-	return &model.Alliance{}
-}
+//func (all *allianceRepository) findByAllianceName(allianceName string) *model.Alliance {
+//	return &model.Alliance{}
+//}
 
 //END AllianceRepo accessor methods
 
 //BGN Corporation accessor methods
 func (corp *corporationRepository) Save(corporation *model.Corporation) error {
 	if corporation.CorporationId == 0 {
-		return &daoError{message: "Primary key must not be 0"}
+		return errors.New("Primary key must not be 0")
 	}
 
 	if beforeEpoc(corporation.InsertedDt) {
-		corporation.InsertedDt = time.Now()
+		corporation.InsertedDt = newTimeNow()
 	}
 
-	corporation.UpdatedDt = time.Now()
+	corporation.UpdatedDt = newTimeNow()
 
 	fmt.Printf("Corporation: (%+v)\n", corporation)
 
@@ -137,19 +134,20 @@ func (corp *corporationRepository) FindByCorporationId(corporationId int64) *mod
 
 	return &corporation
 }
+
 //END Corporation accessor methods
 
 //BGN Character accessor methods
 func (chr *characterRepository) Save(character *model.Character) error {
 	if character.CharacterId == 0 {
-		return &daoError{message: "Primary key must not be 0"}
+		return errors.New("Primary key must not be 0")
 	}
 
 	if beforeEpoc(character.InsertedDt) {
-		character.InsertedDt = time.Now()
+		character.InsertedDt = newTimeNow()
 	}
 
-	character.UpdatedDt = time.Now()
+	character.UpdatedDt = newTimeNow()
 
 	fmt.Printf("Character: (%+v)\n", character)
 
@@ -189,9 +187,9 @@ func (chr *characterRepository) FindByAutenticationCode(authCode string) *model.
 	return &character
 }
 
-func (chr *characterRepository) findByCharacterName(characterName string) *model.Character {
-	return &model.Character{}
-}
+//func (chr *characterRepository) findByCharacterName(characterName string) *model.Character {
+//	return &model.Character{}
+//}
 
 //END Character accessor methods
 
@@ -220,7 +218,7 @@ func (usr *userRepository) LinkCharacterToUserByAuthCode(authCode string, user *
 	foundCharacter := CharacterRepo.FindByAutenticationCode(authCode)
 
 	if foundCharacter == nil {
-		return &daoError{message: "No user with that auth code found"}
+		return errors.New("No user with that auth code found")
 	}
 
 	//Ensure we have all the current associations
@@ -245,7 +243,7 @@ func (usr *userRepository) LinkCharacterToUserByAuthCode(authCode string, user *
 	usr.db.Where("authentication_code = ?", authCode).Find(&authCodeModel)
 
 	if authCodeModel.IsUsed {
-		return &daoError{"Authentication Code is invalid or used."}
+		return errors.New("Authentication Code is invalid or used.")
 	}
 
 	authCodeModel.IsUsed = true
@@ -278,19 +276,23 @@ func (ac *authCodeRepository) Save(character *model.Character, authCode string) 
 //	return nil
 //}
 
-func (ac *authCodeRepository) findByCharacterId(characterId int64) *model.AuthenticationCode {
-	return &model.AuthenticationCode{}
-}
-
+//func (ac *authCodeRepository) findByCharacterId(characterId int64) *model.AuthenticationCode {
+//	return &model.AuthenticationCode{}
+//}
 //END Authentication Code methods
 
-//Make daoError implement error
-func (err *daoError) Error() string {
-	return err.message
-}
-
-func beforeEpoc(timeToCheck time.Time) bool {
+func beforeEpoc(timeToCheck *time.Time) bool {
 	epoch, _ := time.Parse(time.RFC822, "01 Jan 70 00:01 UTC")
 
+	if timeToCheck == nil {
+		return true
+	}
+
 	return timeToCheck.Before(epoch)
+}
+
+func newTimeNow() *time.Time {
+	now := time.Now()
+	now = time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second(), now.Nanosecond(), now.Location())
+	return &now
 }

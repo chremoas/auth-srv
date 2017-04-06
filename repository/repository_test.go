@@ -19,10 +19,42 @@ func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, [2]model.Char
 
 	DB.LogMode(true)
 
-	alliance := model.Alliance{AllianceId: 1, AllianceTicker: "TST", AllianceName: "Test AllianceRepo 1"}
-	corporation := model.Corporation{CorporationId: 1, AllianceId: 1, CorporationName: "Test Corporation 1", CorporationTicker: "TST", Alliance: alliance}
-	character := model.Character{CharacterId: 1, CharacterName: "Test Character 1", CorporationId: 1, Corporation: corporation, Token: ""}
-	character10k := model.Character{CharacterId: 10000, CharacterName: "I'm lonely, auth me", CorporationId: 1, Corporation: corporation, Token: ""}
+	allianceId := int64(1)
+
+	alliance := model.Alliance{
+		AllianceId:     1,
+		AllianceTicker: "TST",
+		AllianceName:   "Test AllianceRepo 1",
+		InsertedDt:     newTimeNow(),
+		UpdatedDt:      newTimeNow(),
+	}
+	corporation := model.Corporation{
+		CorporationId:     1,
+		AllianceId:        &allianceId,
+		CorporationName:   "Test Corporation 1",
+		CorporationTicker: "TST",
+		Alliance:          alliance,
+		InsertedDt:        newTimeNow(),
+		UpdatedDt:         newTimeNow(),
+	}
+	character := model.Character{
+		CharacterId:   1,
+		CharacterName: "Test Character 1",
+		CorporationId: 1,
+		Corporation:   corporation,
+		Token:         "",
+		InsertedDt:    newTimeNow(),
+		UpdatedDt:     newTimeNow(),
+	}
+	character10k := model.Character{
+		CharacterId:   10000,
+		CharacterName: "I'm lonely, auth me",
+		CorporationId: 1,
+		Corporation:   corporation,
+		Token:         "",
+		InsertedDt:    newTimeNow(),
+		UpdatedDt:     newTimeNow(),
+	}
 	user := model.User{UserId: 1, ChatId: "1234567890", Characters: []model.Character{character}}
 	authCode := model.AuthenticationCode{CharacterId: 1, Character: character, AuthenticationCode: "123456789012345678901", IsUsed: true}
 	authCode2 := model.AuthenticationCode{CharacterId: 10000, Character: character10k, AuthenticationCode: "abcdefghijk", IsUsed: false}
@@ -171,7 +203,15 @@ func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 		tx := DB.Begin()
 
 		var userAsRetrieved model.User
-		newCharacter := model.Character{CharacterId: 2, CharacterName: "Test Character 2", CorporationId: 1, Corporation: corporation, Token: ""}
+		newCharacter := model.Character{
+			CharacterId:   2,
+			CharacterName: "Test Character 2",
+			CorporationId: 1,
+			Corporation:   corporation,
+			Token:         "",
+			InsertedDt:    newTimeNow(),
+			UpdatedDt:     newTimeNow(),
+		}
 
 		tx.Create(&newCharacter)
 
@@ -399,7 +439,7 @@ func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
 			CorporationId:     2,
 			CorporationName:   "Test Corporation 2",
 			CorporationTicker: "TST2",
-			AllianceId:        alliance.AllianceId,
+			AllianceId:        &alliance.AllianceId,
 			Alliance:          alliance,
 		}
 
@@ -436,7 +476,7 @@ func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
 		corporationAsCreated := model.Corporation{
 			CorporationName:   "Test Corporation 2",
 			CorporationTicker: "TST2",
-			AllianceId:        alliance.AllianceId,
+			AllianceId:        &alliance.AllianceId,
 			Alliance:          alliance,
 		}
 
