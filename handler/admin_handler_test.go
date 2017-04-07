@@ -4,10 +4,22 @@ import (
 	"testing"
 	"github.com/abaeve/auth-srv/proto"
 	"context"
+	"github.com/abaeve/auth-srv/model"
 )
 
 func TestAdminHandler_CorporationAllianceRoleAdd(t *testing.T) {
+	mockCtrl, _, _, _, _, _, mockAcceRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
 	adminHandler := &AdminHandler{}
+
+	mockAcceRepo.EXPECT().SaveAllianceAndCorpRole(
+		1,
+		1,
+		&model.Role{
+
+		},
+	)
 
 	request := abaeve_auth.AuthAdminRequest{}
 	response := abaeve_auth.AuthAdminResponse{}

@@ -6,12 +6,12 @@ import (
 )
 
 type AccessesRepository interface {
-	SaveAllianceAndCorpRole(allianceId int64, corporationId int64, role model.Role) error
-	SaveAllianceRole(allianceId int64, role model.Role) error
-	SaveCorporationRole(corporationId int64, role model.Role) error
-	SaveCharacterRole(characterId int64, role model.Role) error
-	SaveAllianceCharacterLeadershipRole(allianceId int64, role model.Role) error
-	SaveCorporationCharacterLeadershipRole(corporationId int64, role model.Role) error
+	SaveAllianceAndCorpRole(allianceId int64, corporationId int64, role *model.Role) error
+	SaveAllianceRole(allianceId int64, role *model.Role) error
+	SaveCorporationRole(corporationId int64, role *model.Role) error
+	SaveCharacterRole(characterId int64, role *model.Role) error
+	SaveAllianceCharacterLeadershipRole(allianceId int64, role *model.Role) error
+	SaveCorporationCharacterLeadershipRole(corporationId int64, role *model.Role) error
 
 	FindByChatId(chatId string) ([]string, error)
 }
@@ -94,37 +94,37 @@ WHERE user.chat_id = ?
 
 // Saves a role that is linked to an alliance AND a corporation
 // alliance_coporation_role_map table
-func (acc *accessesRepo) SaveAllianceAndCorpRole(allianceId int64, corporationId int64, role model.Role) error {
+func (acc *accessesRepo) SaveAllianceAndCorpRole(allianceId int64, corporationId int64, role *model.Role) error {
 	return nil
 }
 
 // Saves a role that is linked to an alliance
 // alliance_role_map table
-func (acc *accessesRepo) SaveAllianceRole(allianceId int64, role model.Role) error {
+func (acc *accessesRepo) SaveAllianceRole(allianceId int64, role *model.Role) error {
 	return nil
 }
 
 // Saves a role that is linked to a corporation
 // corporation_role_map table
-func (acc *accessesRepo) SaveCorporationRole(corporationId int64, role model.Role) error {
+func (acc *accessesRepo) SaveCorporationRole(corporationId int64, role *model.Role) error {
 	return nil
 }
 
 // Saves a role that is linked to a character
 // character_role_map table
-func (acc *accessesRepo) SaveCharacterRole(characterId int64, role model.Role) error {
+func (acc *accessesRepo) SaveCharacterRole(characterId int64, role *model.Role) error {
 	return nil
 }
 
 // Saves a role that is linked to an alliance and a character in an alliance leadership position
 // alliance_character_leadership_role_map table
-func (acc *accessesRepo) SaveAllianceCharacterLeadershipRole(allianceId int64, role model.Role) error {
+func (acc *accessesRepo) SaveAllianceCharacterLeadershipRole(allianceId int64, role *model.Role) error {
 	return nil
 }
 
 // Saves a role that is linked to a corporation and a character in a corporation leadership position
 // corp_character_leadership_role_map table
-func (acc *accessesRepo) SaveCorporationCharacterLeadershipRole(corporationId int64, role model.Role) error {
+func (acc *accessesRepo) SaveCorporationCharacterLeadershipRole(corporationId int64, role *model.Role) error {
 	return nil
 }
 
@@ -157,9 +157,5 @@ func (acc *accessesRepo) FindByChatId(chatId string) ([]string, error) {
 }
 
 func (acc *accessesRepo) findByCharacter(character model.Character) map[string]string {
-	return nil
-}
-
-func (acc *accessesRepo) findByUserId(userId int64) []string {
 	return nil
 }
