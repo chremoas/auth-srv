@@ -9,7 +9,7 @@ import (
 
 func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, [2]model.Character, model.User, [2]model.AuthenticationCode) {
 	//<editor-fold desc="Setup code">
-	err := Setup("mysql", "travis-ci@tcp(localhost:3306)/authservices?parseTime=true")
+	err := Setup("mysql", "travis@tcp(localhost:3306)/authservices?parseTime=true")
 
 	if err != nil {
 		t.Fatalf("Could not open database connection: %s", err)
