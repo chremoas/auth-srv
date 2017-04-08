@@ -78,8 +78,9 @@ message GetRolesRequest {
 message AuthAdminRequest {
     repeated int64 EntityId = 1;
     repeated string EntityName = 2;
-    repeated EntityType EntityType = 3;
-    string Role = 4;
+    repeated string EntityTicker = 3;
+    repeated EntityType EntityType = 4;
+    string Role = 5;
 }
 
 message AuthAdminResponse {
