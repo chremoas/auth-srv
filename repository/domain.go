@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/abaeve/auth-srv/model"
+	"github.com/abaeve/auth-srv/util"
 	"github.com/jinzhu/gorm"
-	"time"
 )
 
 type AllianceRepository interface {
@@ -32,6 +32,7 @@ type UserRepository interface {
 
 type RoleRepository interface {
 	Save(role *model.Role) error
+	FindByRoleName(roleName string) *model.Role
 }
 
 type AuthenticationCodeRepository interface {
@@ -73,11 +74,11 @@ func (all *allianceRepository) Save(alliance *model.Alliance) error {
 		return errors.New("Primary key must not be 0")
 	}
 
-	if beforeEpoc(alliance.InsertedDt) {
-		alliance.InsertedDt = newTimeNow()
+	if util.BeforeEpoc(alliance.InsertedDt) {
+		alliance.InsertedDt = util.NewTimeNow()
 	}
 
-	alliance.UpdatedDt = newTimeNow()
+	alliance.UpdatedDt = util.NewTimeNow()
 
 	fmt.Printf("Alliance: (%+v)\n", alliance)
 
@@ -96,6 +97,7 @@ func (all *allianceRepository) FindByAllianceId(allianceId int64) *model.Allianc
 
 	return &alliance
 }
+
 //END AllianceRepo accessor methods
 
 //BGN Corporation accessor methods
@@ -104,11 +106,11 @@ func (corp *corporationRepository) Save(corporation *model.Corporation) error {
 		return errors.New("Primary key must not be 0")
 	}
 
-	if beforeEpoc(corporation.InsertedDt) {
-		corporation.InsertedDt = newTimeNow()
+	if util.BeforeEpoc(corporation.InsertedDt) {
+		corporation.InsertedDt = util.NewTimeNow()
 	}
 
-	corporation.UpdatedDt = newTimeNow()
+	corporation.UpdatedDt = util.NewTimeNow()
 
 	fmt.Printf("Corporation: (%+v)\n", corporation)
 
@@ -129,6 +131,7 @@ func (corp *corporationRepository) FindByCorporationId(corporationId int64) *mod
 
 	return &corporation
 }
+
 //END Corporation accessor methods
 
 //BGN Character accessor methods
@@ -137,11 +140,11 @@ func (chr *characterRepository) Save(character *model.Character) error {
 		return errors.New("Primary key must not be 0")
 	}
 
-	if beforeEpoc(character.InsertedDt) {
-		character.InsertedDt = newTimeNow()
+	if util.BeforeEpoc(character.InsertedDt) {
+		character.InsertedDt = util.NewTimeNow()
 	}
 
-	character.UpdatedDt = newTimeNow()
+	character.UpdatedDt = util.NewTimeNow()
 
 	fmt.Printf("Character: (%+v)\n", character)
 
@@ -180,6 +183,7 @@ func (chr *characterRepository) FindByAutenticationCode(authCode string) *model.
 
 	return &character
 }
+
 //END Character accessor methods
 
 //BGN User accessor methods
@@ -241,19 +245,25 @@ func (usr *userRepository) LinkCharacterToUserByAuthCode(authCode string, user *
 
 	return nil
 }
+
 //END User accessor methods
 
 //BGN Role accessor methods
 func (rle *roleRepository) Save(role *model.Role) error {
-	if beforeEpoc(role.InsertedDt) {
-		role.InsertedDt = newTimeNow()
+	if util.BeforeEpoc(role.InsertedDt) {
+		role.InsertedDt = util.NewTimeNow()
 	}
 
-	role.UpdatedDt = newTimeNow()
+	role.UpdatedDt = util.NewTimeNow()
 
 	err := rle.db.Save(&role).Error
 	return err
 }
+
+func (rle *roleRepository) FindByRoleName(roleName string) *model.Role {
+	return nil
+}
+
 //END Role accessor methods
 
 //BGN Authentication Code methods
@@ -269,19 +279,3 @@ func (ac *authCodeRepository) Save(character *model.Character, authCode string) 
 //	return nil
 //}
 //END Authentication Code methods
-
-func beforeEpoc(timeToCheck *time.Time) bool {
-	epoch, _ := time.Parse(time.RFC822, "01 Jan 70 00:01 UTC")
-
-	if timeToCheck == nil {
-		return true
-	}
-
-	return timeToCheck.Before(epoch)
-}
-
-func newTimeNow() *time.Time {
-	now := time.Now()
-	now = time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second(), now.Nanosecond(), now.Location())
-	return &now
-}

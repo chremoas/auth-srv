@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/abaeve/auth-srv/model"
+	"github.com/abaeve/auth-srv/util"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	"testing"
@@ -24,8 +25,8 @@ func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, [2]model.Char
 		AllianceId:     1,
 		AllianceTicker: "TST",
 		AllianceName:   "Test AllianceRepo 1",
-		InsertedDt:     newTimeNow(),
-		UpdatedDt:      newTimeNow(),
+		InsertedDt:     util.NewTimeNow(),
+		UpdatedDt:      util.NewTimeNow(),
 	}
 	corporation := model.Corporation{
 		CorporationId:     1,
@@ -33,8 +34,8 @@ func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, [2]model.Char
 		CorporationName:   "Test Corporation 1",
 		CorporationTicker: "TST",
 		Alliance:          alliance,
-		InsertedDt:        newTimeNow(),
-		UpdatedDt:         newTimeNow(),
+		InsertedDt:        util.NewTimeNow(),
+		UpdatedDt:         util.NewTimeNow(),
 	}
 	character := model.Character{
 		CharacterId:   1,
@@ -42,8 +43,8 @@ func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, [2]model.Char
 		CorporationId: 1,
 		Corporation:   corporation,
 		Token:         "",
-		InsertedDt:    newTimeNow(),
-		UpdatedDt:     newTimeNow(),
+		InsertedDt:    util.NewTimeNow(),
+		UpdatedDt:     util.NewTimeNow(),
 	}
 	character10k := model.Character{
 		CharacterId:   10000,
@@ -51,8 +52,8 @@ func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, [2]model.Char
 		CorporationId: 1,
 		Corporation:   corporation,
 		Token:         "",
-		InsertedDt:    newTimeNow(),
-		UpdatedDt:     newTimeNow(),
+		InsertedDt:    util.NewTimeNow(),
+		UpdatedDt:     util.NewTimeNow(),
 	}
 	user := model.User{UserId: 1, ChatId: "1234567890", Characters: []model.Character{character}}
 	authCode := model.AuthenticationCode{CharacterId: 1, Character: character, AuthenticationCode: "123456789", IsUsed: true}
@@ -208,8 +209,8 @@ func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 			CorporationId: 1,
 			Corporation:   corporation,
 			Token:         "",
-			InsertedDt:    newTimeNow(),
-			UpdatedDt:     newTimeNow(),
+			InsertedDt:    util.NewTimeNow(),
+			UpdatedDt:     util.NewTimeNow(),
 		}
 
 		tx.Create(&newCharacter)
