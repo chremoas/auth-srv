@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"database/sql"
 	"github.com/abaeve/auth-srv/model"
+	"github.com/jmoiron/sqlx"
 )
 
 type AccessesRepository interface {
@@ -17,7 +17,7 @@ type AccessesRepository interface {
 }
 
 type accessesRepo struct {
-	db *sql.DB
+	db *sqlx.DB
 }
 
 var roleQuery string = `

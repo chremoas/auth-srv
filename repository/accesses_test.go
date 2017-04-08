@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"github.com/jmoiron/sqlx"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 	"strings"
 	"testing"
@@ -24,7 +25,7 @@ func TestAccessesWithAllianceRoleAndCorpRole(t *testing.T) {
 
 	accesses := AccessRepo.(*accessesRepo)
 
-	accesses.db = db
+	accesses.db = sqlx.NewDb(db, "mysql")
 
 	sql := strings.Replace(roleQuery, "(", ".", -1)
 	sql = strings.Replace(sql, ")", ".", -1)
@@ -69,7 +70,7 @@ func TestAccessesWith20Roles(t *testing.T) {
 
 	accesses := AccessRepo.(*accessesRepo)
 
-	accesses.db = db
+	accesses.db = sqlx.NewDb(db, "mysql")
 
 	sql := strings.Replace(roleQuery, "(", ".", -1)
 	sql = strings.Replace(sql, ")", ".", -1)
@@ -155,7 +156,7 @@ func TestErrorOnPrepare(t *testing.T) {
 
 	accesses := AccessRepo.(*accessesRepo)
 
-	accesses.db = db
+	accesses.db = sqlx.NewDb(db, "mysql")
 
 	sql := strings.Replace(roleQuery, "(", ".", -1)
 	sql = strings.Replace(sql, ")", ".", -1)
@@ -180,7 +181,7 @@ func TestErrorOnQuery(t *testing.T) {
 
 	accesses := AccessRepo.(*accessesRepo)
 
-	accesses.db = db
+	accesses.db = sqlx.NewDb(db, "mysql")
 
 	sql := strings.Replace(roleQuery, "(", ".", -1)
 	sql = strings.Replace(sql, ")", ".", -1)
