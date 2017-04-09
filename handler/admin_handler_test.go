@@ -758,7 +758,7 @@ func TestAdminHandler_CorporationAllianceRoleRemove(t *testing.T) {
 			RoleName:         "TEST_ROLE1",
 			ChatServiceGroup: "TEST_ROLE1",
 		},
-	).Return(1, nil)
+	).Return(int64(1), nil)
 
 	adminHandler := &AdminHandler{}
 
@@ -824,7 +824,7 @@ func TestAdminHandler_CorporationAllianceRoleRemove_WithTwoAlliances(t *testing.
 			RoleName:         "TEST_ROLE1",
 			ChatServiceGroup: "TEST_ROLE1",
 		},
-	).Return(1, nil).Times(0)
+	).Return(int64(1), nil).Times(0)
 
 	adminHandler := &AdminHandler{}
 
@@ -901,7 +901,7 @@ func TestAdminHandler_CorporationAllianceRoleRemove_With2Deletions(t *testing.T)
 			RoleName:         "TEST_ROLE1",
 			ChatServiceGroup: "TEST_ROLE1",
 		},
-	).Return(2, nil)
+	).Return(int64(2), nil)
 
 	adminHandler := &AdminHandler{}
 
@@ -978,7 +978,7 @@ func TestAdminHandler_CorporationAllianceRoleRemove_WithError(t *testing.T) {
 			RoleName:         "TEST_ROLE1",
 			ChatServiceGroup: "TEST_ROLE1",
 		},
-	).Return(0, errors.New("Had an issue!"))
+	).Return(int64(1), errors.New("Had an issue!"))
 
 	adminHandler := &AdminHandler{}
 
