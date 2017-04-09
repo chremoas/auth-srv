@@ -737,6 +737,33 @@ func TestCreateRolesThroughREPO(t *testing.T) {
 		}
 	})
 
+	t.Run("FindByRoleName", func(t *testing.T) {
+		newRole := model.Role{RoleName: "TEST_ROLE_FOR_TESTING3", ChatServiceGroup: "SUPER_COOL_CHAT2"}
+		err := RoleRepo.Save(&newRole)
+
+		if err != nil {
+			t.Fatalf("Had an error while saving the role: %s", err)
+		}
+
+		roleAsRetrieved := RoleRepo.FindByRoleName("TEST_ROLE_FOR_TESTING3")
+
+		if roleAsRetrieved == nil {
+			t.Fatal("Expected a role but retrieved nil")
+		}
+
+		if roleAsRetrieved.RoleId != newRole.RoleId {
+			t.Errorf("Role id incorrect, expected: (%d) but retrieved: (%d)", newRole.RoleId, roleAsRetrieved.RoleId)
+		}
+
+		if roleAsRetrieved.RoleName != newRole.RoleName {
+			t.Errorf("Role name, expected: (%s) but retrieved: (%s)", newRole.RoleName, roleAsRetrieved.RoleName)
+		}
+
+		if roleAsRetrieved.ChatServiceGroup != newRole.ChatServiceGroup {
+			t.Errorf("Role chat service group, expected: (%s) but retrieved: (%s)", newRole.ChatServiceGroup, roleAsRetrieved.ChatServiceGroup)
+		}
+	})
+
 	rolesRepo.db.Rollback()
 	SharedTearDown()
 }

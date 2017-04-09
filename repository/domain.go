@@ -261,7 +261,11 @@ func (rle *roleRepository) Save(role *model.Role) error {
 }
 
 func (rle *roleRepository) FindByRoleName(roleName string) *model.Role {
-	return nil
+	var role model.Role
+
+	rle.db.Where("role_name = ?", roleName).Find(&role)
+
+	return &role
 }
 
 //END Role accessor methods
