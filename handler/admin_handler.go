@@ -1,3 +1,4 @@
+//TODO: There's quite a bit of code that can be shared within the functions of this file.
 package handler
 
 import (
@@ -119,18 +120,176 @@ func (ah *AdminHandler) CorporationAllianceRoleRemove(context context.Context, r
 }
 
 func (ah *AdminHandler) AllianceRoleAdd(context context.Context, request *abaeve_auth.AuthAdminRequest, response *abaeve_auth.AuthAdminResponse) error {
+	if !validateOneEntityExists(request) {
+		response.Success = false
+		return nil
+	}
+
+	role, err := findOrSaveRoleByName(request.Role)
+	if err != nil {
+		response.Success = false
+		return nil
+	}
+
+	alliance := findAllianceFromRequest(request)
+	if alliance == nil {
+		response.Success = false
+		return nil
+	}
+
+	err = findOrSaveAlliance(alliance)
+	if err != nil {
+		response.Success = false
+		return nil
+	}
+
+	err = repository.AccessRepo.SaveAllianceRole(alliance.AllianceId, role)
+	if err != nil {
+		response.Success = false
+		return nil
+	}
+
+	response.Success = true
+
+	response.EntityType = make([]abaeve_auth.EntityType, 1)
+	response.EntityType[0] = abaeve_auth.EntityType_ALLIANCE
+
+	response.EntityId = make([]int64, 1)
+	response.EntityId[0] = alliance.AllianceId
+
+	response.EntityName = make([]string, 1)
+	response.EntityName[0] = alliance.AllianceName
+
 	return nil
 }
 
 func (ah *AdminHandler) AllianceRoleRemove(context context.Context, request *abaeve_auth.AuthAdminRequest, response *abaeve_auth.AuthAdminResponse) error {
+	if !validateOneEntityExists(request) {
+		response.Success = false
+		return nil
+	}
+
+	role, err := findOrSaveRoleByName(request.Role)
+	if err != nil {
+		response.Success = false
+		return nil
+	}
+
+	alliance := findAllianceFromRequest(request)
+	if alliance == nil {
+		response.Success = false
+		return nil
+	}
+
+	deletedRows, err := repository.AccessRepo.DeleteAllianceRole(alliance.AllianceId, role)
+	if err != nil {
+		response.Success = false
+		return nil
+	}
+
+	if deletedRows > 1 {
+		response.Success = false
+		return nil
+	}
+
+	response.Success = true
+
+	response.EntityType = make([]abaeve_auth.EntityType, 1)
+	response.EntityType[0] = abaeve_auth.EntityType_ALLIANCE
+
+	response.EntityId = make([]int64, 1)
+	response.EntityId[0] = alliance.AllianceId
+
+	response.EntityName = make([]string, 1)
+	response.EntityName[0] = alliance.AllianceName
+
 	return nil
 }
 
 func (ah *AdminHandler) CorporationRoleAdd(context context.Context, request *abaeve_auth.AuthAdminRequest, response *abaeve_auth.AuthAdminResponse) error {
+	if !validateOneEntityExists(request) {
+		response.Success = false
+		return nil
+	}
+
+	role, err := findOrSaveRoleByName(request.Role)
+	if err != nil {
+		response.Success = false
+		return nil
+	}
+
+	corporation := findCorpFromRequest(request)
+	if corporation == nil {
+		response.Success = false
+		return nil
+	}
+
+	err = findOrSaveCorp(corporation)
+	if err != nil {
+		response.Success = false
+		return nil
+	}
+
+	err = repository.AccessRepo.SaveCorporationRole(corporation.CorporationId, role)
+	if err != nil {
+		response.Success = false
+		return nil
+	}
+
+	response.Success = true
+
+	response.EntityType = make([]abaeve_auth.EntityType, 1)
+	response.EntityType[0] = abaeve_auth.EntityType_CORPORATION
+
+	response.EntityId = make([]int64, 1)
+	response.EntityId[0] = corporation.CorporationId
+
+	response.EntityName = make([]string, 1)
+	response.EntityName[0] = corporation.CorporationName
+
 	return nil
 }
 
 func (ah *AdminHandler) CorporationRoleRemove(context context.Context, request *abaeve_auth.AuthAdminRequest, response *abaeve_auth.AuthAdminResponse) error {
+	if !validateOneEntityExists(request) {
+		response.Success = false
+		return nil
+	}
+
+	role, err := findOrSaveRoleByName(request.Role)
+	if err != nil {
+		response.Success = false
+		return nil
+	}
+
+	corporation := findCorpFromRequest(request)
+	if corporation == nil {
+		response.Success = false
+		return nil
+	}
+
+	deletedRows, err := repository.AccessRepo.DeleteCorporationRole(corporation.CorporationId, role)
+	if err != nil {
+		response.Success = false
+		return nil
+	}
+
+	if deletedRows > 1 {
+		response.Success = false
+		return nil
+	}
+
+	response.Success = true
+
+	response.EntityType = make([]abaeve_auth.EntityType, 1)
+	response.EntityType[0] = abaeve_auth.EntityType_CORPORATION
+
+	response.EntityId = make([]int64, 1)
+	response.EntityId[0] = corporation.CorporationId
+
+	response.EntityName = make([]string, 1)
+	response.EntityName[0] = corporation.CorporationName
+
 	return nil
 }
 
@@ -220,6 +379,7 @@ func findAllianceFromRequest(request *abaeve_auth.AuthAdminRequest) *model.Allia
 	return alliance
 }
 
+//TODO: This is used in two contexts, one for removing role links and one for adding role links, change it so it can be TOLD to save or not
 func findOrSaveRoleByName(roleName string) (*model.Role, error) {
 	role := repository.RoleRepo.FindByRoleName(roleName)
 
