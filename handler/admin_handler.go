@@ -1,12 +1,12 @@
 package handler
 
 import (
+	"errors"
 	"github.com/abaeve/auth-srv/model"
 	"github.com/abaeve/auth-srv/proto"
 	"github.com/abaeve/auth-srv/repository"
 	"github.com/micro/go-micro/client"
 	"golang.org/x/net/context"
-	"errors"
 )
 
 type AdminHandler struct {
