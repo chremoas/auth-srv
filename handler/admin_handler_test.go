@@ -680,7 +680,7 @@ func TestAdminHandler_CorporationAllianceRoleAdd_WithNotEnoughEntityStuff(t *tes
 	}
 }
 
-func TestAdminHandler_CorporationAllianceRoleAdd_WithTwoAlliance(t *testing.T) {
+func TestAdminHandler_CorporationAllianceRoleAdd_WithTwoAlliances(t *testing.T) {
 	mockCtrl, _, _, _, _, _, _, _ := SharedSetup(t)
 	defer mockCtrl.Finish()
 
@@ -742,14 +742,300 @@ func TestAdminHandler_CorporationAllianceRoleAdd_WithTwoAlliance(t *testing.T) {
 }
 
 func TestAdminHandler_CorporationAllianceRoleRemove(t *testing.T) {
+	mockCtrl, _, _, _, _, _, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	)
+	mockAcceRepo.EXPECT().DeleteAllianceAndCorpRole(int64(1), int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Return(1, nil)
+
 	adminHandler := &AdminHandler{}
 
-	request := abaeve_auth.AuthAdminRequest{}
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{1, 1},
+		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_ALLIANCE, abaeve_auth.EntityType_CORPORATION},
+		EntityName:   []string{"Test Alliance", "Test Corporation"},
+		EntityTicker: []string{"TSTA", "TSTC"},
+		Role:         "TEST_ROLE1",
+	}
 	response := abaeve_auth.AuthAdminResponse{}
 
-	adminHandler.CorporationAllianceRoleRemove(context.Background(), &request, &response)
+	err := adminHandler.CorporationAllianceRoleRemove(context.Background(), &request, &response)
 
-	t.Error("Implement me!")
+	if err != nil {
+		t.Fatal("Received an error when one wasn't expected")
+	}
+
+	if !response.Success {
+		t.Fatal("Received a false success when true was expected")
+	}
+
+	if len(response.EntityId) != 2 {
+		t.Fatalf("Expected 2 entity id's but received %d", len(response.EntityId))
+	}
+
+	foundAllianceType := false
+	foundAllianceId := int64(0)
+	foundCorpType := false
+	foundCorpId := int64(0)
+
+	for idx, entityType := range response.EntityType {
+		if entityType == abaeve_auth.EntityType_ALLIANCE {
+			foundAllianceType = true
+			foundAllianceId = response.EntityId[idx]
+		}
+		if entityType == abaeve_auth.EntityType_CORPORATION {
+			foundCorpType = true
+			foundCorpId = response.EntityId[idx]
+		}
+	}
+
+	if !foundAllianceType {
+		t.Fatal("Expected to find 1 response that was of type EntityType_ALLIANCE but found 0")
+	} else if foundAllianceId != 1 {
+		t.Fatalf("Expected alliance id: (%d) but received: (%d)", 1, foundAllianceId)
+	}
+
+	if !foundCorpType {
+		t.Fatal("Expected to find 1 response that was of type EntityType_CORPORATION but found 0")
+	} else if foundCorpId != 1 {
+		t.Fatalf("Expected corp id: (%d) but received: (%d)", 1, foundCorpId)
+	}
+}
+
+func TestAdminHandler_CorporationAllianceRoleRemove_WithTwoAlliances(t *testing.T) {
+	mockCtrl, _, _, _, _, _, mockAcceRepo, _ := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockAcceRepo.EXPECT().DeleteAllianceAndCorpRole(int64(1), int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Return(1, nil).Times(0)
+
+	adminHandler := &AdminHandler{}
+
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{1, 1},
+		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_ALLIANCE, abaeve_auth.EntityType_ALLIANCE},
+		EntityName:   []string{"Test Alliance 1", "Test Alliance 2"},
+		EntityTicker: []string{"TSTA1", "TSTA2"},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.CorporationAllianceRoleRemove(context.Background(), &request, &response)
+
+	if err != nil {
+		t.Fatal("Received an error when one wasn't expected")
+	}
+
+	if response.Success {
+		t.Fatal("Received a true success when false was expected")
+	}
+
+	if len(response.EntityId) != 0 {
+		t.Fatalf("Expected 0 entity id's but received %d", len(response.EntityId))
+	}
+
+	foundAllianceType := false
+	foundAllianceId := int64(0)
+	foundCorpType := false
+	foundCorpId := int64(0)
+
+	for idx, entityType := range response.EntityType {
+		if entityType == abaeve_auth.EntityType_ALLIANCE {
+			foundAllianceType = true
+			foundAllianceId = response.EntityId[idx]
+		}
+		if entityType == abaeve_auth.EntityType_CORPORATION {
+			foundCorpType = true
+			foundCorpId = response.EntityId[idx]
+		}
+	}
+
+	if foundAllianceType {
+		t.Fatal("Expected to find 0 response that was of type EntityType_ALLIANCE but found something")
+	}
+
+	if foundAllianceId != 0 {
+		t.Fatalf("Expected alliance id: (%d) but received: (%d)", 0, foundAllianceId)
+	}
+
+	if foundCorpType {
+		t.Fatal("Expected to find 0 response that was of type EntityType_CORPORATION but found something")
+	}
+
+	if foundCorpId != 0 {
+		t.Fatalf("Expected corp id: (%d) but received: (%d)", 0, foundCorpId)
+	}
+}
+
+func TestAdminHandler_CorporationAllianceRoleRemove_With2Deletions(t *testing.T) {
+	mockCtrl, _, _, _, _, _, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	)
+	mockAcceRepo.EXPECT().DeleteAllianceAndCorpRole(int64(1), int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Return(2, nil)
+
+	adminHandler := &AdminHandler{}
+
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{1, 1},
+		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_ALLIANCE, abaeve_auth.EntityType_CORPORATION},
+		EntityName:   []string{"Test Alliance", "Test Corporation"},
+		EntityTicker: []string{"TSTA", "TSTC"},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.CorporationAllianceRoleRemove(context.Background(), &request, &response)
+
+	if err != nil {
+		t.Fatal("Received an error when one wasn't expected")
+	}
+
+	if response.Success {
+		t.Fatal("Received a true success when false was expected")
+	}
+
+	if len(response.EntityId) != 0 {
+		t.Fatalf("Expected 0 entity id's but received %d", len(response.EntityId))
+	}
+
+	foundAllianceType := false
+	foundAllianceId := int64(0)
+	foundCorpType := false
+	foundCorpId := int64(0)
+
+	for idx, entityType := range response.EntityType {
+		if entityType == abaeve_auth.EntityType_ALLIANCE {
+			foundAllianceType = true
+			foundAllianceId = response.EntityId[idx]
+		}
+		if entityType == abaeve_auth.EntityType_CORPORATION {
+			foundCorpType = true
+			foundCorpId = response.EntityId[idx]
+		}
+	}
+
+	if foundAllianceType {
+		t.Fatal("Expected to find 0 response that was of type EntityType_ALLIANCE but found something")
+	}
+
+	if foundAllianceId != 0 {
+		t.Fatalf("Expected alliance id: (%d) but received: (%d)", 0, foundAllianceId)
+	}
+
+	if foundCorpType {
+		t.Fatal("Expected to find 0 response that was of type EntityType_CORPORATION but found something")
+	}
+
+	if foundCorpId != 0 {
+		t.Fatalf("Expected corp id: (%d) but received: (%d)", 0, foundCorpId)
+	}
+}
+
+func TestAdminHandler_CorporationAllianceRoleRemove_WithError(t *testing.T) {
+	mockCtrl, _, _, _, _, _, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	)
+	mockAcceRepo.EXPECT().DeleteAllianceAndCorpRole(int64(1), int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Return(0, errors.New("Had an issue!"))
+
+	adminHandler := &AdminHandler{}
+
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{1, 1},
+		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_ALLIANCE, abaeve_auth.EntityType_CORPORATION},
+		EntityName:   []string{"Test Alliance", "Test Corporation"},
+		EntityTicker: []string{"TSTA", "TSTC"},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.CorporationAllianceRoleRemove(context.Background(), &request, &response)
+
+	if err != nil {
+		t.Fatal("Received an error when one wasn't expected")
+	}
+
+	if response.Success {
+		t.Fatal("Received a true success when false was expected")
+	}
+
+	if len(response.EntityId) != 0 {
+		t.Fatalf("Expected 0 entity id's but received %d", len(response.EntityId))
+	}
+
+	foundAllianceType := false
+	foundAllianceId := int64(0)
+	foundCorpType := false
+	foundCorpId := int64(0)
+
+	for idx, entityType := range response.EntityType {
+		if entityType == abaeve_auth.EntityType_ALLIANCE {
+			foundAllianceType = true
+			foundAllianceId = response.EntityId[idx]
+		}
+		if entityType == abaeve_auth.EntityType_CORPORATION {
+			foundCorpType = true
+			foundCorpId = response.EntityId[idx]
+		}
+	}
+
+	if foundAllianceType {
+		t.Fatal("Expected to find 0 response that was of type EntityType_ALLIANCE but found something")
+	}
+
+	if foundAllianceId != 0 {
+		t.Fatalf("Expected alliance id: (%d) but received: (%d)", 0, foundAllianceId)
+	}
+
+	if foundCorpType {
+		t.Fatal("Expected to find 0 response that was of type EntityType_CORPORATION but found something")
+	}
+
+	if foundCorpId != 0 {
+		t.Fatalf("Expected corp id: (%d) but received: (%d)", 0, foundCorpId)
+	}
 }
 
 func TestAdminHandler_AllianceRoleAdd(t *testing.T) {
