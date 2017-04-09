@@ -33,9 +33,9 @@ func (_m *MockAccessesRepository) EXPECT() *_MockAccessesRepositoryRecorder {
 	return _m.recorder
 }
 
-func (_m *MockAccessesRepository) DeleteAllianceAndCorpRole(_param0 int64, _param1 int64, _param2 *model.Role) (int, error) {
+func (_m *MockAccessesRepository) DeleteAllianceAndCorpRole(_param0 int64, _param1 int64, _param2 *model.Role) (int64, error) {
 	ret := _m.ctrl.Call(_m, "DeleteAllianceAndCorpRole", _param0, _param1, _param2)
-	ret0, _ := ret[0].(int)
+	ret0, _ := ret[0].(int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -44,9 +44,9 @@ func (_mr *_MockAccessesRepositoryRecorder) DeleteAllianceAndCorpRole(arg0, arg1
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "DeleteAllianceAndCorpRole", arg0, arg1, arg2)
 }
 
-func (_m *MockAccessesRepository) DeleteAllianceCharacterLeadershipRole(_param0 int64, _param1 int64, _param2 *model.Role) (int, error) {
+func (_m *MockAccessesRepository) DeleteAllianceCharacterLeadershipRole(_param0 int64, _param1 int64, _param2 *model.Role) (int64, error) {
 	ret := _m.ctrl.Call(_m, "DeleteAllianceCharacterLeadershipRole", _param0, _param1, _param2)
-	ret0, _ := ret[0].(int)
+	ret0, _ := ret[0].(int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -55,9 +55,9 @@ func (_mr *_MockAccessesRepositoryRecorder) DeleteAllianceCharacterLeadershipRol
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "DeleteAllianceCharacterLeadershipRole", arg0, arg1, arg2)
 }
 
-func (_m *MockAccessesRepository) DeleteAllianceRole(_param0 int64, _param1 *model.Role) (int, error) {
+func (_m *MockAccessesRepository) DeleteAllianceRole(_param0 int64, _param1 *model.Role) (int64, error) {
 	ret := _m.ctrl.Call(_m, "DeleteAllianceRole", _param0, _param1)
-	ret0, _ := ret[0].(int)
+	ret0, _ := ret[0].(int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -66,9 +66,9 @@ func (_mr *_MockAccessesRepositoryRecorder) DeleteAllianceRole(arg0, arg1 interf
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "DeleteAllianceRole", arg0, arg1)
 }
 
-func (_m *MockAccessesRepository) DeleteCharacterRole(_param0 int64, _param1 *model.Role) (int, error) {
+func (_m *MockAccessesRepository) DeleteCharacterRole(_param0 int64, _param1 *model.Role) (int64, error) {
 	ret := _m.ctrl.Call(_m, "DeleteCharacterRole", _param0, _param1)
-	ret0, _ := ret[0].(int)
+	ret0, _ := ret[0].(int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -77,9 +77,9 @@ func (_mr *_MockAccessesRepositoryRecorder) DeleteCharacterRole(arg0, arg1 inter
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "DeleteCharacterRole", arg0, arg1)
 }
 
-func (_m *MockAccessesRepository) DeleteCorporationCharacterLeadershipRole(_param0 int64, _param1 int64, _param2 *model.Role) (int, error) {
+func (_m *MockAccessesRepository) DeleteCorporationCharacterLeadershipRole(_param0 int64, _param1 int64, _param2 *model.Role) (int64, error) {
 	ret := _m.ctrl.Call(_m, "DeleteCorporationCharacterLeadershipRole", _param0, _param1, _param2)
-	ret0, _ := ret[0].(int)
+	ret0, _ := ret[0].(int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -88,9 +88,9 @@ func (_mr *_MockAccessesRepositoryRecorder) DeleteCorporationCharacterLeadership
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "DeleteCorporationCharacterLeadershipRole", arg0, arg1, arg2)
 }
 
-func (_m *MockAccessesRepository) DeleteCorporationRole(_param0 int64, _param1 *model.Role) (int, error) {
+func (_m *MockAccessesRepository) DeleteCorporationRole(_param0 int64, _param1 *model.Role) (int64, error) {
 	ret := _m.ctrl.Call(_m, "DeleteCorporationRole", _param0, _param1)
-	ret0, _ := ret[0].(int)
+	ret0, _ := ret[0].(int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
