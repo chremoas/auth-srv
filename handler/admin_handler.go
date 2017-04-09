@@ -294,10 +294,89 @@ func (ah *AdminHandler) CorporationRoleRemove(context context.Context, request *
 }
 
 func (ah *AdminHandler) CharacterRoleAdd(context context.Context, request *abaeve_auth.AuthAdminRequest, response *abaeve_auth.AuthAdminResponse) error {
+	if !validateOneEntityExists(request) {
+		response.Success = false
+		return nil
+	}
+
+	role, err := findOrSaveRoleByName(request.Role)
+	if err != nil {
+		response.Success = false
+		return nil
+	}
+
+	character := findCharacterFromRequest(request)
+	if character == nil {
+		response.Success = false
+		return nil
+	}
+
+	dbCharacter := repository.CharacterRepo.FindByCharacterId(character.CharacterId)
+	if dbCharacter == nil {
+		response.Success = false
+		return nil
+	}
+
+	err = repository.AccessRepo.SaveCharacterRole(character.CharacterId, role)
+	if err != nil {
+		response.Success = false
+		return nil
+	}
+
+	response.Success = true
+
+	response.EntityType = make([]abaeve_auth.EntityType, 1)
+	response.EntityType[0] = abaeve_auth.EntityType_CHARACTER
+
+	response.EntityId = make([]int64, 1)
+	response.EntityId[0] = character.CharacterId
+
+	response.EntityName = make([]string, 1)
+	response.EntityName[0] = character.CharacterName
+
 	return nil
 }
 
 func (ah *AdminHandler) CharacterRoleRemove(context context.Context, request *abaeve_auth.AuthAdminRequest, response *abaeve_auth.AuthAdminResponse) error {
+	if !validateOneEntityExists(request) {
+		response.Success = false
+		return nil
+	}
+
+	role, err := findOrSaveRoleByName(request.Role)
+	if err != nil {
+		response.Success = false
+		return nil
+	}
+
+	character := findCharacterFromRequest(request)
+	if character == nil {
+		response.Success = false
+		return nil
+	}
+
+	deletedRows, err := repository.AccessRepo.DeleteCharacterRole(character.CharacterId, role)
+	if err != nil {
+		response.Success = false
+		return nil
+	}
+
+	if deletedRows > 1 {
+		response.Success = false
+		return nil
+	}
+
+	response.Success = true
+
+	response.EntityType = make([]abaeve_auth.EntityType, 1)
+	response.EntityType[0] = abaeve_auth.EntityType_CHARACTER
+
+	response.EntityId = make([]int64, 1)
+	response.EntityId[0] = character.CharacterId
+
+	response.EntityName = make([]string, 1)
+	response.EntityName[0] = character.CharacterName
+
 	return nil
 }
 
@@ -318,7 +397,7 @@ func (ah *AdminHandler) CorporationCharacterLeadershipRoleRemove(context context
 }
 
 func validateOneEntityExists(request *abaeve_auth.AuthAdminRequest) bool {
-	if len(request.EntityType) != 1 || len(request.EntityId) != 1 || len(request.EntityName) != 1 || len(request.EntityTicker) != 1 {
+	if len(request.EntityType) != 1 || len(request.EntityId) != 1 || len(request.EntityName) != 1 {
 		return false
 	}
 
@@ -326,7 +405,7 @@ func validateOneEntityExists(request *abaeve_auth.AuthAdminRequest) bool {
 }
 
 func validateTwoEntitiesExist(request *abaeve_auth.AuthAdminRequest) bool {
-	if len(request.EntityType) != 2 || len(request.EntityId) != 2 || len(request.EntityName) != 2 || len(request.EntityTicker) != 2 {
+	if len(request.EntityType) != 2 || len(request.EntityId) != 2 || len(request.EntityName) != 2 {
 		return false
 	}
 
@@ -346,6 +425,21 @@ func findAllianceAndCorpFromRequest(request *abaeve_auth.AuthAdminRequest) (*mod
 
 	return alliance, corporation, true
 }
+func findAllianceFromRequest(request *abaeve_auth.AuthAdminRequest) *model.Alliance {
+	var alliance *model.Alliance
+
+	for idx, entityType := range request.EntityType {
+		if entityType == abaeve_auth.EntityType_ALLIANCE {
+			alliance = &model.Alliance{
+				AllianceId:     request.EntityId[idx],
+				AllianceName:   request.EntityName[idx],
+				AllianceTicker: request.EntityTicker[idx],
+			}
+		}
+	}
+
+	return alliance
+}
 
 func findCorpFromRequest(request *abaeve_auth.AuthAdminRequest) *model.Corporation {
 	var corporation *model.Corporation
@@ -363,20 +457,19 @@ func findCorpFromRequest(request *abaeve_auth.AuthAdminRequest) *model.Corporati
 	return corporation
 }
 
-func findAllianceFromRequest(request *abaeve_auth.AuthAdminRequest) *model.Alliance {
-	var alliance *model.Alliance
+func findCharacterFromRequest(request *abaeve_auth.AuthAdminRequest) *model.Character {
+	var character *model.Character
 
 	for idx, entityType := range request.EntityType {
-		if entityType == abaeve_auth.EntityType_ALLIANCE {
-			alliance = &model.Alliance{
-				AllianceId:     request.EntityId[idx],
-				AllianceName:   request.EntityName[idx],
-				AllianceTicker: request.EntityTicker[idx],
+		if entityType == abaeve_auth.EntityType_CHARACTER {
+			character = &model.Character{
+				CharacterId:   request.EntityId[idx],
+				CharacterName: request.EntityName[idx],
 			}
 		}
 	}
 
-	return alliance
+	return character
 }
 
 //TODO: This is used in two contexts, one for removing role links and one for adding role links, change it so it can be TOLD to save or not

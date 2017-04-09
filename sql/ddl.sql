@@ -29,7 +29,7 @@ CREATE TABLE alliances
 (
   alliance_id     BIGINT(20) PRIMARY KEY             NOT NULL,
   alliance_name   VARCHAR(100)                       NOT NULL,
-  alliance_ticker VARCHAR(5)                         NOT NULL,
+  alliance_ticker VARCHAR(5),
   inserted_dt     TIMESTAMP                          NOT NULL,
   updated_dt      TIMESTAMP                          NOT NULL
 );
@@ -42,7 +42,7 @@ CREATE TABLE corporations
   alliance_id        BIGINT(20),
   inserted_dt        TIMESTAMP                          NOT NULL,
   updated_dt         TIMESTAMP                          NOT NULL,
-  corporation_ticker VARCHAR(5)                         NOT NULL,
+  corporation_ticker VARCHAR(5),
   CONSTRAINT corporation_alliance_alliance_id_fk FOREIGN KEY (alliance_id) REFERENCES alliances (alliance_id)
 );
 

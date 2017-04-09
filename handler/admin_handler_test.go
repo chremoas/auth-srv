@@ -1294,28 +1294,133 @@ func TestAdminHandler_CorporationRoleRemove(t *testing.T) {
 }
 
 func TestAdminHandler_CharacterRoleAdd(t *testing.T) {
-	adminHandler := &AdminHandler{}
+	mockCtrl, _, _, mockCharRepo, _, _, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
 
-	request := abaeve_auth.AuthAdminRequest{}
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	)
+	mockCharRepo.EXPECT().FindByCharacterId(int64(1)).Return(
+		&model.Character{
+			CharacterId:   1,
+			CharacterName: "Test Corporation",
+		},
+	)
+	mockAcceRepo.EXPECT().SaveCharacterRole(
+		int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	)
+
+	adminHandler := &AdminHandler{}
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:   []int64{1},
+		EntityType: []abaeve_auth.EntityType{abaeve_auth.EntityType_CHARACTER},
+		EntityName: []string{"Test Character"},
+		Role:       "TEST_ROLE1",
+	}
 	response := abaeve_auth.AuthAdminResponse{}
 
-	adminHandler.CharacterRoleAdd(context.Background(), &request, &response)
+	err := adminHandler.CharacterRoleAdd(context.Background(), &request, &response)
 
-	t.Error("Implement me!")
+	if err != nil {
+		t.Fatal("Received an error when one wasn't expected")
+	}
+
+	if !response.Success {
+		t.Fatal("Received a false success when true was expected")
+	}
+
+	if len(response.EntityId) != 1 {
+		t.Fatalf("Expected 1 entity id's but received %d", len(response.EntityId))
+	}
+
+	foundCharType := false
+	foundCharId := int64(0)
+
+	for idx, entityType := range response.EntityType {
+		if entityType == abaeve_auth.EntityType_CHARACTER {
+			foundCharType = true
+			foundCharId = response.EntityId[idx]
+		}
+	}
+
+	if !foundCharType {
+		t.Fatal("Expected to find 1 response that was of type EntityType_CHARACTER but found 0")
+	} else if foundCharId != 1 {
+		t.Fatalf("Expected char id: (%d) but received: (%d)", 1, foundCharId)
+	}
 }
 
 func TestAdminHandler_CharacterRoleRemove(t *testing.T) {
-	adminHandler := &AdminHandler{}
+	mockCtrl, _, _, _, _, _, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
 
-	request := abaeve_auth.AuthAdminRequest{}
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	)
+	mockAcceRepo.EXPECT().DeleteCharacterRole(
+		int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	)
+
+	adminHandler := &AdminHandler{}
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:   []int64{1},
+		EntityType: []abaeve_auth.EntityType{abaeve_auth.EntityType_CHARACTER},
+		EntityName: []string{"Test Character"},
+		Role:       "TEST_ROLE1",
+	}
 	response := abaeve_auth.AuthAdminResponse{}
 
-	adminHandler.CharacterRoleRemove(context.Background(), &request, &response)
+	err := adminHandler.CharacterRoleRemove(context.Background(), &request, &response)
 
-	t.Error("Implement me!")
+	if err != nil {
+		t.Fatal("Received an error when one wasn't expected")
+	}
+
+	if !response.Success {
+		t.Fatal("Received a false success when true was expected")
+	}
+
+	if len(response.EntityId) != 1 {
+		t.Fatalf("Expected 1 entity id's but received %d", len(response.EntityId))
+	}
+
+	foundCharType := false
+	foundCharId := int64(0)
+
+	for idx, entityType := range response.EntityType {
+		if entityType == abaeve_auth.EntityType_CHARACTER {
+			foundCharType = true
+			foundCharId = response.EntityId[idx]
+		}
+	}
+
+	if !foundCharType {
+		t.Fatal("Expected to find 1 response that was of type EntityType_CHARACTER but found 0")
+	} else if foundCharId != 1 {
+		t.Fatalf("Expected char id: (%d) but received: (%d)", 1, foundCharId)
+	}
 }
 
 func TestAdminHandler_AllianceCharacterLeadershipRoleAdd(t *testing.T) {
+	t.SkipNow()
 	adminHandler := &AdminHandler{}
 
 	request := abaeve_auth.AuthAdminRequest{}
@@ -1327,6 +1432,7 @@ func TestAdminHandler_AllianceCharacterLeadershipRoleAdd(t *testing.T) {
 }
 
 func TestAdminHandler_AllianceCharacterLeadershipRoleRemove(t *testing.T) {
+	t.SkipNow()
 	adminHandler := &AdminHandler{}
 
 	request := abaeve_auth.AuthAdminRequest{}
@@ -1338,6 +1444,7 @@ func TestAdminHandler_AllianceCharacterLeadershipRoleRemove(t *testing.T) {
 }
 
 func TestAdminHandler_CorporationCharacterLeadershipRoleAdd(t *testing.T) {
+	t.SkipNow()
 	adminHandler := &AdminHandler{}
 
 	request := abaeve_auth.AuthAdminRequest{}
@@ -1349,6 +1456,7 @@ func TestAdminHandler_CorporationCharacterLeadershipRoleAdd(t *testing.T) {
 }
 
 func TestAdminHandler_CorporationCharacterLeadershipRoleRemove(t *testing.T) {
+	t.SkipNow()
 	adminHandler := &AdminHandler{}
 
 	request := abaeve_auth.AuthAdminRequest{}
