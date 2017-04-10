@@ -2,7 +2,6 @@ package repository
 
 import (
 	"errors"
-	"fmt"
 	"github.com/abaeve/auth-srv/model"
 	"github.com/abaeve/auth-srv/util"
 	"github.com/jinzhu/gorm"
@@ -80,8 +79,6 @@ func (all *allianceRepository) Save(alliance *model.Alliance) error {
 
 	alliance.UpdatedDt = util.NewTimeNow()
 
-	fmt.Printf("Alliance: (%+v)\n", alliance)
-
 	err := all.db.Save(alliance).Error
 
 	return err
@@ -111,8 +108,6 @@ func (corp *corporationRepository) Save(corporation *model.Corporation) error {
 	}
 
 	corporation.UpdatedDt = util.NewTimeNow()
-
-	fmt.Printf("Corporation: (%+v)\n", corporation)
 
 	err := corp.db.Save(corporation).Error
 
@@ -145,8 +140,6 @@ func (chr *characterRepository) Save(character *model.Character) error {
 	}
 
 	character.UpdatedDt = util.NewTimeNow()
-
-	fmt.Printf("Character: (%+v)\n", character)
 
 	err := chr.db.Save(character).Error
 	return err
