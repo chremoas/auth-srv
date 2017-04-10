@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/jinzhu/gorm"
+	"github.com/jmoiron/sqlx"
 )
 
 var DB *gorm.DB
@@ -30,7 +31,7 @@ func Setup(dialect string, connectionString string) error {
 	CharacterRepo = &characterRepository{db: DB}
 	UserRepo = &userRepository{db: DB}
 	RoleRepo = &roleRepository{db: DB}
-	AccessRepo = &accessesRepo{db: DB.DB()}
+	AccessRepo = &accessesRepo{db: sqlx.NewDb(DB.DB(), dialect)}
 	AuthenticationCodeRepo = &authCodeRepository{db: DB}
 
 	return nil

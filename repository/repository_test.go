@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/abaeve/auth-srv/model"
+	"github.com/abaeve/auth-srv/util"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	"testing"
@@ -24,8 +25,8 @@ func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, [2]model.Char
 		AllianceId:     1,
 		AllianceTicker: "TST",
 		AllianceName:   "Test AllianceRepo 1",
-		InsertedDt:     newTimeNow(),
-		UpdatedDt:      newTimeNow(),
+		InsertedDt:     util.NewTimeNow(),
+		UpdatedDt:      util.NewTimeNow(),
 	}
 	corporation := model.Corporation{
 		CorporationId:     1,
@@ -33,8 +34,8 @@ func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, [2]model.Char
 		CorporationName:   "Test Corporation 1",
 		CorporationTicker: "TST",
 		Alliance:          alliance,
-		InsertedDt:        newTimeNow(),
-		UpdatedDt:         newTimeNow(),
+		InsertedDt:        util.NewTimeNow(),
+		UpdatedDt:         util.NewTimeNow(),
 	}
 	character := model.Character{
 		CharacterId:   1,
@@ -42,8 +43,8 @@ func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, [2]model.Char
 		CorporationId: 1,
 		Corporation:   corporation,
 		Token:         "",
-		InsertedDt:    newTimeNow(),
-		UpdatedDt:     newTimeNow(),
+		InsertedDt:    util.NewTimeNow(),
+		UpdatedDt:     util.NewTimeNow(),
 	}
 	character10k := model.Character{
 		CharacterId:   10000,
@@ -51,8 +52,8 @@ func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, [2]model.Char
 		CorporationId: 1,
 		Corporation:   corporation,
 		Token:         "",
-		InsertedDt:    newTimeNow(),
-		UpdatedDt:     newTimeNow(),
+		InsertedDt:    util.NewTimeNow(),
+		UpdatedDt:     util.NewTimeNow(),
 	}
 	user := model.User{UserId: 1, ChatId: "1234567890", Characters: []model.Character{character}}
 	authCode := model.AuthenticationCode{CharacterId: 1, Character: character, AuthenticationCode: "123456789", IsUsed: true}
@@ -208,8 +209,8 @@ func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 			CorporationId: 1,
 			Corporation:   corporation,
 			Token:         "",
-			InsertedDt:    newTimeNow(),
-			UpdatedDt:     newTimeNow(),
+			InsertedDt:    util.NewTimeNow(),
+			UpdatedDt:     util.NewTimeNow(),
 		}
 
 		tx.Create(&newCharacter)
@@ -733,6 +734,33 @@ func TestCreateRolesThroughREPO(t *testing.T) {
 		if roleAsRetrieved.ChatServiceGroup != newRole.ChatServiceGroup {
 			t.Fatalf("Retrieved role's chatservice group: (%s) does not match original: (%s)",
 				roleAsRetrieved.ChatServiceGroup, newRole.ChatServiceGroup)
+		}
+	})
+
+	t.Run("FindByRoleName", func(t *testing.T) {
+		newRole := model.Role{RoleName: "TEST_ROLE_FOR_TESTING3", ChatServiceGroup: "SUPER_COOL_CHAT2"}
+		err := RoleRepo.Save(&newRole)
+
+		if err != nil {
+			t.Fatalf("Had an error while saving the role: %s", err)
+		}
+
+		roleAsRetrieved := RoleRepo.FindByRoleName("TEST_ROLE_FOR_TESTING3")
+
+		if roleAsRetrieved == nil {
+			t.Fatal("Expected a role but retrieved nil")
+		}
+
+		if roleAsRetrieved.RoleId != newRole.RoleId {
+			t.Errorf("Role id incorrect, expected: (%d) but retrieved: (%d)", newRole.RoleId, roleAsRetrieved.RoleId)
+		}
+
+		if roleAsRetrieved.RoleName != newRole.RoleName {
+			t.Errorf("Role name, expected: (%s) but retrieved: (%s)", newRole.RoleName, roleAsRetrieved.RoleName)
+		}
+
+		if roleAsRetrieved.ChatServiceGroup != newRole.ChatServiceGroup {
+			t.Errorf("Role chat service group, expected: (%s) but retrieved: (%s)", newRole.ChatServiceGroup, roleAsRetrieved.ChatServiceGroup)
 		}
 	})
 
