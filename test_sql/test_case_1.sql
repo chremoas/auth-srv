@@ -258,7 +258,7 @@ SELECT
 FROM users user
   JOIN user_character_map ucm ON (user.user_id = ucm.user_id)
   JOIN characters chars ON (ucm.character_id = chars.character_id)
-  JOIN character_role_map crm ON (chars.corporation_id = crm.character_id)
+  JOIN character_role_map crm ON (chars.character_id = crm.character_id)
   JOIN roles role ON (crm.role_id = role.role_id)
 WHERE user.chat_id = '1234567890'
 UNION
