@@ -412,6 +412,9 @@ func validateTwoEntitiesExist(request *abaeve_auth.AuthAdminRequest) bool {
 	return true
 }
 
+// This function exists to ease the two alliance AND corporation role link sanity checks.  They both need to get the
+// alliance and the corporation and then check that both exist.  If one or the other doesn't exist then they can safely
+// exit and tell the caller to try again.
 func findAllianceAndCorpFromRequest(request *abaeve_auth.AuthAdminRequest) (*model.Alliance, *model.Corporation, bool) {
 	alliance := findAllianceFromRequest(request)
 	corporation := findCorpFromRequest(request)
@@ -421,10 +424,12 @@ func findAllianceAndCorpFromRequest(request *abaeve_auth.AuthAdminRequest) (*mod
 	}
 
 	//Now set the corporations alliance id
+	//This isn't really needed but just in case it becomes needed in the future... why not?
 	corporation.AllianceId = &alliance.AllianceId
 
 	return alliance, corporation, true
 }
+
 func findAllianceFromRequest(request *abaeve_auth.AuthAdminRequest) *model.Alliance {
 	var alliance *model.Alliance
 
