@@ -17,7 +17,6 @@ var AuthenticationCodeRepo AuthenticationCodeRepository
 
 func Setup(dialect string, connectionString string) error {
 	db, err := gorm.Open(dialect, connectionString)
-
 	if err != nil {
 		return err
 	}
