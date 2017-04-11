@@ -100,21 +100,23 @@ SELECT
 WHERE user.chat_id = ?
 `
 
-var allianceCorpInsert string = "insert into alliance_corporation_role_map (alliance_id, corporation_id, role_id) values (?, ?, ?)"
+const (
+	allianceCorpInsert = "insert into alliance_corporation_role_map (alliance_id, corporation_id, role_id) values (?, ?, ?)"
 
-var allianceCorpDelete string = "delete from alliance_corporation_role_map where alliance_id = ? and corporation_id = ? and role_id = ?"
+	allianceCorpDelete = "delete from alliance_corporation_role_map where alliance_id = ? and corporation_id = ? and role_id = ?"
 
-var allianceInsert string = "insert into alliance_role_map (alliance_id, role_id) values (?, ?)"
+	allianceInsert = "insert into alliance_role_map (alliance_id, role_id) values (?, ?)"
 
-var allianceDelete string = "delete from alliance_role_map where alliance_id = ? and role_id = ?"
+	allianceDelete = "delete from alliance_role_map where alliance_id = ? and role_id = ?"
 
-var corporationInsert string = "insert into corporation_role_map (corporation_id, role_id) values (?, ?)"
+	corporationInsert = "insert into corporation_role_map (corporation_id, role_id) values (?, ?)"
 
-var corporationDelete string = "delete from corporation_role_map where corporation_id = ? and role_id = ?"
+	corporationDelete = "delete from corporation_role_map where corporation_id = ? and role_id = ?"
 
-var characterInsert string = "insert into character_role_map (character_id, role_id) values (?, ?)"
+	characterInsert = "insert into character_role_map (character_id, role_id) values (?, ?)"
 
-var characterDelete string = "delete from character_role_map where character_id = ? and role_id = ?"
+	characterDelete = "delete from character_role_map where character_id = ? and role_id = ?"
+)
 
 // Saves a role that is linked to an alliance AND a corporation
 // alliance_coporation_role_map table
