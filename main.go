@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/abaeve/services-common/config"
+	"errors"
 	"github.com/abaeve/auth-srv/handler"
 	"github.com/abaeve/auth-srv/proto"
 	"github.com/abaeve/auth-srv/repository"
+	"github.com/abaeve/services-common/config"
 	_ "github.com/go-sql-driver/mysql"
-	"errors"
 	"github.com/micro/go-micro"
 )
 
