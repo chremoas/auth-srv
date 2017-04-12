@@ -10,3 +10,6 @@ database:
   password: password
   options: someoptions using Pear DB like options or nothing
   maxConnections: 5
+registry:
+  hostname: localhost
+  port: 8500
