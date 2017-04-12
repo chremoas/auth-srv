@@ -8,6 +8,11 @@ enum EntityType {
     CHARACTER = 2;
 }
 
+enum EntityOperation {
+    ADD = 0;
+    REMOVE = 1;
+}
+
 service UserAuthentication {
     //Called by the auth-web to state someone has started the auth process
     rpc Create (AuthCreateRequest) returns (AuthCreateResponse) {
@@ -17,6 +22,15 @@ service UserAuthentication {
     };
     //Called to get all roles for an already authed user
     rpc GetRoles (GetRolesRequest) returns (AuthConfirmResponse) {
+    };
+}
+
+service UserAuthenticationQuery {
+    rpc GetAlliances (EntityQuery) returns (Alliances) {
+    };
+    rpc GetCorporations (EntityQuery) returns (Corporations) {
+    };
+    rpc GetCharacters (EntityQuery) returns (Characters) {
     };
 }
 
@@ -44,6 +58,15 @@ service UserAuthenticationAdmin {
     rpc CorporationCharacterLeadershipRoleAdd (AuthAdminRequest) returns (AuthAdminResponse) {
     };
     rpc CorporationCharacterLeadershipRoleRemove (AuthAdminRequest) returns (AuthAdminResponse) {
+    };
+}
+
+service EntityAdmin {
+    rpc AllianceUpdate (AllianceAdminRequest) returns (EntityAdminResponse) {
+    };
+    rpc CorporationUpdate (CoporationAdminRequest) returns (EntityAdminResponse) {
+    };
+    rpc CharacterUpdate (CharacterAdminRequest) returns (EntityAdminRequest) {
     };
 }
 
@@ -90,9 +113,17 @@ message AuthAdminResponse {
     bool Success = 4;
 }
 
+message Characters {
+    repeated Character Character = 1;
+}
+
 message Character {
     int64 Id = 1;
     string Name = 2;
+}
+
+message Corporations {
+    repeated Corporation Corporation = 1;
 }
 
 message Corporation {
@@ -101,8 +132,35 @@ message Corporation {
     string Ticker = 3;
 }
 
+message Alliances {
+    repeated Alliance Alliance = 1;
+}
+
 message Alliance {
     int64 Id = 1;
     string Name = 2;
     string Ticker = 3;
+}
+
+message EntityAdminResponse {
+    bool Success = 1;
+}
+
+message AllianceAdminRequest {
+    Alliance Alliance = 1;
+    EntityOperation Operation = 2;
+}
+
+message CoporationAdminRequest {
+    Corporation Corporation = 1;
+    EntityOperation Operation = 2;
+}
+
+message CharacterAdminRequest {
+    Character Character = 1;
+    EntityOperation Operation = 2;
+}
+
+message EntityQuery {
+    EntityType EntityType = 1;
 }
