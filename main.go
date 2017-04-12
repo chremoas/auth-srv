@@ -13,7 +13,7 @@ import (
 var version string = "1.0.0"
 
 func main() {
-	service := config.NewService(version, initialize)
+	service := config.NewService(version, "auth-srv", initialize)
 
 	abaeve_auth.RegisterUserAuthenticationAdminHandler(service.Server(), &handler.AdminHandler{service.Client()})
 	abaeve_auth.RegisterUserAuthenticationHandler(service.Server(), &handler.AuthHandler{service.Client()})
