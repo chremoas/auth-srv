@@ -1525,14 +1525,21 @@ func TestAdminHandler_AllianceRoleAdd_WithAllianceSaveError(t *testing.T) {
 			RoleName:         "TEST_ROLE1",
 			ChatServiceGroup: "TEST_ROLE1",
 		},
+	).SetArg(0,
+		model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
 	)
-	mockAlliRepo.EXPECT().FindByAllianceId(int64(1)).Return(
+	mockAlliRepo.EXPECT().FindByAllianceId(int64(1)).Return(nil)
+	mockAlliRepo.EXPECT().Save(
 		&model.Alliance{
 			AllianceId:     1,
 			AllianceName:   "Test Alliance",
 			AllianceTicker: "TSTA",
 		},
-	).Times(0)
+	).Return(errors.New("I'm sorry, Dave. I'm afraid I can't do that."))
 	mockAcceRepo.EXPECT().SaveAllianceRole(int64(1),
 		&model.Role{
 			RoleId:           1,
@@ -1544,9 +1551,9 @@ func TestAdminHandler_AllianceRoleAdd_WithAllianceSaveError(t *testing.T) {
 	adminHandler := &AdminHandler{}
 	request := abaeve_auth.AuthAdminRequest{
 		EntityId:     []int64{1},
-		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_CORPORATION},
-		EntityName:   []string{"Test Corporation"},
-		EntityTicker: []string{"TSTC"},
+		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_ALLIANCE},
+		EntityName:   []string{"Test Alliance"},
+		EntityTicker: []string{"TSTA"},
 		Role:         "TEST_ROLE1",
 	}
 	response := abaeve_auth.AuthAdminResponse{}
