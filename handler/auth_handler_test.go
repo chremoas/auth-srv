@@ -1136,7 +1136,222 @@ func TestConfirmWithAuthNoUser(t *testing.T) {
 	}
 }
 
+func TestConfirm_WithUserSaveError(t *testing.T) {
+	mockCtrl, _, mockUserRepo, mockCharRepo, _, _, mockAcceRepo, _ := SharedSetup(t)
+
+	defer mockCtrl.Finish()
+
+	var ctx context.Context
+	var authConfirmResponse proto.AuthConfirmResponse
+	authConfirmRequest := proto.AuthConfirmRequest{
+		UserId:             "1234567890",
+		AuthenticationCode: "123456789012",
+	}
+
+	authHandler := AuthHandler{}
+	expectedCharName := "Test Character Result"
+
+	allianceId := int64(1)
+
+	underlyingError := "I'm sorry, Dave. I'm afraid I can't do that."
+
+	gomock.InOrder(
+		mockCharRepo.EXPECT().FindByAutenticationCode(authConfirmRequest.AuthenticationCode).Return(
+			&model.Character{
+				CharacterId:   1,
+				CharacterName: expectedCharName,
+				CorporationId: 1,
+				Corporation: model.Corporation{
+					CorporationId:     1,
+					CorporationName:   "Test Corporation Result",
+					CorporationTicker: "TSTC",
+					AllianceId:        &allianceId,
+					Alliance: model.Alliance{
+						AllianceId:     1,
+						AllianceName:   "Test Alliance Result",
+						AllianceTicker: "TSTA",
+					},
+				},
+			},
+		),
+		mockUserRepo.EXPECT().FindByChatId(authConfirmRequest.UserId).Return(nil),
+		mockUserRepo.EXPECT().Save(
+			&model.User{
+				ChatId: authConfirmRequest.UserId,
+			},
+		).Return(errors.New(underlyingError)),
+		mockUserRepo.EXPECT().LinkCharacterToUserByAuthCode(authConfirmRequest.AuthenticationCode,
+			&model.User{
+				ChatId: authConfirmRequest.UserId,
+			},
+		).Return(nil).Times(0),
+		mockAcceRepo.EXPECT().FindByChatId(authConfirmRequest.UserId).Return([]string{"ROLE1", "ROLE2", "ROLE3"}, nil).Times(0),
+	)
+
+	err := authHandler.Confirm(ctx, &authConfirmRequest, &authConfirmResponse)
+
+	expectedError := "Error saving user: " + underlyingError
+
+	if err != nil && err.Error() != expectedError {
+		t.Errorf("Expected error message (%s) but received (%s)", expectedError, err)
+	} else if err == nil {
+		t.Error("Expected an error but received nil")
+	}
+}
+
+func TestConfirm_WithUserLinkError(t *testing.T) {
+	mockCtrl, _, mockUserRepo, mockCharRepo, _, _, mockAcceRepo, _ := SharedSetup(t)
+
+	defer mockCtrl.Finish()
+
+	var ctx context.Context
+	var authConfirmResponse proto.AuthConfirmResponse
+	authConfirmRequest := proto.AuthConfirmRequest{
+		UserId:             "1234567890",
+		AuthenticationCode: "123456789012",
+	}
+
+	authHandler := AuthHandler{}
+	expectedCharName := "Test Character Result"
+
+	allianceId := int64(1)
+
+	underlyingError := "I'm sorry, Dave. I'm afraid I can't do that."
+
+	gomock.InOrder(
+		mockCharRepo.EXPECT().FindByAutenticationCode(authConfirmRequest.AuthenticationCode).Return(
+			&model.Character{
+				CharacterId:   1,
+				CharacterName: expectedCharName,
+				CorporationId: 1,
+				Corporation: model.Corporation{
+					CorporationId:     1,
+					CorporationName:   "Test Corporation Result",
+					CorporationTicker: "TSTC",
+					AllianceId:        &allianceId,
+					Alliance: model.Alliance{
+						AllianceId:     1,
+						AllianceName:   "Test Alliance Result",
+						AllianceTicker: "TSTA",
+					},
+				},
+			},
+		),
+		mockUserRepo.EXPECT().FindByChatId(authConfirmRequest.UserId).Return(nil),
+		mockUserRepo.EXPECT().Save(
+			&model.User{
+				ChatId: authConfirmRequest.UserId,
+			},
+		),
+		mockUserRepo.EXPECT().LinkCharacterToUserByAuthCode(authConfirmRequest.AuthenticationCode,
+			&model.User{
+				ChatId: authConfirmRequest.UserId,
+			},
+		).Return(errors.New(underlyingError)),
+		mockAcceRepo.EXPECT().FindByChatId(authConfirmRequest.UserId).Return([]string{"ROLE1", "ROLE2", "ROLE3"}, nil).Times(0),
+	)
+
+	err := authHandler.Confirm(ctx, &authConfirmRequest, &authConfirmResponse)
+
+	expectedError := "Error linking user: " + underlyingError
+
+	if err != nil && err.Error() != expectedError {
+		t.Errorf("Expected error message (%s) but received (%s)", expectedError, err)
+	} else if err == nil {
+		t.Error("Expected an error but received nil")
+	}
+}
+
+func TestConfirm_WithRoleFindError(t *testing.T) {
+	mockCtrl, _, mockUserRepo, mockCharRepo, _, _, mockAcceRepo, _ := SharedSetup(t)
+
+	defer mockCtrl.Finish()
+
+	var ctx context.Context
+	var authConfirmResponse proto.AuthConfirmResponse
+	authConfirmRequest := proto.AuthConfirmRequest{
+		UserId:             "1234567890",
+		AuthenticationCode: "123456789012",
+	}
+
+	authHandler := AuthHandler{}
+	expectedCharName := "Test Character Result"
+
+	allianceId := int64(1)
+
+	underlyingError := "I'm sorry, Dave. I'm afraid I can't do that."
+
+	gomock.InOrder(
+		mockCharRepo.EXPECT().FindByAutenticationCode(authConfirmRequest.AuthenticationCode).Return(
+			&model.Character{
+				CharacterId:   1,
+				CharacterName: expectedCharName,
+				CorporationId: 1,
+				Corporation: model.Corporation{
+					CorporationId:     1,
+					CorporationName:   "Test Corporation Result",
+					CorporationTicker: "TSTC",
+					AllianceId:        &allianceId,
+					Alliance: model.Alliance{
+						AllianceId:     1,
+						AllianceName:   "Test Alliance Result",
+						AllianceTicker: "TSTA",
+					},
+				},
+			},
+		),
+		mockUserRepo.EXPECT().FindByChatId(authConfirmRequest.UserId).Return(nil),
+		mockUserRepo.EXPECT().Save(
+			&model.User{
+				ChatId: authConfirmRequest.UserId,
+			},
+		),
+		mockUserRepo.EXPECT().LinkCharacterToUserByAuthCode(authConfirmRequest.AuthenticationCode,
+			&model.User{
+				ChatId: authConfirmRequest.UserId,
+			},
+		),
+		mockAcceRepo.EXPECT().FindByChatId(authConfirmRequest.UserId).Return(nil, errors.New(underlyingError)),
+	)
+
+	err := authHandler.Confirm(ctx, &authConfirmRequest, &authConfirmResponse)
+
+	expectedError := "Error finding roles: " + underlyingError
+
+	if err != nil && err.Error() != expectedError {
+		t.Errorf("Expected error message (%s) but received (%s)", expectedError, err)
+	} else if err == nil {
+		t.Error("Expected an error but received nil")
+	}
+}
+
 func TestGetRoles(t *testing.T) {
+	mockCtrl, _, mockUserRepo, _, _, _, mockAcceRepo, _ := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	authHandler := AuthHandler{}
+
+	underlyingError := "I'm sorry, Dave. I'm afraid I can't do that."
+
+	gomock.InOrder(
+		mockUserRepo.EXPECT().FindByChatId("1234567890").Return(&model.User{UserId: 1, ChatId: "1234567890"}),
+		mockAcceRepo.EXPECT().FindByChatId("1234567890").Return(nil, errors.New(underlyingError)),
+	)
+
+	response := proto.AuthConfirmResponse{}
+
+	err := authHandler.GetRoles(context.Background(), &proto.GetRolesRequest{UserId: "1234567890"}, &response)
+
+	expectedError := "Error finding roles: " + underlyingError
+
+	if err != nil && err.Error() != expectedError {
+		t.Errorf("Expected error message (%s) but received (%s)", expectedError, err)
+	} else if err == nil {
+		t.Error("Expected an error but received nil")
+	}
+}
+
+func TestGetRoles_WithRoleFindError(t *testing.T) {
 	mockCtrl, _, mockUserRepo, _, _, _, mockAcceRepo, _ := SharedSetup(t)
 	defer mockCtrl.Finish()
 

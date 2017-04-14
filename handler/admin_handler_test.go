@@ -619,6 +619,104 @@ func TestAdminHandler_CorporationAllianceRoleAdd_WithRoleSaveError(t *testing.T)
 	}
 }
 
+func TestAdminHandler_CorporationAllianceRoleAdd_WithSaveAllianceAndCorpRoleError(t *testing.T) {
+	mockCtrl, _, _, _, mockCorpRepo, mockAlliRepo, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	var allianceId int64
+	allianceId = int64(1)
+
+	expectedError := "I'm sorry, Dave. I'm afraid I can't do that."
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	)
+	mockAlliRepo.EXPECT().FindByAllianceId(int64(1)).Return(
+		&model.Alliance{
+			AllianceId:     1,
+			AllianceName:   "Test Alliance",
+			AllianceTicker: "TSTA",
+		},
+	)
+	mockCorpRepo.EXPECT().FindByCorporationId(int64(1)).Return(
+		&model.Corporation{
+			CorporationId:     1,
+			CorporationName:   "Test Corporation",
+			CorporationTicker: "TSTC",
+			AllianceId:        &allianceId,
+		},
+	)
+	mockAcceRepo.EXPECT().SaveAllianceAndCorpRole(
+		int64(1),
+		int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Return(errors.New(expectedError))
+
+	adminHandler := &AdminHandler{}
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{1, 1},
+		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_ALLIANCE, abaeve_auth.EntityType_CORPORATION},
+		EntityName:   []string{"Test Alliance", "Test Corporation"},
+		EntityTicker: []string{"TSTA", "TSTC"},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.CorporationAllianceRoleAdd(context.Background(), &request, &response)
+
+	if err != nil {
+		t.Fatal("Received an error when one wasn't expected")
+	}
+
+	if response.Success {
+		t.Fatal("Received a true success when false was expected")
+	}
+
+	if len(response.EntityId) != 0 {
+		t.Fatalf("Expected 0 entity id's but received %d", len(response.EntityId))
+	}
+
+	foundAllianceType := false
+	foundAllianceId := int64(0)
+	foundCorpType := false
+	foundCorpId := int64(0)
+
+	for idx, entityType := range response.EntityType {
+		if entityType == abaeve_auth.EntityType_ALLIANCE {
+			foundAllianceType = true
+			foundAllianceId = response.EntityId[idx]
+		}
+		if entityType == abaeve_auth.EntityType_CORPORATION {
+			foundCorpType = true
+			foundCorpId = response.EntityId[idx]
+		}
+	}
+
+	if foundAllianceType {
+		t.Fatal("Expected to find 0 response that was of type EntityType_ALLIANCE but found something")
+	}
+
+	if foundAllianceId != 0 {
+		t.Fatalf("Expected alliance id: (%d) but received: (%d)", 0, foundAllianceId)
+	}
+
+	if foundCorpType {
+		t.Fatal("Expected to find 0 response that was of type EntityType_CORPORATION but found something")
+	}
+
+	if foundCorpId != 0 {
+		t.Fatalf("Expected corp id: (%d) but received: (%d)", 0, foundCorpId)
+	}
+}
+
 func TestAdminHandler_CorporationAllianceRoleAdd_WithNotEnoughEntityStuff(t *testing.T) {
 	mockCtrl, _, _, _, _, _, _, _ := SharedSetup(t)
 	defer mockCtrl.Finish()
@@ -884,6 +982,76 @@ func TestAdminHandler_CorporationAllianceRoleRemove_WithTwoAlliances(t *testing.
 	}
 }
 
+func TestAdminHandler_CorporationAllianceRoleRemove_WithOneEntity(t *testing.T) {
+	mockCtrl, _, _, _, _, _, mockAcceRepo, _ := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockAcceRepo.EXPECT().DeleteAllianceAndCorpRole(int64(1), int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Return(int64(1), nil).Times(0)
+
+	adminHandler := &AdminHandler{}
+
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{1},
+		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_ALLIANCE},
+		EntityName:   []string{"Test Alliance 1"},
+		EntityTicker: []string{"TSTA1"},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.CorporationAllianceRoleRemove(context.Background(), &request, &response)
+
+	if err != nil {
+		t.Fatal("Received an error when one wasn't expected")
+	}
+
+	if response.Success {
+		t.Fatal("Received a true success when false was expected")
+	}
+
+	if len(response.EntityId) != 0 {
+		t.Fatalf("Expected 0 entity id's but received %d", len(response.EntityId))
+	}
+
+	foundAllianceType := false
+	foundAllianceId := int64(0)
+	foundCorpType := false
+	foundCorpId := int64(0)
+
+	for idx, entityType := range response.EntityType {
+		if entityType == abaeve_auth.EntityType_ALLIANCE {
+			foundAllianceType = true
+			foundAllianceId = response.EntityId[idx]
+		}
+		if entityType == abaeve_auth.EntityType_CORPORATION {
+			foundCorpType = true
+			foundCorpId = response.EntityId[idx]
+		}
+	}
+
+	if foundAllianceType {
+		t.Fatal("Expected to find 0 response that was of type EntityType_ALLIANCE but found something")
+	}
+
+	if foundAllianceId != 0 {
+		t.Fatalf("Expected alliance id: (%d) but received: (%d)", 0, foundAllianceId)
+	}
+
+	if foundCorpType {
+		t.Fatal("Expected to find 0 response that was of type EntityType_CORPORATION but found something")
+	}
+
+	if foundCorpId != 0 {
+		t.Fatalf("Expected corp id: (%d) but received: (%d)", 0, foundCorpId)
+	}
+}
+
 func TestAdminHandler_CorporationAllianceRoleRemove_With2Deletions(t *testing.T) {
 	mockCtrl, _, _, _, _, _, mockAcceRepo, mockRoleRepo := SharedSetup(t)
 	defer mockCtrl.Finish()
@@ -1038,6 +1206,83 @@ func TestAdminHandler_CorporationAllianceRoleRemove_WithError(t *testing.T) {
 	}
 }
 
+func TestAdminHandler_CorporationAllianceRoleRemove_WithRoleSaveError(t *testing.T) {
+	mockCtrl, _, _, _, _, _, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(nil)
+	mockRoleRepo.EXPECT().Save(
+		&model.Role{
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Return(errors.New("Had a problem"))
+	mockAcceRepo.EXPECT().DeleteAllianceAndCorpRole(int64(1), int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Return(int64(1), nil).Times(0)
+
+	adminHandler := &AdminHandler{}
+
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{1, 1},
+		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_ALLIANCE, abaeve_auth.EntityType_CORPORATION},
+		EntityName:   []string{"Test Alliance", "Test Corporation"},
+		EntityTicker: []string{"TSTA", "TSTC"},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.CorporationAllianceRoleRemove(context.Background(), &request, &response)
+
+	if err != nil {
+		t.Fatal("Received an error when one wasn't expected")
+	}
+
+	if response.Success {
+		t.Fatal("Received a true success when false was expected")
+	}
+
+	if len(response.EntityId) != 0 {
+		t.Fatalf("Expected 0 entity id's but received %d", len(response.EntityId))
+	}
+
+	foundAllianceType := false
+	foundAllianceId := int64(0)
+	foundCorpType := false
+	foundCorpId := int64(0)
+
+	for idx, entityType := range response.EntityType {
+		if entityType == abaeve_auth.EntityType_ALLIANCE {
+			foundAllianceType = true
+			foundAllianceId = response.EntityId[idx]
+		}
+		if entityType == abaeve_auth.EntityType_CORPORATION {
+			foundCorpType = true
+			foundCorpId = response.EntityId[idx]
+		}
+	}
+
+	if foundAllianceType {
+		t.Fatal("Expected to find 0 response that was of type EntityType_ALLIANCE but found something")
+	}
+
+	if foundAllianceId != 0 {
+		t.Fatalf("Expected alliance id: (%d) but received: (%d)", 0, foundAllianceId)
+	}
+
+	if foundCorpType {
+		t.Fatal("Expected to find 0 response that was of type EntityType_CORPORATION but found something")
+	}
+
+	if foundCorpId != 0 {
+		t.Fatalf("Expected corp id: (%d) but received: (%d)", 0, foundCorpId)
+	}
+}
+
 func TestAdminHandler_AllianceRoleAdd(t *testing.T) {
 	mockCtrl, _, _, _, _, mockAlliRepo, mockAcceRepo, mockRoleRepo := SharedSetup(t)
 	defer mockCtrl.Finish()
@@ -1105,6 +1350,265 @@ func TestAdminHandler_AllianceRoleAdd(t *testing.T) {
 	}
 }
 
+func TestAdminHandler_AllianceRoleAdd_WithZeroEntities(t *testing.T) {
+	mockCtrl, _, _, _, _, mockAlliRepo, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Times(0)
+	mockAlliRepo.EXPECT().FindByAllianceId(int64(1)).Return(
+		&model.Alliance{
+			AllianceId:     1,
+			AllianceName:   "Test Alliance",
+			AllianceTicker: "TSTA",
+		},
+	).Times(0)
+	mockAcceRepo.EXPECT().SaveAllianceRole(int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Times(0)
+
+	adminHandler := &AdminHandler{}
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{},
+		EntityType:   []abaeve_auth.EntityType{},
+		EntityName:   []string{},
+		EntityTicker: []string{},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.AllianceRoleAdd(context.Background(), &request, &response)
+
+	if err != nil {
+		t.Fatal("Received an error when one wasn't expected")
+	}
+
+	if response.Success {
+		t.Fatal("Received a true success when false was expected")
+	}
+
+	if len(response.EntityId) != 0 {
+		t.Fatalf("Expected 0 entity id's but received %d", len(response.EntityId))
+	}
+
+	foundAllianceType := false
+	foundAllianceId := int64(0)
+	foundCorpType := false
+	foundCorpId := int64(0)
+
+	for idx, entityType := range response.EntityType {
+		if entityType == abaeve_auth.EntityType_ALLIANCE {
+			foundAllianceType = true
+			foundAllianceId = response.EntityId[idx]
+		}
+		if entityType == abaeve_auth.EntityType_CORPORATION {
+			foundCorpType = true
+			foundCorpId = response.EntityId[idx]
+		}
+	}
+
+	if foundAllianceType {
+		t.Fatal("Expected to find 0 response that was of type EntityType_ALLIANCE but found something")
+	}
+
+	if foundAllianceId != 0 {
+		t.Fatalf("Expected alliance id: (%d) but received: (%d)", 0, foundAllianceId)
+	}
+
+	if foundCorpType {
+		t.Fatal("Expected to find 0 response that was of type EntityType_CORPORATION but found something")
+	}
+
+	if foundCorpId != 0 {
+		t.Fatalf("Expected corp id: (%d) but received: (%d)", 0, foundCorpId)
+	}
+}
+
+func TestAdminHandler_AllianceRoleAdd_WithRoleSaveError(t *testing.T) {
+	mockCtrl, _, _, _, _, mockAlliRepo, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(nil)
+	mockRoleRepo.EXPECT().Save(
+		&model.Role{
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Return(errors.New("I'm sorry, Dave. I'm afraid I can't do that."))
+	mockAlliRepo.EXPECT().FindByAllianceId(int64(1)).Return(
+		&model.Alliance{
+			AllianceId:     1,
+			AllianceName:   "Test Alliance",
+			AllianceTicker: "TSTA",
+		},
+	).Times(0)
+	mockAcceRepo.EXPECT().SaveAllianceRole(int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Times(0)
+
+	adminHandler := &AdminHandler{}
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{1},
+		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_ALLIANCE},
+		EntityName:   []string{"Test Alliance"},
+		EntityTicker: []string{"TSTA"},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.AllianceRoleAdd(context.Background(), &request, &response)
+
+	validateErrorResponse(err, response, t)
+}
+
+func TestAdminHandler_AllianceRoleAdd_WithCorporation(t *testing.T) {
+	mockCtrl, _, _, _, _, mockAlliRepo, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(nil)
+	mockRoleRepo.EXPECT().Save(
+		&model.Role{
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	)
+	mockAlliRepo.EXPECT().FindByAllianceId(int64(1)).Return(
+		&model.Alliance{
+			AllianceId:     1,
+			AllianceName:   "Test Alliance",
+			AllianceTicker: "TSTA",
+		},
+	).Times(0)
+	mockAcceRepo.EXPECT().SaveAllianceRole(int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Times(0)
+
+	adminHandler := &AdminHandler{}
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{1},
+		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_CORPORATION},
+		EntityName:   []string{"Test Corporation"},
+		EntityTicker: []string{"TSTC"},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.AllianceRoleAdd(context.Background(), &request, &response)
+
+	validateErrorResponse(err, response, t)
+}
+
+func TestAdminHandler_AllianceRoleAdd_WithAllianceSaveError(t *testing.T) {
+	mockCtrl, _, _, _, _, mockAlliRepo, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(nil)
+	mockRoleRepo.EXPECT().Save(
+		&model.Role{
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).SetArg(0,
+		model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	)
+	mockAlliRepo.EXPECT().FindByAllianceId(int64(1)).Return(nil)
+	mockAlliRepo.EXPECT().Save(
+		&model.Alliance{
+			AllianceId:     1,
+			AllianceName:   "Test Alliance",
+			AllianceTicker: "TSTA",
+		},
+	).Return(errors.New("I'm sorry, Dave. I'm afraid I can't do that."))
+	mockAcceRepo.EXPECT().SaveAllianceRole(int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Times(0)
+
+	adminHandler := &AdminHandler{}
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{1},
+		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_ALLIANCE},
+		EntityName:   []string{"Test Alliance"},
+		EntityTicker: []string{"TSTA"},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.AllianceRoleAdd(context.Background(), &request, &response)
+
+	validateErrorResponse(err, response, t)
+}
+
+func TestAdminHandler_AllianceRoleAdd_WithAllianceRoleSaveError(t *testing.T) {
+	mockCtrl, _, _, _, _, mockAlliRepo, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(nil)
+	mockRoleRepo.EXPECT().Save(
+		&model.Role{
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).SetArg(0, model.Role{
+		RoleId:           1,
+		RoleName:         "TEST_ROLE1",
+		ChatServiceGroup: "TEST_ROLE1",
+	})
+	mockAlliRepo.EXPECT().FindByAllianceId(int64(1)).Return(nil)
+	mockAlliRepo.EXPECT().Save(
+		&model.Alliance{
+			AllianceId:     1,
+			AllianceName:   "Test Alliance",
+			AllianceTicker: "TSTA",
+		},
+	)
+	mockAcceRepo.EXPECT().SaveAllianceRole(int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Return(errors.New("I'm sorry, Dave. I'm afraid I can't do that."))
+
+	adminHandler := &AdminHandler{}
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{1},
+		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_ALLIANCE},
+		EntityName:   []string{"Test Alliance"},
+		EntityTicker: []string{"TSTA"},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.AllianceRoleAdd(context.Background(), &request, &response)
+
+	validateErrorResponse(err, response, t)
+}
+
 func TestAdminHandler_AllianceRoleRemove(t *testing.T) {
 	mockCtrl, _, _, _, _, _, mockAcceRepo, mockRoleRepo := SharedSetup(t)
 	defer mockCtrl.Finish()
@@ -1164,6 +1668,186 @@ func TestAdminHandler_AllianceRoleRemove(t *testing.T) {
 	} else if foundAllianceId != 1 {
 		t.Fatalf("Expected alliance id: (%d) but received: (%d)", 1, foundAllianceId)
 	}
+}
+
+func TestAdminHandler_AllianceRoleRemove_WithCorporation(t *testing.T) {
+	mockCtrl, _, _, _, _, _, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	)
+	mockAcceRepo.EXPECT().DeleteAllianceRole(int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Times(0)
+
+	adminHandler := &AdminHandler{}
+
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{1},
+		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_CORPORATION},
+		EntityName:   []string{"Test Corporation"},
+		EntityTicker: []string{"TSTC"},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.AllianceRoleRemove(context.Background(), &request, &response)
+
+	validateErrorResponse(err, response, t)
+}
+
+func TestAdminHandler_AllianceRoleRemove_WithErrorDeletingAllianceRole(t *testing.T) {
+	mockCtrl, _, _, _, _, _, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	)
+	mockAcceRepo.EXPECT().DeleteAllianceRole(int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Return(int64(0), errors.New("I'm sorry, Dave. I'm afraid I can't do that."))
+
+	adminHandler := &AdminHandler{}
+
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{1},
+		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_ALLIANCE},
+		EntityName:   []string{"Test Alliance"},
+		EntityTicker: []string{"TSTA"},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.AllianceRoleRemove(context.Background(), &request, &response)
+
+	validateErrorResponse(err, response, t)
+}
+
+func TestAdminHandler_AllianceRoleRemove_WithZeroEntities(t *testing.T) {
+	mockCtrl, _, _, _, _, _, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Times(0)
+	mockAcceRepo.EXPECT().DeleteAllianceRole(int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Times(0)
+
+	adminHandler := &AdminHandler{}
+
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{},
+		EntityType:   []abaeve_auth.EntityType{},
+		EntityName:   []string{},
+		EntityTicker: []string{},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.AllianceRoleRemove(context.Background(), &request, &response)
+
+	validateErrorResponse(err, response, t)
+}
+
+func TestAdminHandler_AllianceRoleRemove_WithRoleSaveError(t *testing.T) {
+	mockCtrl, _, _, _, _, _, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(nil)
+	mockRoleRepo.EXPECT().Save(
+		&model.Role{
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Return(errors.New("I'm sorry, Dave. I'm afraid I can't do that."))
+	mockAcceRepo.EXPECT().DeleteAllianceRole(int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Times(0)
+
+	adminHandler := &AdminHandler{}
+
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{1},
+		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_ALLIANCE},
+		EntityName:   []string{"Test Alliance"},
+		EntityTicker: []string{"TSTA"},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.AllianceRoleRemove(context.Background(), &request, &response)
+
+	validateErrorResponse(err, response, t)
+}
+
+func TestAdminHandler_AllianceRoleRemove_With2Deletions(t *testing.T) {
+	mockCtrl, _, _, _, _, _, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(nil)
+	mockRoleRepo.EXPECT().Save(
+		&model.Role{
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).SetArg(0,
+		model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		})
+	mockAcceRepo.EXPECT().DeleteAllianceRole(int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Return(int64(2), nil)
+
+	adminHandler := &AdminHandler{}
+
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{1},
+		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_ALLIANCE},
+		EntityName:   []string{"Test Alliance"},
+		EntityTicker: []string{"TSTA"},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.AllianceRoleRemove(context.Background(), &request, &response)
+
+	validateErrorResponse(err, response, t)
 }
 
 func TestAdminHandler_CorporationRoleAdd(t *testing.T) {
@@ -1233,6 +1917,227 @@ func TestAdminHandler_CorporationRoleAdd(t *testing.T) {
 	}
 }
 
+func TestAdminHandler_CorporationRoleAdd_WithZeroEntities(t *testing.T) {
+	mockCtrl, _, _, _, mockCorpRepo, _, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Times(0)
+	mockCorpRepo.EXPECT().FindByCorporationId(int64(1)).Return(
+		&model.Corporation{
+			CorporationId:     1,
+			CorporationName:   "Test Corporation",
+			CorporationTicker: "TSTC",
+		},
+	).Times(0)
+	mockAcceRepo.EXPECT().SaveCorporationRole(
+		int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Times(0)
+
+	adminHandler := &AdminHandler{}
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{},
+		EntityType:   []abaeve_auth.EntityType{},
+		EntityName:   []string{},
+		EntityTicker: []string{},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.CorporationRoleAdd(context.Background(), &request, &response)
+
+	validateErrorResponse(err, response, t)
+}
+
+func TestAdminHandler_CorporationRoleAdd_WithRoleSaveError(t *testing.T) {
+	mockCtrl, _, _, _, mockCorpRepo, _, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(nil)
+	mockRoleRepo.EXPECT().Save(
+		&model.Role{
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Return(errors.New("I'm sorry, Dave. I'm afraid I can't do that."))
+	mockCorpRepo.EXPECT().FindByCorporationId(int64(1)).Return(
+		&model.Corporation{
+			CorporationId:     1,
+			CorporationName:   "Test Corporation",
+			CorporationTicker: "TSTC",
+		},
+	).Times(0)
+	mockAcceRepo.EXPECT().SaveCorporationRole(
+		int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Times(0)
+
+	adminHandler := &AdminHandler{}
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{1},
+		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_CORPORATION},
+		EntityName:   []string{"Test Corporation"},
+		EntityTicker: []string{"TSTC"},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.CorporationRoleAdd(context.Background(), &request, &response)
+
+	validateErrorResponse(err, response, t)
+}
+
+func TestAdminHandler_CorporationRoleAdd_WithAlliance(t *testing.T) {
+	mockCtrl, _, _, _, mockCorpRepo, _, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(nil)
+	mockRoleRepo.EXPECT().Save(
+		&model.Role{
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	)
+	mockCorpRepo.EXPECT().FindByCorporationId(int64(1)).Return(
+		&model.Corporation{
+			CorporationId:     1,
+			CorporationName:   "Test Corporation",
+			CorporationTicker: "TSTC",
+		},
+	).Times(0)
+	mockAcceRepo.EXPECT().SaveCorporationRole(
+		int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Times(0)
+
+	adminHandler := &AdminHandler{}
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{1},
+		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_ALLIANCE},
+		EntityName:   []string{"Test Alliance"},
+		EntityTicker: []string{"TSTA"},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.CorporationRoleAdd(context.Background(), &request, &response)
+
+	validateErrorResponse(err, response, t)
+}
+
+func TestAdminHandler_CorporationRoleAdd_WithSaveCorporationError(t *testing.T) {
+	mockCtrl, _, _, _, mockCorpRepo, _, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(nil)
+	mockRoleRepo.EXPECT().Save(
+		&model.Role{
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).SetArg(0,
+		model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		})
+	mockCorpRepo.EXPECT().FindByCorporationId(int64(1)).Return(nil)
+	mockCorpRepo.EXPECT().Save(
+		&model.Corporation{
+			CorporationId:     1,
+			CorporationName:   "Test Corporation",
+			CorporationTicker: "TSTC",
+		},
+	).Return(errors.New("I'm sorry, Dave. I'm afraid I can't do that."))
+	mockAcceRepo.EXPECT().SaveCorporationRole(
+		int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Times(0)
+
+	adminHandler := &AdminHandler{}
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{1},
+		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_CORPORATION},
+		EntityName:   []string{"Test Corporation"},
+		EntityTicker: []string{"TSTC"},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.CorporationRoleAdd(context.Background(), &request, &response)
+
+	validateErrorResponse(err, response, t)
+}
+
+func TestAdminHandler_CorporationRoleAdd_WithSaveCorporationRoleError(t *testing.T) {
+	mockCtrl, _, _, _, mockCorpRepo, _, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(nil)
+	mockRoleRepo.EXPECT().Save(
+		&model.Role{
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).SetArg(0,
+		model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		})
+	mockCorpRepo.EXPECT().FindByCorporationId(int64(1)).Return(
+		&model.Corporation{
+			CorporationId:     1,
+			CorporationName:   "Test Corporation",
+			CorporationTicker: "TSTC",
+		},
+	)
+	mockAcceRepo.EXPECT().SaveCorporationRole(
+		int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Return(errors.New("I'm sorry, Dave. I'm afraid I can't do that."))
+
+	adminHandler := &AdminHandler{}
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{1},
+		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_CORPORATION},
+		EntityName:   []string{"Test Corporation"},
+		EntityTicker: []string{"TSTC"},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.CorporationRoleAdd(context.Background(), &request, &response)
+
+	validateErrorResponse(err, response, t)
+}
+
 func TestAdminHandler_CorporationRoleRemove(t *testing.T) {
 	mockCtrl, _, _, _, _, _, mockAcceRepo, mockRoleRepo := SharedSetup(t)
 	defer mockCtrl.Finish()
@@ -1291,6 +2196,123 @@ func TestAdminHandler_CorporationRoleRemove(t *testing.T) {
 	} else if foundCorpId != 1 {
 		t.Fatalf("Expected corp id: (%d) but received: (%d)", 1, foundCorpId)
 	}
+}
+
+func TestAdminHandler_CorporationRoleRemove_WithZeroEntities(t *testing.T) {
+	mockCtrl, _, _, _, _, _, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Times(0)
+	mockAcceRepo.EXPECT().DeleteCorporationRole(
+		int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Times(0)
+
+	adminHandler := &AdminHandler{}
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{},
+		EntityType:   []abaeve_auth.EntityType{},
+		EntityName:   []string{""},
+		EntityTicker: []string{""},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.CorporationRoleRemove(context.Background(), &request, &response)
+
+	validateErrorResponse(err, response, t)
+}
+
+func TestAdminHandler_CorporationRoleRemove_WithSaveRoleError(t *testing.T) {
+	mockCtrl, _, _, _, _, _, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(nil)
+	mockRoleRepo.EXPECT().Save(
+		&model.Role{
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).SetArg(0,
+		model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Return(errors.New("I'm sorry, Dave. I'm afraid I can't do that."))
+	mockAcceRepo.EXPECT().DeleteCorporationRole(
+		int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Times(0)
+
+	adminHandler := &AdminHandler{}
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{1},
+		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_CORPORATION},
+		EntityName:   []string{"Test Corporation"},
+		EntityTicker: []string{"TSTC"},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.CorporationRoleRemove(context.Background(), &request, &response)
+
+	validateErrorResponse(err, response, t)
+}
+
+func TestAdminHandler_CorporationRoleRemove_WithAlliance(t *testing.T) {
+	mockCtrl, _, _, _, _, _, mockAcceRepo, mockRoleRepo := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockRoleRepo.EXPECT().FindByRoleName("TEST_ROLE1").Return(nil)
+	mockRoleRepo.EXPECT().Save(
+		&model.Role{
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).SetArg(0,
+		model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Return(errors.New("I'm sorry, Dave. I'm afraid I can't do that."))
+	mockAcceRepo.EXPECT().DeleteCorporationRole(
+		int64(1),
+		&model.Role{
+			RoleId:           1,
+			RoleName:         "TEST_ROLE1",
+			ChatServiceGroup: "TEST_ROLE1",
+		},
+	).Times(0)
+
+	adminHandler := &AdminHandler{}
+	request := abaeve_auth.AuthAdminRequest{
+		EntityId:     []int64{1},
+		EntityType:   []abaeve_auth.EntityType{abaeve_auth.EntityType_ALLIANCE},
+		EntityName:   []string{"Test Alliance"},
+		EntityTicker: []string{"TSTA"},
+		Role:         "TEST_ROLE1",
+	}
+	response := abaeve_auth.AuthAdminResponse{}
+
+	err := adminHandler.CorporationRoleRemove(context.Background(), &request, &response)
+
+	validateErrorResponse(err, response, t)
 }
 
 func TestAdminHandler_CharacterRoleAdd(t *testing.T) {
@@ -1465,4 +2487,50 @@ func TestAdminHandler_CorporationCharacterLeadershipRoleRemove(t *testing.T) {
 	adminHandler.CorporationCharacterLeadershipRoleRemove(context.Background(), &request, &response)
 
 	t.Error("Implement me!")
+}
+
+func validateErrorResponse(errorFromCall error, response abaeve_auth.AuthAdminResponse, t *testing.T) {
+	if errorFromCall != nil {
+		t.Fatal("Received an error when one wasn't expected")
+	}
+
+	if response.Success {
+		t.Fatal("Received a true success when false was expected")
+	}
+
+	if len(response.EntityId) != 0 {
+		t.Fatalf("Expected 0 entity id's but received %d", len(response.EntityId))
+	}
+
+	foundAllianceType := false
+	foundAllianceId := int64(0)
+	foundCorpType := false
+	foundCorpId := int64(0)
+
+	for idx, entityType := range response.EntityType {
+		if entityType == abaeve_auth.EntityType_ALLIANCE {
+			foundAllianceType = true
+			foundAllianceId = response.EntityId[idx]
+		}
+		if entityType == abaeve_auth.EntityType_CORPORATION {
+			foundCorpType = true
+			foundCorpId = response.EntityId[idx]
+		}
+	}
+
+	if foundAllianceType {
+		t.Fatal("Expected to find 0 response that was of type EntityType_ALLIANCE but found something")
+	}
+
+	if foundAllianceId != 0 {
+		t.Fatalf("Expected alliance id: (%d) but received: (%d)", 0, foundAllianceId)
+	}
+
+	if foundCorpType {
+		t.Fatal("Expected to find 0 response that was of type EntityType_CORPORATION but found something")
+	}
+
+	if foundCorpId != 0 {
+		t.Fatalf("Expected corp id: (%d) but received: (%d)", 0, foundCorpId)
+	}
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/abaeve/auth-srv/repository"
 	"github.com/micro/go-micro/client"
 	"golang.org/x/net/context"
+	"errors"
 )
 
 type authError struct {
@@ -112,20 +113,20 @@ func (ah *AuthHandler) Confirm(context context.Context, request *abaeve_auth.Aut
 		err := repository.UserRepo.Save(user)
 
 		if err != nil {
-			return err
+			return errors.New("Error saving user: " + err.Error())
 		}
 	}
 
 	err := repository.UserRepo.LinkCharacterToUserByAuthCode(request.AuthenticationCode, user)
 
 	if err != nil {
-		return err
+		return errors.New("Error linking user: " + err.Error())
 	}
 
 	roles, err := repository.AccessRepo.FindByChatId(user.ChatId)
 
 	if err != nil {
-		return err
+		return errors.New("Error finding roles: " + err.Error())
 	}
 
 	response.Roles = roles
@@ -146,7 +147,7 @@ func (ah *AuthHandler) GetRoles(ctx context.Context, request *abaeve_auth.GetRol
 	roles, err := repository.AccessRepo.FindByChatId(request.UserId)
 
 	if err != nil {
-		return err
+		return errors.New("Error finding roles: " + err.Error())
 	}
 
 	response.Success = true
