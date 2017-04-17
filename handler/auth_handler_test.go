@@ -2,13 +2,13 @@ package handler
 
 import (
 	"errors"
+	"github.com/abaeve/auth-srv/mocks"
 	"github.com/abaeve/auth-srv/model"
 	proto "github.com/abaeve/auth-srv/proto"
 	"github.com/abaeve/auth-srv/repository"
 	"github.com/golang/mock/gomock"
 	"golang.org/x/net/context"
 	"testing"
-	"github.com/abaeve/auth-srv/mocks"
 )
 
 type testError struct {
