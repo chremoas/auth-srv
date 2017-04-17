@@ -25,12 +25,12 @@ service UserAuthentication {
     };
 }
 
-service UserAuthenticationQuery {
-    rpc GetAlliances (EntityQuery) returns (Alliances) {
+service EntityQuery {
+    rpc GetAlliances (EntityQueryRequest) returns (Alliances) {
     };
-    rpc GetCorporations (EntityQuery) returns (Corporations) {
+    rpc GetCorporations (EntityQueryRequest) returns (Corporations) {
     };
-    rpc GetCharacters (EntityQuery) returns (Characters) {
+    rpc GetCharacters (EntityQueryRequest) returns (Characters) {
     };
 }
 
@@ -161,6 +161,6 @@ message CharacterAdminRequest {
     EntityOperation Operation = 2;
 }
 
-message EntityQuery {
+message EntityQueryRequest {
     EntityType EntityType = 1;
 }
