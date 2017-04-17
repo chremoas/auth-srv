@@ -66,7 +66,7 @@ service EntityAdmin {
     };
     rpc CorporationUpdate (CoporationAdminRequest) returns (EntityAdminResponse) {
     };
-    rpc CharacterUpdate (CharacterAdminRequest) returns (EntityAdminRequest) {
+    rpc CharacterUpdate (CharacterAdminRequest) returns (EntityAdminResponse) {
     };
 }
 
@@ -114,7 +114,7 @@ message AuthAdminResponse {
 }
 
 message Characters {
-    repeated Character Character = 1;
+    repeated Character List = 1;
 }
 
 message Character {
@@ -123,7 +123,7 @@ message Character {
 }
 
 message Corporations {
-    repeated Corporation Corporation = 1;
+    repeated Corporation List = 1;
 }
 
 message Corporation {
@@ -133,7 +133,7 @@ message Corporation {
 }
 
 message Alliances {
-    repeated Alliance Alliance = 1;
+    repeated Alliance List = 1;
 }
 
 message Alliance {
