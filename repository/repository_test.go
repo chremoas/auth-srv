@@ -355,6 +355,16 @@ func TestCreateAndRetrieveAlliancesThroughREPO(t *testing.T) {
 		}
 	})
 
+	t.Run("RetrieveByAllianceId_WhereAllianceDoesn'tExist", func(t *testing.T) {
+		var allianceAsRetrieved *model.Alliance
+
+		allianceAsRetrieved = AllianceRepo.FindByAllianceId(20000)
+
+		if allianceAsRetrieved != nil {
+			t.Error("Received an alliance when one wasn't expected")
+		}
+	})
+
 	t.Run("Create", func(t *testing.T) {
 		var allianceAsRetrieved model.Alliance
 		allianceAsCreated := model.Alliance{AllianceId: 2, AllianceName: "Test Alliacnce 2", AllianceTicker: "TST2"}
@@ -430,6 +440,16 @@ func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
 		if corporationAsRetrieved.Alliance.AllianceId != corporation.Alliance.AllianceId {
 			t.Fatalf("Retrieved corporation's alliance/alliance id: (%d) does not equal original: (%d)",
 				corporationAsRetrieved.Alliance.AllianceId, corporation.Alliance.AllianceId)
+		}
+	})
+
+	t.Run("RetrieveByCorporationId_WhereCorporationDoesn'tExist", func(t *testing.T) {
+		var corporationAsRetrieved *model.Corporation
+
+		corporationAsRetrieved = CorporationRepo.FindByCorporationId(20000)
+
+		if corporationAsRetrieved != nil {
+			t.Error("Retrieved a corporation when one wasn't expected")
 		}
 	})
 
@@ -511,12 +531,28 @@ func TestCreateAndRetrieveCharactersThroughREPO(t *testing.T) {
 		}
 	})
 
+	t.Run("RetrieveByCharacterId_WhereCharacterDoesn'tExist", func(t *testing.T) {
+		characterAsRetrieved := CharacterRepo.FindByCharacterId(20000)
+
+		if characterAsRetrieved != nil {
+			t.Error("Received a character when none were expected")
+		}
+	})
+
 	t.Run("RetrieveByAuthenticationCode", func(t *testing.T) {
 		characterAsRetrieved := CharacterRepo.FindByAutenticationCode("123456789")
 
 		if characterAsRetrieved.CharacterId != 1 {
 			t.Fatalf("Retrieved characters character id: (%d) doesn't equal original: (%d)",
 				characterAsRetrieved.CharacterId, character[0].CharacterId)
+		}
+	})
+
+	t.Run("RetrieveByAuthenticationCode_WhereAuthCodeDoesn'tExist", func(t *testing.T) {
+		characterAsRetrieved := CharacterRepo.FindByAutenticationCode("fjksadljfahuoifsoda")
+
+		if characterAsRetrieved != nil {
+			t.Error("Retrieved a character when none were expected")
 		}
 	})
 
@@ -550,6 +586,20 @@ func TestCreateAndRetrieveCharactersThroughREPO(t *testing.T) {
 		if characterAsRetrieved.CorporationId != characterAsCreated.CorporationId {
 			t.Fatalf("Retrieved characters corporation id: (%d) does not equal the created one: (%d)",
 				characterAsRetrieved.CorporationId, characterAsCreated.CorporationId)
+		}
+	})
+
+	t.Run("Create_WithBadId", func(t *testing.T) {
+		characterAsCreated := model.Character{CharacterId: 0, CorporationId: 1, Token: "123456", CharacterName: "Test Character 2"}
+
+		err := CharacterRepo.Save(&characterAsCreated)
+
+		if err == nil {
+			t.Fatal("Received nil when an error was expected")
+		}
+
+		if err.Error() != "Primary key must not be 0" {
+			t.Fatalf("Expected error text: (Primary key must not be 0) but received: (%s)", err)
 		}
 	})
 
@@ -688,6 +738,17 @@ func TestLinkCharacterToUserWithInvalidAuthCode(t *testing.T) {
 	SharedTearDown()
 }
 
+func TestLinkCharacterToUserWithNonExistingCharacter(t *testing.T) {
+	_, _, _, user, _ := SharedSetup(t)
+	usersRepo := UserRepo.(*userRepository)
+	usersRepo.db = usersRepo.db.Begin()
+	err := UserRepo.LinkCharacterToUserByAuthCode("sfjakdslfjaksdlajl", &user)
+
+	if err == nil {
+		t.Fatal("Expected an error while linking a character to a user")
+	}
+}
+
 func TestCreateRolesThroughREPO(t *testing.T) {
 	SharedSetup(t)
 	rolesRepo := RoleRepo.(*roleRepository)
@@ -801,4 +862,11 @@ func TestCreateAndRetrieveAuthenticationCodesThroughREPO(t *testing.T) {
 
 	authCodeRepo.db.Rollback()
 	SharedTearDown()
+}
+
+func TestSetup_BadConnectionString(t *testing.T) {
+	err := Setup("derp", "yep")
+	if err == nil {
+		t.Error("Should have received an error... what kind of connection string is yep on the derp driver?")
+	}
 }

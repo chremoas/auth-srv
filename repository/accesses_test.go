@@ -613,6 +613,126 @@ func TestAccessesRepo_DeleteCorporationCharacterLeadershipRole(t *testing.T) {
 	t.SkipNow()
 }
 
+func Test_doubleEntityRoleQuery_WithTransactionBeginError(t *testing.T) {
+	db, mock, _ := AccessesSharedSetup(t, allianceCorpInsert)
+	defer db.Close()
+
+	expectedError := "I'm sorry, Dave. I'm afraid I can't do that."
+
+	mock.ExpectBegin().WillReturnError(errors.New(expectedError))
+
+	err := AccessRepo.SaveAllianceAndCorpRole(int64(1), int64(2), &model.Role{
+		RoleId:           int64(3),
+		RoleName:         "TEST_ROLE1",
+		ChatServiceGroup: "TEST_ROLE1",
+	})
+
+	expectedError = "Error opening a transaction: " + expectedError
+
+	if err == nil {
+		t.Error("Expected an error but received nil")
+	}
+
+	if err.Error() != expectedError {
+		t.Errorf("Expected error text: (%s) but received: (%s)", expectedError, err)
+	}
+
+	// we make sure that all expectations were met
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expections: %s", err)
+	}
+}
+
+func Test_doubleEntityRoleQuery_WithMultipleInsertions(t *testing.T) {
+	db, mock, query := AccessesSharedSetup(t, allianceCorpInsert)
+	defer db.Close()
+
+	mock.ExpectBegin()
+	mock.ExpectPrepare(query).ExpectExec().WithArgs(int64(1), int64(2), int64(3)).WillReturnResult(sqlmock.NewResult(0, 2))
+	mock.ExpectRollback()
+
+	err := AccessRepo.SaveAllianceAndCorpRole(int64(1), int64(2), &model.Role{
+		RoleId:           int64(3),
+		RoleName:         "TEST_ROLE1",
+		ChatServiceGroup: "TEST_ROLE1",
+	})
+
+	expectedError := "Inserted more than one record?"
+
+	if err == nil {
+		t.Error("Expected an error but received nil")
+	}
+
+	if err.Error() != expectedError {
+		t.Errorf("Expected error text: (%s) but received: (%s)", expectedError, err)
+	}
+
+	// we make sure that all expectations were met
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expections: %s", err)
+	}
+}
+
+func Test_singleEntityRoleQuery_WithTransactionBeginError(t *testing.T) {
+	db, mock, _ := AccessesSharedSetup(t, corporationInsert)
+	defer db.Close()
+
+	expectedError := "I'm sorry, Dave. I'm afraid I can't do that."
+
+	mock.ExpectBegin().WillReturnError(errors.New(expectedError))
+
+	err := AccessRepo.SaveCorporationRole(int64(1), &model.Role{
+		RoleId:           int64(3),
+		RoleName:         "TEST_ROLE1",
+		ChatServiceGroup: "TEST_ROLE1",
+	})
+
+	expectedError = "Error opening a transaction: " + expectedError
+
+	if err == nil {
+		t.Error("Expected an error but received nil")
+	}
+
+	if err.Error() != expectedError {
+		t.Errorf("Expected error text: (%s) but received: (%s)", expectedError, err)
+	}
+
+	// we make sure that all expectations were met
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expections: %s", err)
+	}
+}
+
+func Test_singleEntityRoleQuery_WithMultipleInsertions(t *testing.T) {
+	db, mock, query := AccessesSharedSetup(t, corporationInsert)
+	defer db.Close()
+
+	mock.ExpectBegin()
+	mock.ExpectPrepare(query).ExpectExec().WithArgs(int64(1), int64(3)).WillReturnResult(sqlmock.NewResult(0, 2))
+	mock.ExpectRollback()
+
+	err := AccessRepo.SaveCorporationRole(int64(1), &model.Role{
+		RoleId:           int64(3),
+		RoleName:         "TEST_ROLE1",
+		ChatServiceGroup: "TEST_ROLE1",
+	})
+
+	expectedError := "Inserted more than one record?"
+
+	if err == nil {
+		t.Error("Expected an error but received nil")
+	}
+
+	if err.Error() != expectedError {
+		t.Errorf("Expected error text: (%s) but received: (%s)", expectedError, err)
+	}
+
+	// we make sure that all expectations were met
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expections: %s", err)
+	}
+}
+
 func makeQueryStringRegex(queryString string) string {
 	sqlRegex := strings.Replace(queryString, "(", ".", -1)
 	sqlRegex = strings.Replace(sqlRegex, ")", ".", -1)
