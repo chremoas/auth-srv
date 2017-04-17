@@ -802,3 +802,10 @@ func TestCreateAndRetrieveAuthenticationCodesThroughREPO(t *testing.T) {
 	authCodeRepo.db.Rollback()
 	SharedTearDown()
 }
+
+func TestSetup_BadConnectionString(t *testing.T) {
+	err := Setup("derp", "yep")
+	if err == nil {
+		t.Error("Should have received an error... what kind of connection string is yep on the derp driver?")
+	}
+}
