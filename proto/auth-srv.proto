@@ -26,11 +26,11 @@ service UserAuthentication {
 }
 
 service EntityQuery {
-    rpc GetAlliances (EntityQueryRequest) returns (Alliances) {
+    rpc GetAlliances (EntityQueryRequest) returns (AlliancesResponse) {
     };
-    rpc GetCorporations (EntityQueryRequest) returns (Corporations) {
+    rpc GetCorporations (EntityQueryRequest) returns (CorporationsResponse) {
     };
-    rpc GetCharacters (EntityQueryRequest) returns (Characters) {
+    rpc GetCharacters (EntityQueryRequest) returns (CharactersResponse) {
     };
 }
 
@@ -113,16 +113,17 @@ message AuthAdminResponse {
     bool Success = 4;
 }
 
-message Characters {
+message CharactersResponse {
     repeated Character List = 1;
 }
 
 message Character {
     int64 Id = 1;
     string Name = 2;
+    int64 CorporationId = 3;
 }
 
-message Corporations {
+message CorporationsResponse {
     repeated Corporation List = 1;
 }
 
@@ -130,9 +131,10 @@ message Corporation {
     int64 Id = 1;
     string Name = 2;
     string Ticker = 3;
+    int64 AllianceId = 4;
 }
 
-message Alliances {
+message AlliancesResponse {
     repeated Alliance List = 1;
 }
 
@@ -144,6 +146,7 @@ message Alliance {
 
 message EntityAdminResponse {
     bool Success = 1;
+    string ErrorText = 2;
 }
 
 message AllianceAdminRequest {

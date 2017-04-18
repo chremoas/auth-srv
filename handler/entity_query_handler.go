@@ -10,14 +10,14 @@ type EntityQueryHandler struct {
 	Client client.Client
 }
 
-func (eqh *EntityQueryHandler) GetAlliances(context.Context, *abaeve_auth.EntityQueryRequest, *abaeve_auth.Alliances) error {
+func (eqh *EntityQueryHandler) GetAlliances(context.Context, *abaeve_auth.EntityQueryRequest, *abaeve_auth.AlliancesResponse) error {
 	return nil
 }
 
-func (eqh *EntityQueryHandler) GetCorporations(context.Context, *abaeve_auth.EntityQueryRequest, *abaeve_auth.Corporations) error {
+func (eqh *EntityQueryHandler) GetCorporations(context.Context, *abaeve_auth.EntityQueryRequest, *abaeve_auth.CorporationsResponse) error {
 	return nil
 }
 
-func (eqh *EntityQueryHandler) GetCharacters(context.Context, *abaeve_auth.EntityQueryRequest, *abaeve_auth.Characters) error {
+func (eqh *EntityQueryHandler) GetCharacters(context.Context, *abaeve_auth.EntityQueryRequest, *abaeve_auth.CharactersResponse) error {
 	return nil
 }
