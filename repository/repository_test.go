@@ -403,6 +403,23 @@ func TestCreateAndRetrieveAlliancesThroughREPO(t *testing.T) {
 		}
 	})
 
+	t.Run("FindAll", func(t *testing.T) {
+		allianceAsCreated := model.Alliance{AllianceId: 2, AllianceName: "Test Alliance No ID", AllianceTicker: "TST3"}
+
+		//First lets create one, so we can get 2 back
+		err := AllianceRepo.Save(&allianceAsCreated)
+
+		if err != nil {
+			t.Fatal("Didn't expect an error here")
+		}
+
+		alliances := AllianceRepo.FindAll()
+
+		if len(alliances) != 2 {
+			t.Errorf("Expected 2 but found (%d)", len(alliances))
+		}
+	})
+
 	allianceRepo.db.Rollback()
 	SharedTearDown()
 }
@@ -507,6 +524,28 @@ func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
 		}
 	})
 
+	t.Run("FindAll", func(t *testing.T) {
+		corporationAsCreated := model.Corporation{
+			CorporationId:     2,
+			CorporationName:   "Test Corporation 2",
+			CorporationTicker: "TST2",
+			AllianceId:        &alliance.AllianceId,
+			Alliance:          alliance,
+		}
+
+		err := CorporationRepo.Save(&corporationAsCreated)
+
+		if err != nil {
+			t.Fatalf("Had an error while saving the test corporation: %s", err)
+		}
+
+		corporations := CorporationRepo.FindAll()
+
+		if len(corporations) != 2 {
+			t.Errorf("Expected 2 but found (%d)", len(corporations))
+		}
+	})
+
 	corpRepo.db.Rollback()
 	SharedTearDown()
 }
@@ -600,6 +639,22 @@ func TestCreateAndRetrieveCharactersThroughREPO(t *testing.T) {
 
 		if err.Error() != "Primary key must not be 0" {
 			t.Fatalf("Expected error text: (Primary key must not be 0) but received: (%s)", err)
+		}
+	})
+
+	t.Run("FindAll", func(t *testing.T) {
+		characterAsCreated := model.Character{CharacterId: 2, CorporationId: 1, Token: "123456", CharacterName: "Test Character 2"}
+
+		err := CharacterRepo.Save(&characterAsCreated)
+
+		if err != nil {
+			t.Fatalf("Had an error saving the character: %s", err)
+		}
+
+		characters := CharacterRepo.FindAll()
+
+		if len(characters) != 3 {
+			t.Errorf("Expected 3 but found (%d)", len(characters))
 		}
 	})
 

@@ -187,6 +187,16 @@ func (_m *MockAllianceRepository) EXPECT() *_MockAllianceRepositoryRecorder {
 	return _m.recorder
 }
 
+func (_m *MockAllianceRepository) FindAll() []*model.Alliance {
+	ret := _m.ctrl.Call(_m, "FindAll")
+	ret0, _ := ret[0].([]*model.Alliance)
+	return ret0
+}
+
+func (_mr *_MockAllianceRepositoryRecorder) FindAll() *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "FindAll")
+}
+
 func (_m *MockAllianceRepository) FindByAllianceId(_param0 int64) *model.Alliance {
 	ret := _m.ctrl.Call(_m, "FindByAllianceId", _param0)
 	ret0, _ := ret[0].(*model.Alliance)
@@ -228,6 +238,16 @@ func (_m *MockCorporationRepository) EXPECT() *_MockCorporationRepositoryRecorde
 	return _m.recorder
 }
 
+func (_m *MockCorporationRepository) FindAll() []*model.Corporation {
+	ret := _m.ctrl.Call(_m, "FindAll")
+	ret0, _ := ret[0].([]*model.Corporation)
+	return ret0
+}
+
+func (_mr *_MockCorporationRepositoryRecorder) FindAll() *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "FindAll")
+}
+
 func (_m *MockCorporationRepository) FindByCorporationId(_param0 int64) *model.Corporation {
 	ret := _m.ctrl.Call(_m, "FindByCorporationId", _param0)
 	ret0, _ := ret[0].(*model.Corporation)
@@ -267,6 +287,16 @@ func NewMockCharacterRepository(ctrl *gomock.Controller) *MockCharacterRepositor
 
 func (_m *MockCharacterRepository) EXPECT() *_MockCharacterRepositoryRecorder {
 	return _m.recorder
+}
+
+func (_m *MockCharacterRepository) FindAll() []*model.Character {
+	ret := _m.ctrl.Call(_m, "FindAll")
+	ret0, _ := ret[0].([]*model.Character)
+	return ret0
+}
+
+func (_mr *_MockCharacterRepositoryRecorder) FindAll() *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "FindAll")
 }
 
 func (_m *MockCharacterRepository) FindByAutenticationCode(_param0 string) *model.Character {
