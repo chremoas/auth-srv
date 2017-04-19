@@ -9,7 +9,7 @@ enum EntityType {
 }
 
 enum EntityOperation {
-    ADD = 0;
+    ADD_OR_UPDATE = 0;
     REMOVE = 1;
 }
 
