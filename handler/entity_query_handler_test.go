@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"testing"
+	"github.com/abaeve/auth-srv/model"
 	"github.com/abaeve/auth-srv/proto"
 	"golang.org/x/net/context"
-	"github.com/abaeve/auth-srv/model"
+	"testing"
 )
 
 func TestEntityQueryHandler_GetAlliances(t *testing.T) {
@@ -84,6 +84,41 @@ func TestEntityQueryHandler_GetCorporations(t *testing.T) {
 	}
 }
 
+func TestEntityQueryHandler_GetCorporations_NoAlliance(t *testing.T) {
+	mockCtrl, _, _, _, mockCorpRepo, _, _, _ := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	mockCorpRepo.EXPECT().FindAll().Return(
+		[]*model.Corporation{
+			{
+				CorporationId:     int64(1),
+				CorporationName:   "Test Corporation 1",
+				CorporationTicker: "TSTC1",
+			},
+		},
+	)
+
+	entityQueryHandler := EntityQueryHandler{}
+	request := abaeve_auth.EntityQueryRequest{
+		EntityType: abaeve_auth.EntityType_CORPORATION,
+	}
+	response := abaeve_auth.CorporationsResponse{}
+
+	err := entityQueryHandler.GetCorporations(context.Background(), &request, &response)
+
+	if err != nil {
+		t.Error("Received an error when none were expected")
+	}
+
+	if len(response.List) != 1 {
+		t.Errorf("Expected 1 but received (%d)", len(response.List))
+	}
+
+	if response.List[0].AllianceId != 0 {
+		t.Errorf("Expected alliance id: (0) but received: (%s)", response.List[0].AllianceId)
+	}
+}
+
 func TestEntityQueryHandler_GetCharacters(t *testing.T) {
 	mockCtrl, _, _, mockCharRepo, _, _, _, _ := SharedSetup(t)
 	defer mockCtrl.Finish()
@@ -105,11 +140,11 @@ func TestEntityQueryHandler_GetCharacters(t *testing.T) {
 
 	entityQueryHandler := EntityQueryHandler{}
 	request := abaeve_auth.EntityQueryRequest{
-		EntityType: abaeve_auth.EntityType_ALLIANCE,
+		EntityType: abaeve_auth.EntityType_CHARACTER,
 	}
-	response := abaeve_auth.AlliancesResponse{}
+	response := abaeve_auth.CharactersResponse{}
 
-	err := entityQueryHandler.GetAlliances(context.Background(), &request, &response)
+	err := entityQueryHandler.GetCharacters(context.Background(), &request, &response)
 
 	if err != nil {
 		t.Error("Received an error when none were expected")
