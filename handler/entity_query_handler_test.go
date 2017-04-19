@@ -41,6 +41,41 @@ func TestEntityQueryHandler_GetAlliances(t *testing.T) {
 	if len(response.List) != 2 {
 		t.Errorf("Expected 2 but received (%d)", len(response.List))
 	}
+
+	firstAllianceMatches := false
+	secondAllianceMatches := false
+
+	for _, alliance := range response.List {
+		if alliance.Id == 1 {
+			if alliance.Name == "Test Alliance 1" {
+				if alliance.Ticker == "TSTA1" {
+					firstAllianceMatches = true
+				} else {
+					t.Errorf("Expected (TSTA1) but received (%s)", alliance.Ticker)
+				}
+			} else {
+				t.Errorf("Expected (Test Alliance 1) but received (%s)", alliance.Name)
+			}
+		} else if alliance.Id == 2 {
+			if alliance.Name == "Test Alliance 2" {
+				if alliance.Ticker == "TSTA2" {
+					secondAllianceMatches = true
+				} else {
+					t.Errorf("Expected (TSTA2) but received (%s)", alliance.Ticker)
+				}
+			} else {
+				t.Errorf("Expected (Test Alliance 2) but received (%s)", alliance.Name)
+			}
+		}
+	}
+
+	if !firstAllianceMatches {
+		t.Error("First alliance had some issue's")
+	}
+
+	if !secondAllianceMatches {
+		t.Error("Second alliance had some issue's")
+	}
 }
 
 func TestEntityQueryHandler_GetCorporations(t *testing.T) {
@@ -81,6 +116,50 @@ func TestEntityQueryHandler_GetCorporations(t *testing.T) {
 
 	if len(response.List) != 2 {
 		t.Errorf("Expected 2 but received (%d)", len(response.List))
+	}
+
+	firstCorporationMatches := false
+	secondCorporationMatches := false
+
+	//Don't ask... I was in a weird mood...
+	for _, corporation := range response.List {
+		if corporation.Id == 1 {
+			if corporation.Name == "Test Corporation 1" {
+				if corporation.Ticker == "TSTC1" {
+					if corporation.AllianceId == 1 {
+						firstCorporationMatches = true
+					} else {
+						t.Errorf("Expected 1 but received (%d)", corporation.AllianceId)
+					}
+				} else {
+					t.Errorf("Expected (TSTC1) but received (%s)", corporation.Ticker)
+				}
+			} else {
+				t.Errorf("Expected (Test Corporation 1) but received (%s)", corporation.Name)
+			}
+		} else if corporation.Id == 2 {
+			if corporation.Name == "Test Corporation 2" {
+				if corporation.Ticker == "TSTC2" {
+					if corporation.AllianceId == 2 {
+						secondCorporationMatches = true
+					} else {
+						t.Errorf("Expected 2 but received (%d)", corporation.AllianceId)
+					}
+				} else {
+					t.Errorf("Expected (TSTC2) but received (%s)", corporation.Ticker)
+				}
+			} else {
+				t.Errorf("Expected (Test Corporation 2) but received (%s)", corporation.Name)
+			}
+		}
+	}
+
+	if !firstCorporationMatches {
+		t.Error("First corporation had some issue's")
+	}
+
+	if !secondCorporationMatches {
+		t.Error("Second corporation had some issue's")
 	}
 }
 
@@ -152,5 +231,40 @@ func TestEntityQueryHandler_GetCharacters(t *testing.T) {
 
 	if len(response.List) != 2 {
 		t.Errorf("Expected 2 but received (%d)", len(response.List))
+	}
+
+	firstCharacterMatches := false
+	secondCharacterMatches := false
+
+	for _, character := range response.List {
+		if character.Id == 1 {
+			if character.Name == "Test Character 1" {
+				if character.CorporationId == 1 {
+					firstCharacterMatches = true
+				} else {
+					t.Errorf("Expected (1) but received (%d)", character.CorporationId)
+				}
+			} else {
+				t.Errorf("Expected (Test Character 1) but received (%s)", character.Name)
+			}
+		} else if character.Id == 2 {
+			if character.Name == "Test Character 2" {
+				if character.CorporationId == 3 {
+					secondCharacterMatches = true
+				} else {
+					t.Errorf("Expected (3) but received (%d)", character.CorporationId)
+				}
+			} else {
+				t.Errorf("Expected (Test Character 2) but received (%s)", character.Name)
+			}
+		}
+	}
+
+	if !firstCharacterMatches {
+		t.Error("First character had some issue's")
+	}
+
+	if !secondCharacterMatches {
+		t.Error("Second character had some issue's")
 	}
 }
