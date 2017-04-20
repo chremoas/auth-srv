@@ -486,11 +486,51 @@ func TestAccessesRepo_SaveCharacterRole(t *testing.T) {
 }
 
 func TestAccessesRepo_SaveAllianceCharacterLeadershipRole(t *testing.T) {
-	t.SkipNow()
+	db, mock, query := AccessesSharedSetup(t, characterAllianceInsert)
+	defer db.Close()
+
+	mock.ExpectBegin()
+	mock.ExpectPrepare(query).ExpectExec().WithArgs(int64(1), int64(2), int64(3)).WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectCommit()
+
+	err := AccessRepo.SaveAllianceCharacterLeadershipRole(int64(1), int64(2), &model.Role{
+		RoleId:           int64(3),
+		RoleName:         "TEST_ROLE1",
+		ChatServiceGroup: "TEST_ROLE1",
+	})
+
+	if err != nil {
+		t.Errorf("Received an error but expected none: (%s).", err)
+	}
+
+	// we make sure that all expectations were met
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expections: %s", err)
+	}
 }
 
 func TestAccessesRepo_SaveCorporationCharacterLeadershipRole(t *testing.T) {
-	t.SkipNow()
+	db, mock, query := AccessesSharedSetup(t, characterCorpInsert)
+	defer db.Close()
+
+	mock.ExpectBegin()
+	mock.ExpectPrepare(query).ExpectExec().WithArgs(int64(1), int64(2), int64(3)).WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectCommit()
+
+	err := AccessRepo.SaveCorporationCharacterLeadershipRole(int64(1), int64(2), &model.Role{
+		RoleId:           int64(3),
+		RoleName:         "TEST_ROLE1",
+		ChatServiceGroup: "TEST_ROLE1",
+	})
+
+	if err != nil {
+		t.Errorf("Received an error but expected none: (%s).", err)
+	}
+
+	// we make sure that all expectations were met
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expections: %s", err)
+	}
 }
 
 func TestAccessesRepo_DeleteAllianceAndCorpRole(t *testing.T) {
@@ -606,11 +646,59 @@ func TestAccessesRepo_DeleteCharacterRole(t *testing.T) {
 }
 
 func TestAccessesRepo_DeleteAllianceCharacterLeadershipRole(t *testing.T) {
-	t.SkipNow()
+	db, mock, query := AccessesSharedSetup(t, characterAllianceDelete)
+	defer db.Close()
+
+	mock.ExpectBegin()
+	mock.ExpectPrepare(query).ExpectExec().WithArgs(int64(1), int64(2), int64(3)).WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectCommit()
+
+	rows, err := AccessRepo.DeleteAllianceCharacterLeadershipRole(int64(1), int64(2), &model.Role{
+		RoleId:           int64(3),
+		RoleName:         "TEST_ROLE1",
+		ChatServiceGroup: "TEST_ROLE1",
+	})
+
+	if err != nil {
+		t.Errorf("Received an error but expected none: (%s).", err)
+	}
+
+	if rows != 1 {
+		t.Errorf("Expected 1 modification but recieved: (%d)", rows)
+	}
+
+	// we make sure that all expectations were met
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expections: %s", err)
+	}
 }
 
 func TestAccessesRepo_DeleteCorporationCharacterLeadershipRole(t *testing.T) {
-	t.SkipNow()
+	db, mock, query := AccessesSharedSetup(t, characterCorpDelete)
+	defer db.Close()
+
+	mock.ExpectBegin()
+	mock.ExpectPrepare(query).ExpectExec().WithArgs(int64(1), int64(2), int64(3)).WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectCommit()
+
+	rows, err := AccessRepo.DeleteCorporationCharacterLeadershipRole(int64(1), int64(2), &model.Role{
+		RoleId:           int64(3),
+		RoleName:         "TEST_ROLE1",
+		ChatServiceGroup: "TEST_ROLE1",
+	})
+
+	if err != nil {
+		t.Errorf("Received an error but expected none: (%s).", err)
+	}
+
+	if rows != 1 {
+		t.Errorf("Expected 1 modification but recieved: (%d)", rows)
+	}
+
+	// we make sure that all expectations were met
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expections: %s", err)
+	}
 }
 
 func Test_doubleEntityRoleQuery_WithTransactionBeginError(t *testing.T) {

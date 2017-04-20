@@ -10,17 +10,20 @@ import (
 type AllianceRepository interface {
 	Save(alliance *model.Alliance) error
 	FindByAllianceId(allianceId int64) *model.Alliance
+	FindAll() []*model.Alliance
 }
 
 type CorporationRepository interface {
 	Save(corporation *model.Corporation) error
 	FindByCorporationId(corporationId int64) *model.Corporation
+	FindAll() []*model.Corporation
 }
 
 type CharacterRepository interface {
 	Save(character *model.Character) error
 	FindByCharacterId(characterId int64) *model.Character
 	FindByAutenticationCode(authCode string) *model.Character
+	FindAll() []*model.Character
 }
 
 type UserRepository interface {
@@ -95,6 +98,13 @@ func (all *allianceRepository) FindByAllianceId(allianceId int64) *model.Allianc
 	return &alliance
 }
 
+func (all *allianceRepository) FindAll() []*model.Alliance {
+	alliances := []*model.Alliance{}
+
+	all.db.Find(&alliances)
+
+	return alliances
+}
 //END AllianceRepo accessor methods
 
 //BGN Corporation accessor methods
@@ -127,6 +137,13 @@ func (corp *corporationRepository) FindByCorporationId(corporationId int64) *mod
 	return &corporation
 }
 
+func (corp *corporationRepository) FindAll() []*model.Corporation {
+	var corporations []*model.Corporation
+
+	corp.db.Find(&corporations)
+
+	return corporations
+}
 //END Corporation accessor methods
 
 //BGN Character accessor methods
@@ -177,6 +194,13 @@ func (chr *characterRepository) FindByAutenticationCode(authCode string) *model.
 	return &character
 }
 
+func (chr *characterRepository) FindAll() []*model.Character {
+	characters := []*model.Character{}
+
+	chr.db.Find(&characters)
+
+	return characters
+}
 //END Character accessor methods
 
 //BGN User accessor methods

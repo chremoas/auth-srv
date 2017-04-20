@@ -116,6 +116,14 @@ const (
 	characterInsert = "insert into character_role_map (character_id, role_id) values (?, ?)"
 
 	characterDelete = "delete from character_role_map where character_id = ? and role_id = ?"
+
+	characterAllianceInsert = "insert into alliance_character_leadership_role_map (alliance_id, character_id, role_id) values(?, ?, ?)"
+
+	characterAllianceDelete = "delete from alliance_character_leadership_role_map where alliance_id = ? and character_id = ? and role_id = ?"
+
+	characterCorpInsert = "insert into corp_character_leadership_role_map (corporation_id, character_id, role_id) values (?, ?, ?)"
+
+	characterCorpDelete = "delete from corp_character_leadership_role_map where corporation_id = ? and character_id = ? and role_id = ?"
 )
 
 // Saves a role that is linked to an alliance AND a corporation
@@ -149,13 +157,15 @@ func (acc *accessesRepo) SaveCharacterRole(characterId int64, role *model.Role) 
 // Saves a role that is linked to an alliance and a character in an alliance leadership position
 // alliance_character_leadership_role_map table
 func (acc *accessesRepo) SaveAllianceCharacterLeadershipRole(allianceId, characterId int64, role *model.Role) error {
-	return nil
+	_, err := acc.doubleEntityRoleQuery(allianceId, characterId, role.RoleId, characterAllianceInsert)
+	return err
 }
 
 // Saves a role that is linked to a corporation and a character in a corporation leadership position
 // corp_character_leadership_role_map table
 func (acc *accessesRepo) SaveCorporationCharacterLeadershipRole(corporationId, characterId int64, role *model.Role) error {
-	return nil
+	_, err := acc.doubleEntityRoleQuery(corporationId, characterId, role.RoleId, characterCorpInsert)
+	return err
 }
 
 func (acc *accessesRepo) DeleteAllianceAndCorpRole(allianceId, corporationId int64, role *model.Role) (int64, error) {
@@ -175,11 +185,11 @@ func (acc *accessesRepo) DeleteCharacterRole(characterId int64, role *model.Role
 }
 
 func (acc *accessesRepo) DeleteAllianceCharacterLeadershipRole(allianceId, characterId int64, role *model.Role) (int64, error) {
-	return 0, nil
+	return acc.doubleEntityRoleQuery(allianceId, characterId, role.RoleId, characterAllianceDelete)
 }
 
 func (acc *accessesRepo) DeleteCorporationCharacterLeadershipRole(corporationId, characterId int64, role *model.Role) (int64, error) {
-	return 0, nil
+	return acc.doubleEntityRoleQuery(corporationId, characterId, role.RoleId, characterCorpDelete)
 }
 
 // Will take the two entityId's, roleId and query (as long as it follows the insert into table (entityOneId, entityTwoId, roleId) values (?, ?, ?))
