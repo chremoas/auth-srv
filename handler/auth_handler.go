@@ -41,6 +41,9 @@ func (ah *AuthHandler) Create(context context.Context, request *abaeve_auth.Auth
 			if err != nil {
 				return err
 			}
+
+			publication := ah.Client.NewPublication(abaeve_auth.AllianceAddTopic(), request.Alliance)
+			ah.Client.Publish(context, publication)
 		}
 	}
 

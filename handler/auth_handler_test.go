@@ -11,12 +11,22 @@ import (
 	"testing"
 )
 
-type testError struct {
-	message string
+type mockPublication struct {
+	topic       string
+	message     interface{}
+	contentType string
 }
 
-func (te *testError) Error() string {
-	return te.message
+func (mp mockPublication) Topic() string {
+	return mp.topic
+}
+
+func (mp mockPublication) Message() interface{} {
+	return mp.message
+}
+
+func (mp mockPublication) ContentType() string {
+	return mp.contentType
 }
 
 func SharedSetup(t *testing.T) (*gomock.Controller,
@@ -50,6 +60,7 @@ func SharedSetup(t *testing.T) (*gomock.Controller,
 
 func TestCreateEmptyDb(t *testing.T) {
 	mockCtrl, mockAuthRepo, _, mockCharRepo, mockCorpRepo, mockAlliRepo, _, _ := SharedSetup(t)
+	mockClient := mocks.NewMockClient(mockCtrl)
 	defer mockCtrl.Finish()
 
 	authCreateRequest := proto.AuthCreateRequest{
@@ -62,7 +73,7 @@ func TestCreateEmptyDb(t *testing.T) {
 	var authCreateResponse proto.AuthCreateResponse
 	var ctx context.Context
 
-	authHandler := AuthHandler{}
+	authHandler := AuthHandler{mockClient}
 
 	//Set our expectations
 	gomock.InOrder(
@@ -74,6 +85,18 @@ func TestCreateEmptyDb(t *testing.T) {
 				AllianceTicker: authCreateRequest.Alliance.Ticker,
 			},
 		).Return(nil),
+		mockClient.EXPECT().NewPublication(proto.AllianceAddTopic(),
+			authCreateRequest.Alliance,
+		).Return(mockPublication{
+			message:     authCreateRequest.Alliance,
+			topic:       "AllianceAdd",
+			contentType: "ContentType",
+		}),
+		mockClient.EXPECT().Publish(ctx, mockPublication{
+			message:     authCreateRequest.Alliance,
+			topic:       "AllianceAdd",
+			contentType: "ContentType",
+		}),
 
 		mockCorpRepo.EXPECT().FindByCorporationId(authCreateRequest.Corporation.Id).Return(nil),
 		mockCorpRepo.EXPECT().Save(
@@ -146,6 +169,7 @@ func TestCreateEmptyDb(t *testing.T) {
 
 func TestCreateNoAllianceCorporation(t *testing.T) {
 	mockCtrl, mockAuthRepo, _, mockCharRepo, mockCorpRepo, mockAlliRepo, _, _ := SharedSetup(t)
+	mockClient := mocks.NewMockClient(mockCtrl)
 	defer mockCtrl.Finish()
 
 	authCreateRequest := proto.AuthCreateRequest{
@@ -158,7 +182,7 @@ func TestCreateNoAllianceCorporation(t *testing.T) {
 	var authCreateResponse proto.AuthCreateResponse
 	var ctx context.Context
 
-	authHandler := AuthHandler{}
+	authHandler := AuthHandler{mockClient}
 
 	//Set our expectations
 	gomock.InOrder(
@@ -170,6 +194,18 @@ func TestCreateNoAllianceCorporation(t *testing.T) {
 				AllianceTicker: authCreateRequest.Alliance.Ticker,
 			},
 		).Return(nil),
+		mockClient.EXPECT().NewPublication(proto.AllianceAddTopic(),
+			authCreateRequest.Alliance,
+		).Return(mockPublication{
+			message:     authCreateRequest.Alliance,
+			topic:       "AllianceAdd",
+			contentType: "ContentType",
+		}),
+		mockClient.EXPECT().Publish(ctx, mockPublication{
+			message:     authCreateRequest.Alliance,
+			topic:       "AllianceAdd",
+			contentType: "ContentType",
+		}),
 
 		mockCorpRepo.EXPECT().FindByCorporationId(authCreateRequest.Corporation.Id).Return(nil),
 		mockCorpRepo.EXPECT().Save(
@@ -242,6 +278,7 @@ func TestCreateNoAllianceCorporation(t *testing.T) {
 
 func TestAllianceExistsNoCorpOrChar(t *testing.T) {
 	mockCtrl, mockAuthRepo, _, mockCharRepo, mockCorpRepo, mockAlliRepo, _, _ := SharedSetup(t)
+	mockClient := mocks.NewMockClient(mockCtrl)
 	defer mockCtrl.Finish()
 
 	authCreateRequest := proto.AuthCreateRequest{
@@ -254,7 +291,7 @@ func TestAllianceExistsNoCorpOrChar(t *testing.T) {
 	var authCreateResponse proto.AuthCreateResponse
 	var ctx context.Context
 
-	authHandler := AuthHandler{}
+	authHandler := AuthHandler{mockClient}
 
 	//Set our expectations
 	gomock.InOrder(
@@ -336,6 +373,7 @@ func TestAllianceExistsNoCorpOrChar(t *testing.T) {
 
 func TestAllianceAndCorpExistButNoChar(t *testing.T) {
 	mockCtrl, mockAuthRepo, _, mockCharRepo, mockCorpRepo, mockAlliRepo, _, _ := SharedSetup(t)
+	mockClient := mocks.NewMockClient(mockCtrl)
 	defer mockCtrl.Finish()
 
 	authCreateRequest := proto.AuthCreateRequest{
@@ -348,7 +386,7 @@ func TestAllianceAndCorpExistButNoChar(t *testing.T) {
 	var authCreateResponse proto.AuthCreateResponse
 	var ctx context.Context
 
-	authHandler := AuthHandler{}
+	authHandler := AuthHandler{mockClient}
 
 	//Set our expectations
 	gomock.InOrder(
@@ -428,6 +466,7 @@ func TestAllianceAndCorpExistButNoChar(t *testing.T) {
 
 func TestAllianceAndCorpAndCharExist(t *testing.T) {
 	mockCtrl, mockAuthRepo, _, mockCharRepo, mockCorpRepo, mockAlliRepo, _, _ := SharedSetup(t)
+	mockClient := mocks.NewMockClient(mockCtrl)
 	defer mockCtrl.Finish()
 
 	authCreateRequest := proto.AuthCreateRequest{
@@ -440,7 +479,7 @@ func TestAllianceAndCorpAndCharExist(t *testing.T) {
 	var authCreateResponse proto.AuthCreateResponse
 	var ctx context.Context
 
-	authHandler := AuthHandler{}
+	authHandler := AuthHandler{mockClient}
 
 	//Set our expectations
 	gomock.InOrder(
@@ -450,6 +489,14 @@ func TestAllianceAndCorpAndCharExist(t *testing.T) {
 			AllianceTicker: authCreateRequest.Alliance.Ticker,
 		}),
 		mockAlliRepo.EXPECT().Save(&model.Alliance{}).Times(0),
+		mockClient.EXPECT().NewPublication(proto.AllianceAddTopic(),
+			authCreateRequest.Alliance,
+		).Times(0),
+		mockClient.EXPECT().Publish(ctx, mockPublication{
+			message:     authCreateRequest.Alliance,
+			topic:       "AllianceAdd",
+			contentType: "ContentType",
+		}).Times(0),
 
 		mockCorpRepo.EXPECT().FindByCorporationId(authCreateRequest.Corporation.Id).Return(&model.Corporation{
 			CorporationId:     authCreateRequest.Corporation.Id,
@@ -512,6 +559,7 @@ func TestAllianceAndCorpAndCharExist(t *testing.T) {
 
 func TestAllianceErrorCondition(t *testing.T) {
 	mockCtrl, _, _, _, _, mockAlliRepo, _, _ := SharedSetup(t)
+	mockClient := mocks.NewMockClient(mockCtrl)
 	defer mockCtrl.Finish()
 
 	authCreateRequest := proto.AuthCreateRequest{
@@ -524,12 +572,12 @@ func TestAllianceErrorCondition(t *testing.T) {
 	var authCreateResponse proto.AuthCreateResponse
 	var ctx context.Context
 
-	authHandler := AuthHandler{}
+	authHandler := AuthHandler{mockClient}
 
 	//Set our expectations
 	gomock.InOrder(
 		mockAlliRepo.EXPECT().FindByAllianceId(authCreateRequest.Alliance.Id).Return(nil),
-		mockAlliRepo.EXPECT().Save(gomock.Any()).Return(&testError{message: "Don't do that alliance"}),
+		mockAlliRepo.EXPECT().Save(gomock.Any()).Return(errors.New("Don't do that alliance")),
 	)
 
 	err := authHandler.Create(ctx, &authCreateRequest, &authCreateResponse)
@@ -541,6 +589,7 @@ func TestAllianceErrorCondition(t *testing.T) {
 
 func TestCorporationErrorCondition(t *testing.T) {
 	mockCtrl, _, _, _, mockCorpRepo, mockAlliRepo, _, _ := SharedSetup(t)
+	mockClient := mocks.NewMockClient(mockCtrl)
 	defer mockCtrl.Finish()
 
 	authCreateRequest := proto.AuthCreateRequest{
@@ -553,15 +602,17 @@ func TestCorporationErrorCondition(t *testing.T) {
 	var authCreateResponse proto.AuthCreateResponse
 	var ctx context.Context
 
-	authHandler := AuthHandler{}
+	authHandler := AuthHandler{mockClient}
 
 	//Set our expectations
 	gomock.InOrder(
 		mockAlliRepo.EXPECT().FindByAllianceId(gomock.Any()).Return(nil),
 		mockAlliRepo.EXPECT().Save(gomock.Any()).Times(1),
+		mockClient.EXPECT().NewPublication(gomock.Any(), gomock.Any()).Times(1),
+		mockClient.EXPECT().Publish(gomock.Any(), gomock.Any()).Times(1),
 
 		mockCorpRepo.EXPECT().FindByCorporationId(gomock.Any()).Return(nil),
-		mockCorpRepo.EXPECT().Save(gomock.Any()).Return(&testError{message: "Don't do that corp"}),
+		mockCorpRepo.EXPECT().Save(gomock.Any()).Return(errors.New("Don't do that corp")),
 	)
 
 	err := authHandler.Create(ctx, &authCreateRequest, &authCreateResponse)
@@ -573,6 +624,7 @@ func TestCorporationErrorCondition(t *testing.T) {
 
 func TestCharacterErrorCondition(t *testing.T) {
 	mockCtrl, _, _, mockCharRepo, mockCorpRepo, mockAlliRepo, _, _ := SharedSetup(t)
+	mockClient := mocks.NewMockClient(mockCtrl)
 	defer mockCtrl.Finish()
 
 	authCreateRequest := proto.AuthCreateRequest{
@@ -585,18 +637,20 @@ func TestCharacterErrorCondition(t *testing.T) {
 	var authCreateResponse proto.AuthCreateResponse
 	var ctx context.Context
 
-	authHandler := AuthHandler{}
+	authHandler := AuthHandler{mockClient}
 
 	//Set our expectations
 	gomock.InOrder(
 		mockAlliRepo.EXPECT().FindByAllianceId(gomock.Any()).Return(nil),
 		mockAlliRepo.EXPECT().Save(gomock.Any()).Times(1),
+		mockClient.EXPECT().NewPublication(gomock.Any(), gomock.Any()).Times(1),
+		mockClient.EXPECT().Publish(gomock.Any(), gomock.Any()).Times(1),
 
 		mockCorpRepo.EXPECT().FindByCorporationId(gomock.Any()).Return(nil),
 		mockCorpRepo.EXPECT().Save(gomock.Any()).Times(1),
 
 		mockCharRepo.EXPECT().FindByCharacterId(gomock.Any()).Return(nil),
-		mockCharRepo.EXPECT().Save(gomock.Any()).Return(&testError{message: "Don't do that char"}),
+		mockCharRepo.EXPECT().Save(gomock.Any()).Return(errors.New("Don't do that char")),
 	)
 
 	err := authHandler.Create(ctx, &authCreateRequest, &authCreateResponse)
@@ -608,6 +662,7 @@ func TestCharacterErrorCondition(t *testing.T) {
 
 func TestAuthCodeErrorCondition(t *testing.T) {
 	mockCtrl, mockAuthRepo, _, mockCharRepo, mockCorpRepo, mockAlliRepo, _, _ := SharedSetup(t)
+	mockClient := mocks.NewMockClient(mockCtrl)
 	defer mockCtrl.Finish()
 
 	authCreateRequest := proto.AuthCreateRequest{
@@ -620,12 +675,14 @@ func TestAuthCodeErrorCondition(t *testing.T) {
 	var authCreateResponse proto.AuthCreateResponse
 	var ctx context.Context
 
-	authHandler := AuthHandler{}
+	authHandler := AuthHandler{mockClient}
 
 	//Set our expectations
 	gomock.InOrder(
 		mockAlliRepo.EXPECT().FindByAllianceId(gomock.Any()).Return(nil),
 		mockAlliRepo.EXPECT().Save(gomock.Any()).Times(1),
+		mockClient.EXPECT().NewPublication(gomock.Any(), gomock.Any()).Times(1),
+		mockClient.EXPECT().Publish(gomock.Any(), gomock.Any()).Times(1),
 
 		mockCorpRepo.EXPECT().FindByCorporationId(gomock.Any()).Return(nil),
 		mockCorpRepo.EXPECT().Save(gomock.Any()).Times(1),
