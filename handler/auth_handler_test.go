@@ -112,6 +112,18 @@ func TestCreateEmptyDb(t *testing.T) {
 				},
 			},
 		).Return(nil),
+		mockClient.EXPECT().NewPublication(proto.CorporationAddTopic(),
+			authCreateRequest.Corporation,
+		).Return(mockPublication{
+			message:     authCreateRequest.Corporation,
+			topic:       "CorporationAdd",
+			contentType: "ContentType",
+		}),
+		mockClient.EXPECT().Publish(ctx, mockPublication{
+			message:     authCreateRequest.Corporation,
+			topic:       "CorporationAdd",
+			contentType: "ContentType",
+		}),
 
 		mockCharRepo.EXPECT().FindByCharacterId(authCreateRequest.Character.Id).Return(nil),
 		mockCharRepo.EXPECT().Save(
@@ -133,6 +145,18 @@ func TestCreateEmptyDb(t *testing.T) {
 				},
 			},
 		).Return(nil),
+		mockClient.EXPECT().NewPublication(proto.CharacterAddTopic(),
+			authCreateRequest.Character,
+		).Return(mockPublication{
+			message:     authCreateRequest.Character,
+			topic:       "CharacterAdd",
+			contentType: "ContentType",
+		}),
+		mockClient.EXPECT().Publish(ctx, mockPublication{
+			message:     authCreateRequest.Character,
+			topic:       "CharacterAdd",
+			contentType: "ContentType",
+		}),
 
 		mockAuthRepo.EXPECT().Save(
 			&model.Character{
