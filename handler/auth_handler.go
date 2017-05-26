@@ -41,6 +41,9 @@ func (ah *AuthHandler) Create(context context.Context, request *abaeve_auth.Auth
 			if err != nil {
 				return err
 			}
+
+			publication := ah.Client.NewPublication(abaeve_auth.AllianceAddTopic(), request.Alliance)
+			ah.Client.Publish(context, publication)
 		}
 	}
 
@@ -63,6 +66,9 @@ func (ah *AuthHandler) Create(context context.Context, request *abaeve_auth.Auth
 		if err != nil {
 			return err
 		}
+
+		publication := ah.Client.NewPublication(abaeve_auth.CorporationAddTopic(), request.Corporation)
+		ah.Client.Publish(context, publication)
 	}
 
 	character := repository.CharacterRepo.FindByCharacterId(request.Character.Id)
@@ -80,6 +86,9 @@ func (ah *AuthHandler) Create(context context.Context, request *abaeve_auth.Auth
 		if err != nil {
 			return err
 		}
+
+		publication := ah.Client.NewPublication(abaeve_auth.CharacterAddTopic(), request.Character)
+		ah.Client.Publish(context, publication)
 	}
 
 	//Now... make an auth string... hopefully this isn't too ugly
