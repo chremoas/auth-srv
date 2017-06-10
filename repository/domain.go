@@ -225,6 +225,15 @@ func (usr *userRepository) FindByChatId(chatId string) *model.User {
 }
 
 func (usr *userRepository) LinkCharacterToUserByAuthCode(authCode string, user *model.User) error {
+	//First we check that we haven't already consumed this auth code
+	var authCodeModel model.AuthenticationCode
+	//TODO: Refactor this into the auth code repo?usr.db.Where("authentication_code = ? and is_used = ?", authCode, false).Find(&authCodeModel)
+	usr.db.Where("authentication_code = ?", authCode).Find(&authCodeModel)
+
+	if authCodeModel.IsUsed {
+		return errors.New("Authentication Code is invalid or used.")
+	}
+
 	foundCharacter := CharacterRepo.FindByAutenticationCode(authCode)
 
 	if foundCharacter == nil {
@@ -248,14 +257,6 @@ func (usr *userRepository) LinkCharacterToUserByAuthCode(authCode string, user *
 	usr.db.Save(&user)
 
 	//Now use up the auth code
-	var authCodeModel model.AuthenticationCode
-	//TODO: Refactor this into the auth code repo?usr.db.Where("authentication_code = ? and is_used = ?", authCode, false).Find(&authCodeModel)
-	usr.db.Where("authentication_code = ?", authCode).Find(&authCodeModel)
-
-	if authCodeModel.IsUsed {
-		return errors.New("Authentication Code is invalid or used.")
-	}
-
 	authCodeModel.IsUsed = true
 
 	usr.db.Save(&authCodeModel)

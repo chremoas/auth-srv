@@ -10,7 +10,7 @@ import (
 
 func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, [2]model.Character, model.User, [2]model.AuthenticationCode) {
 	//<editor-fold desc="Setup code">
-	err := Setup("mysql", "travis@tcp(localhost:3306)/authservices?parseTime=true")
+	err := Setup("mysql", "root@tcp(localhost:3306)/authservices?parseTime=true")
 
 	if err != nil {
 		t.Fatalf("Could not open database connection: %s", err)
@@ -756,9 +756,19 @@ func TestCreateAndRetrieveUsersThroughREPO(t *testing.T) {
 
 func TestLinkCharacterToUserWithInvalidAuthCode(t *testing.T) {
 	_, _, character, user, authCode := SharedSetup(t)
+
+	user2 := model.User{UserId: 2, ChatId: "12345678901"}
+
 	usersRepo := UserRepo.(*userRepository)
 	usersRepo.db = usersRepo.db.Begin()
-	err := UserRepo.LinkCharacterToUserByAuthCode(authCode[0].AuthenticationCode, &user)
+
+	err := usersRepo.Save(&user2)
+
+	if err != nil {
+		t.Fatalf("Could not create a new user: %s", err.Error())
+	}
+
+	err = UserRepo.LinkCharacterToUserByAuthCode(authCode[0].AuthenticationCode, &user2)
 
 	if err == nil {
 		t.Fatal("Expected an error while linking a character to a user")
@@ -767,35 +777,44 @@ func TestLinkCharacterToUserWithInvalidAuthCode(t *testing.T) {
 	var linkedUser []model.User
 	var authCodeAsRetrieved model.AuthenticationCode
 	var userAsRetrieved model.User
-	usersRepo.db.Where("user_id = ?", user.UserId).Find(&userAsRetrieved)
+	usersRepo.db.Where("user_id = ?", user2.UserId).Find(&userAsRetrieved)
 	usersRepo.db.Model(&userAsRetrieved).Association("Characters").Find(&userAsRetrieved.Characters)
 	usersRepo.db.Model(&character[0]).Association("Users").Find(&linkedUser)
 	usersRepo.db.Where("character_id = ?", character[0].CharacterId).Find(&authCodeAsRetrieved)
 
 	if len(linkedUser) == 0 {
-		t.Fatal("Expected at least one linked user")
+		t.Error("Expected at least one linked user")
 	}
 
-	if len(userAsRetrieved.Characters) != 1 {
-		t.Fatalf("User should have 1 characters instead they have: %d", len(userAsRetrieved.Characters))
+	if len(linkedUser) != 1 {
+		t.Errorf("Expected 1 user but found: %d", len(linkedUser))
+	}
+
+	if len(userAsRetrieved.Characters) != 0 {
+		t.Errorf("User should have 0 characters instead they have: %d", len(userAsRetrieved.Characters))
 	}
 
 	if linkedUser[0].UserId != user.UserId {
-		t.Fatalf("Linked user's user id: (%d) does not equal original: (%d)",
+		t.Errorf("Linked user's user id: (%d) does not equal original: (%d)",
 			linkedUser[0].UserId, user.UserId)
 	}
 
 	if authCodeAsRetrieved.IsUsed == false {
-		t.Fatal("Auth code was not used up")
+		t.Error("Auth code was not used up")
 	}
 
 	usersRepo.db.Rollback()
 	SharedTearDown()
 }
 
+//func TestLinkCharacterToUserWithUsedAuthCode(t *testing.T) {
+//	_, _, character, user, authCode := SharedSetup(t)
+//}
+
 func TestLinkCharacterToUserWithNonExistingCharacter(t *testing.T) {
 	_, _, _, user, _ := SharedSetup(t)
 	usersRepo := UserRepo.(*userRepository)
+
 	usersRepo.db = usersRepo.db.Begin()
 	err := UserRepo.LinkCharacterToUserByAuthCode("sfjakdslfjaksdlajl", &user)
 
