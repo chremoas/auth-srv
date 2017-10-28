@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/abaeve/auth-srv/model"
+	"git.maurer-it.net/abaeve/auth-srv/model"
 	"github.com/jinzhu/gorm"
 )
 

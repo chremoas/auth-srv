@@ -2,8 +2,8 @@ package repository
 
 import (
 	"errors"
-	"github.com/abaeve/auth-srv/model"
-	"github.com/abaeve/auth-srv/util"
+	"git.maurer-it.net/abaeve/auth-srv/model"
+	"git.maurer-it.net/abaeve/auth-srv/util"
 	"github.com/jinzhu/gorm"
 )
 

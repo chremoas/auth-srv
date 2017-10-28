@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"github.com/abaeve/auth-srv/model"
-	"github.com/abaeve/auth-srv/proto"
-	"github.com/abaeve/auth-srv/repository"
+	"git.maurer-it.net/abaeve/auth-srv/model"
+	"git.maurer-it.net/abaeve/auth-srv/proto"
+	"git.maurer-it.net/abaeve/auth-srv/repository"
 	"github.com/micro/go-micro/client"
 	"golang.org/x/net/context"
 )
