@@ -71,3 +71,21 @@ func (eqh *EntityQueryHandler) GetCharacters(ctx context.Context, request *abaev
 
 	return nil
 }
+
+func (eqh *EntityQueryHandler) GetRoles(ctx context.Context, request *abaeve_auth.EntityQueryRequest, response *abaeve_auth.RoleResponse) error {
+	dbRoles := repository.RoleRepo.FindAll()
+	respRoles := []*abaeve_auth.Role{}
+
+	for _, role := range dbRoles {
+		respRoles = append(respRoles,
+			&abaeve_auth.Role{
+				Name:     role.RoleName,
+				RoleName: role.ChatServiceGroup,
+			},
+		)
+	}
+
+	response.List = respRoles
+
+	return nil
+}

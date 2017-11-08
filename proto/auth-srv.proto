@@ -6,6 +6,7 @@ enum EntityType {
     ALLIANCE = 0;
     CORPORATION = 1;
     CHARACTER = 2;
+    ROLE = 3;
 }
 
 enum EntityOperation {
@@ -31,6 +32,8 @@ service EntityQuery {
     rpc GetCorporations (EntityQueryRequest) returns (CorporationsResponse) {
     };
     rpc GetCharacters (EntityQueryRequest) returns (CharactersResponse) {
+    };
+    rpc GetRoles (EntityQueryRequest) returns (RoleResponse) {
     };
 }
 
@@ -121,6 +124,15 @@ message Character {
     int64 Id = 1;
     string Name = 2;
     int64 CorporationId = 3;
+}
+
+message RoleResponse {
+    repeated Role List = 1;
+}
+
+message Role {
+    string Name = 1;
+    string RoleName = 2;
 }
 
 message CorporationsResponse {

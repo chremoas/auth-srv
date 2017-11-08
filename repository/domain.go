@@ -35,6 +35,7 @@ type UserRepository interface {
 type RoleRepository interface {
 	Save(role *model.Role) error
 	FindByRoleName(roleName string) *model.Role
+	FindAll() []*model.Role
 }
 
 type AuthenticationCodeRepository interface {
