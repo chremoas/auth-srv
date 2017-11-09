@@ -5,6 +5,7 @@ import (
 	"github.com/abaeve/auth-srv/model"
 	"github.com/abaeve/auth-srv/util"
 	"github.com/jinzhu/gorm"
+	"fmt"
 )
 
 type AllianceRepository interface {
@@ -36,6 +37,7 @@ type RoleRepository interface {
 	Save(role *model.Role) error
 	FindByRoleName(roleName string) *model.Role
 	FindAll() []*model.Role
+	Delete(roleName string) error
 }
 
 type AuthenticationCodeRepository interface {
@@ -287,6 +289,22 @@ func (rle *roleRepository) FindByRoleName(roleName string) *model.Role {
 	return &role
 }
 
+func (rle *roleRepository) FindAll() []*model.Role {
+	roles := []*model.Role{}
+
+	rle.db.Find(&roles)
+
+	return roles
+}
+
+func (rle *roleRepository) Delete(roleName string) error {
+	result := rle.db.Where("role_name = ?", roleName).Delete(&model.Role{})
+
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("No such role: %s", roleName)
+	}
+	return nil
+}
 //END Role accessor methods
 
 //BGN Authentication Code methods

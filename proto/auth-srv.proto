@@ -71,6 +71,8 @@ service EntityAdmin {
     };
     rpc CharacterUpdate (CharacterAdminRequest) returns (EntityAdminResponse) {
     };
+    rpc RoleUpdate (RoleAdminRequest) returns (EntityAdminResponse) {
+    };
 }
 
 message AuthCreateRequest {
@@ -131,8 +133,8 @@ message RoleResponse {
 }
 
 message Role {
-    string Name = 1;
-    string RoleName = 2;
+    string RoleName = 1;
+    string ChatServiceGroup = 2;
 }
 
 message CorporationsResponse {
@@ -173,6 +175,11 @@ message CoporationAdminRequest {
 
 message CharacterAdminRequest {
     Character Character = 1;
+    EntityOperation Operation = 2;
+}
+
+message RoleAdminRequest {
+    Role Role = 1;
     EntityOperation Operation = 2;
 }
 

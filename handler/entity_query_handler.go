@@ -79,8 +79,8 @@ func (eqh *EntityQueryHandler) GetRoles(ctx context.Context, request *abaeve_aut
 	for _, role := range dbRoles {
 		respRoles = append(respRoles,
 			&abaeve_auth.Role{
-				Name:     role.RoleName,
-				RoleName: role.ChatServiceGroup,
+				RoleName:         role.RoleName,
+				ChatServiceGroup: role.ChatServiceGroup,
 			},
 		)
 	}
