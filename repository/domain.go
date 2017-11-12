@@ -2,10 +2,10 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"github.com/abaeve/auth-srv/model"
 	"github.com/abaeve/auth-srv/util"
 	"github.com/jinzhu/gorm"
-	"fmt"
 )
 
 type AllianceRepository interface {
@@ -108,6 +108,7 @@ func (all *allianceRepository) FindAll() []*model.Alliance {
 
 	return alliances
 }
+
 //END AllianceRepo accessor methods
 
 //BGN Corporation accessor methods
@@ -147,6 +148,7 @@ func (corp *corporationRepository) FindAll() []*model.Corporation {
 
 	return corporations
 }
+
 //END Corporation accessor methods
 
 //BGN Character accessor methods
@@ -204,6 +206,7 @@ func (chr *characterRepository) FindAll() []*model.Character {
 
 	return characters
 }
+
 //END Character accessor methods
 
 //BGN User accessor methods
@@ -305,6 +308,7 @@ func (rle *roleRepository) Delete(roleName string) error {
 	}
 	return nil
 }
+
 //END Role accessor methods
 
 //BGN Authentication Code methods
