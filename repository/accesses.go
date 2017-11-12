@@ -2,7 +2,7 @@ package repository
 
 import (
 	"errors"
-	"git.maurer-it.net/abaeve/auth-srv/model"
+	"github.com/abaeve/auth-srv/model"
 	"github.com/jmoiron/sqlx"
 )
 

@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"git.maurer-it.net/abaeve/auth-srv/model"
-	"git.maurer-it.net/abaeve/auth-srv/util"
+	"github.com/abaeve/auth-srv/model"
+	"github.com/abaeve/auth-srv/util"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	"testing"

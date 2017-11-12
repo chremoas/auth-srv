@@ -2,10 +2,10 @@ package main
 
 import (
 	"errors"
-	"git.maurer-it.net/abaeve/auth-srv/handler"
-	"git.maurer-it.net/abaeve/auth-srv/proto"
-	"git.maurer-it.net/abaeve/auth-srv/repository"
-	"git.maurer-it.net/abaeve/services-common/config"
+	"github.com/abaeve/auth-srv/handler"
+	"github.com/abaeve/auth-srv/proto"
+	"github.com/abaeve/auth-srv/repository"
+	"github.com/abaeve/services-common/config"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/micro/go-micro"
 )

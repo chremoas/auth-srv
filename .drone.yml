@@ -2,7 +2,7 @@ platform: linux/arm
 
 workspace:
   base: /go
-  path: src/git.maurer-it.net/abaeve/auth-srv
+  path: src/github.com/abaeve/auth-srv
 
 clone:
   default:

@@ -2,10 +2,10 @@ package handler
 
 import (
 	"errors"
-	"git.maurer-it.net/abaeve/auth-srv/mocks"
-	"git.maurer-it.net/abaeve/auth-srv/model"
-	proto "git.maurer-it.net/abaeve/auth-srv/proto"
-	"git.maurer-it.net/abaeve/auth-srv/repository"
+	"github.com/abaeve/auth-srv/mocks"
+	"github.com/abaeve/auth-srv/model"
+	proto "github.com/abaeve/auth-srv/proto"
+	"github.com/abaeve/auth-srv/repository"
 	"github.com/golang/mock/gomock"
 	"golang.org/x/net/context"
 	"testing"

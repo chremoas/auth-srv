@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"git.maurer-it.net/abaeve/auth-srv/model"
-	"git.maurer-it.net/abaeve/auth-srv/proto"
+	"github.com/abaeve/auth-srv/model"
+	"github.com/abaeve/auth-srv/proto"
 	"golang.org/x/net/context"
 	"testing"
 )
@@ -194,7 +194,7 @@ func TestEntityQueryHandler_GetCorporations_NoAlliance(t *testing.T) {
 	}
 
 	if response.List[0].AllianceId != 0 {
-		t.Errorf("Expected alliance id: (0) but received: (%s)", response.List[0].AllianceId)
+		t.Errorf("Expected alliance id: (0) but received: (%d)", response.List[0].AllianceId)
 	}
 }
 

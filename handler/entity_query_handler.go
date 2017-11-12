@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"git.maurer-it.net/abaeve/auth-srv/proto"
-	"git.maurer-it.net/abaeve/auth-srv/repository"
+	"github.com/abaeve/auth-srv/proto"
+	"github.com/abaeve/auth-srv/repository"
 	"github.com/micro/go-micro/client"
 	"golang.org/x/net/context"
 )
@@ -68,6 +68,24 @@ func (eqh *EntityQueryHandler) GetCharacters(ctx context.Context, request *abaev
 	}
 
 	response.List = respCharacters
+
+	return nil
+}
+
+func (eqh *EntityQueryHandler) GetRoles(ctx context.Context, request *abaeve_auth.EntityQueryRequest, response *abaeve_auth.RoleResponse) error {
+	dbRoles := repository.RoleRepo.FindAll()
+	respRoles := []*abaeve_auth.Role{}
+
+	for _, role := range dbRoles {
+		respRoles = append(respRoles,
+			&abaeve_auth.Role{
+				RoleName:         role.RoleName,
+				ChatServiceGroup: role.ChatServiceGroup,
+			},
+		)
+	}
+
+	response.List = respRoles
 
 	return nil
 }

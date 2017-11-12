@@ -2,8 +2,9 @@ package repository
 
 import (
 	"errors"
-	"git.maurer-it.net/abaeve/auth-srv/model"
-	"git.maurer-it.net/abaeve/auth-srv/util"
+	"fmt"
+	"github.com/abaeve/auth-srv/model"
+	"github.com/abaeve/auth-srv/util"
 	"github.com/jinzhu/gorm"
 )
 
@@ -35,6 +36,8 @@ type UserRepository interface {
 type RoleRepository interface {
 	Save(role *model.Role) error
 	FindByRoleName(roleName string) *model.Role
+	FindAll() []*model.Role
+	Delete(roleName string) error
 }
 
 type AuthenticationCodeRepository interface {
@@ -105,6 +108,7 @@ func (all *allianceRepository) FindAll() []*model.Alliance {
 
 	return alliances
 }
+
 //END AllianceRepo accessor methods
 
 //BGN Corporation accessor methods
@@ -144,6 +148,7 @@ func (corp *corporationRepository) FindAll() []*model.Corporation {
 
 	return corporations
 }
+
 //END Corporation accessor methods
 
 //BGN Character accessor methods
@@ -201,6 +206,7 @@ func (chr *characterRepository) FindAll() []*model.Character {
 
 	return characters
 }
+
 //END Character accessor methods
 
 //BGN User accessor methods
@@ -284,6 +290,23 @@ func (rle *roleRepository) FindByRoleName(roleName string) *model.Role {
 	rle.db.Where("role_name = ?", roleName).Find(&role)
 
 	return &role
+}
+
+func (rle *roleRepository) FindAll() []*model.Role {
+	roles := []*model.Role{}
+
+	rle.db.Find(&roles)
+
+	return roles
+}
+
+func (rle *roleRepository) Delete(roleName string) error {
+	result := rle.db.Where("role_name = ?", roleName).Delete(&model.Role{})
+
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("No such role: %s", roleName)
+	}
+	return nil
 }
 
 //END Role accessor methods

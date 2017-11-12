@@ -6,6 +6,7 @@ enum EntityType {
     ALLIANCE = 0;
     CORPORATION = 1;
     CHARACTER = 2;
+    ROLE = 3;
 }
 
 enum EntityOperation {
@@ -31,6 +32,8 @@ service EntityQuery {
     rpc GetCorporations (EntityQueryRequest) returns (CorporationsResponse) {
     };
     rpc GetCharacters (EntityQueryRequest) returns (CharactersResponse) {
+    };
+    rpc GetRoles (EntityQueryRequest) returns (RoleResponse) {
     };
 }
 
@@ -67,6 +70,8 @@ service EntityAdmin {
     rpc CorporationUpdate (CoporationAdminRequest) returns (EntityAdminResponse) {
     };
     rpc CharacterUpdate (CharacterAdminRequest) returns (EntityAdminResponse) {
+    };
+    rpc RoleUpdate (RoleAdminRequest) returns (EntityAdminResponse) {
     };
 }
 
@@ -123,6 +128,15 @@ message Character {
     int64 CorporationId = 3;
 }
 
+message RoleResponse {
+    repeated Role List = 1;
+}
+
+message Role {
+    string RoleName = 1;
+    string ChatServiceGroup = 2;
+}
+
 message CorporationsResponse {
     repeated Corporation List = 1;
 }
@@ -161,6 +175,11 @@ message CoporationAdminRequest {
 
 message CharacterAdminRequest {
     Character Character = 1;
+    EntityOperation Operation = 2;
+}
+
+message RoleAdminRequest {
+    Role Role = 1;
     EntityOperation Operation = 2;
 }
 

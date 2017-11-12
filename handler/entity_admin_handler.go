@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"git.maurer-it.net/abaeve/auth-srv/model"
-	"git.maurer-it.net/abaeve/auth-srv/proto"
-	"git.maurer-it.net/abaeve/auth-srv/repository"
+	"github.com/abaeve/auth-srv/model"
+	"github.com/abaeve/auth-srv/proto"
+	"github.com/abaeve/auth-srv/repository"
 	"github.com/micro/go-micro/client"
 	"golang.org/x/net/context"
 )
@@ -152,6 +152,56 @@ func (eah *EntityAdminHandler) CharacterUpdate(ctx context.Context, request *aba
 	if err != nil {
 		response.Success = false
 		response.ErrorText = "Error while saving: " + err.Error()
+		return nil
+	}
+
+	response.Success = true
+	return nil
+}
+
+func (eah *EntityAdminHandler) RoleUpdate(ctx context.Context, request *abaeve_auth.RoleAdminRequest, response *abaeve_auth.EntityAdminResponse) error {
+	if request.Role == nil {
+		response.Success = false
+		response.ErrorText = "Invalid Role (nil)"
+		return nil
+	}
+
+	if len(request.Role.RoleName) == 0 {
+		response.Success = false
+		response.ErrorText = "Invalid Role Name (0/nil)"
+		return nil
+	}
+
+	if request.Operation == abaeve_auth.EntityOperation_ADD_OR_UPDATE {
+		if len(request.Role.ChatServiceGroup) == 0 {
+			response.Success = false
+			response.ErrorText = "Invalid Chat Service Group (empty/nil)"
+			return nil
+		}
+	}
+
+	//role := repository.RoleRepo.FindByRoleName(request.Role.Name)
+	//if role == nil {
+	//	response.Success = false
+	//	response.ErrorText = "Invalid Corporation Id, Corporation doesn't exist"
+	//	return nil
+	//}
+
+	var err error
+	if request.Operation == abaeve_auth.EntityOperation_ADD_OR_UPDATE {
+		role := model.Role{
+			RoleName:         request.Role.RoleName,
+			ChatServiceGroup: request.Role.ChatServiceGroup,
+		}
+
+		err = repository.RoleRepo.Save(&role)
+	} else {
+		err = repository.RoleRepo.Delete(request.Role.RoleName)
+	}
+
+	if err != nil {
+		response.Success = false
+		response.ErrorText = "Error: " + err.Error()
 		return nil
 	}
 

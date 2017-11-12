@@ -3,8 +3,8 @@ package handler
 import (
 	"context"
 	"errors"
-	"git.maurer-it.net/abaeve/auth-srv/model"
-	"git.maurer-it.net/abaeve/auth-srv/proto"
+	"github.com/abaeve/auth-srv/model"
+	"github.com/abaeve/auth-srv/proto"
 	"testing"
 )
 

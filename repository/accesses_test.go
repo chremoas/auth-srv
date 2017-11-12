@@ -4,7 +4,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
-	"git.maurer-it.net/abaeve/auth-srv/model"
+	"github.com/abaeve/auth-srv/model"
 	"github.com/jmoiron/sqlx"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 	"strings"
