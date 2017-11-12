@@ -67,7 +67,7 @@ service UserAuthenticationAdmin {
 service EntityAdmin {
     rpc AllianceUpdate (AllianceAdminRequest) returns (EntityAdminResponse) {
     };
-    rpc CorporationUpdate (CoporationAdminRequest) returns (EntityAdminResponse) {
+    rpc CorporationUpdate (CorporationAdminRequest) returns (EntityAdminResponse) {
     };
     rpc CharacterUpdate (CharacterAdminRequest) returns (EntityAdminResponse) {
     };
@@ -168,7 +168,7 @@ message AllianceAdminRequest {
     EntityOperation Operation = 2;
 }
 
-message CoporationAdminRequest {
+message CorporationAdminRequest {
     Corporation Corporation = 1;
     EntityOperation Operation = 2;
 }
