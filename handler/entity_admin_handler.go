@@ -55,7 +55,7 @@ func (eah *EntityAdminHandler) AllianceUpdate(ctx context.Context, request *abae
 	return nil
 }
 
-func (eah *EntityAdminHandler) CorporationUpdate(ctx context.Context, request *abaeve_auth.CoporationAdminRequest, response *abaeve_auth.EntityAdminResponse) error {
+func (eah *EntityAdminHandler) CorporationUpdate(ctx context.Context, request *abaeve_auth.CorporationAdminRequest, response *abaeve_auth.EntityAdminResponse) error {
 	if request.Corporation == nil {
 		response.Success = false
 		response.ErrorText = "Invalid Corporation (nil)"

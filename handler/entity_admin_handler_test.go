@@ -252,7 +252,7 @@ func TestEntityAdminHandler_CorporationUpdate(t *testing.T) {
 	).Return(nil)
 
 	eah := EntityAdminHandler{}
-	request := abaeve_auth.CoporationAdminRequest{
+	request := abaeve_auth.CorporationAdminRequest{
 		Corporation: &abaeve_auth.Corporation{
 			Id:         int64(1),
 			Name:       "Test Corporation",
@@ -287,7 +287,7 @@ func TestEntityAdminHandler_CorporationUpdate_WithNoAlliance(t *testing.T) {
 	).Return(nil)
 
 	eah := EntityAdminHandler{}
-	request := abaeve_auth.CoporationAdminRequest{
+	request := abaeve_auth.CorporationAdminRequest{
 		Corporation: &abaeve_auth.Corporation{
 			Id:     int64(1),
 			Name:   "Test Corporation",
@@ -330,7 +330,7 @@ func TestEntityAdminHandler_CorporationUpdate_WithInvalidCorp(t *testing.T) {
 	).Times(0)
 
 	eah := EntityAdminHandler{}
-	request := abaeve_auth.CoporationAdminRequest{}
+	request := abaeve_auth.CorporationAdminRequest{}
 	response := abaeve_auth.EntityAdminResponse{}
 
 	err := eah.CorporationUpdate(context.Background(), &request, &response)
@@ -373,7 +373,7 @@ func TestEntityAdminHandler_CorporationUpdate_WithInvalidCorpId(t *testing.T) {
 	).Times(0)
 
 	eah := EntityAdminHandler{}
-	request := abaeve_auth.CoporationAdminRequest{
+	request := abaeve_auth.CorporationAdminRequest{
 		Corporation: &abaeve_auth.Corporation{
 			Name:       "Test Corporation",
 			Ticker:     "TSTC",
@@ -421,7 +421,7 @@ func TestEntityAdminHandler_CorporationUpdate_WithInvalidCorpName(t *testing.T) 
 	).Times(0)
 
 	eah := EntityAdminHandler{}
-	request := abaeve_auth.CoporationAdminRequest{
+	request := abaeve_auth.CorporationAdminRequest{
 		Corporation: &abaeve_auth.Corporation{
 			Id:         int64(1),
 			Ticker:     "TSTC",
@@ -469,7 +469,7 @@ func TestEntityAdminHandler_CorporationUpdate_WithInvalidCorpTicker(t *testing.T
 	).Times(0)
 
 	eah := EntityAdminHandler{}
-	request := abaeve_auth.CoporationAdminRequest{
+	request := abaeve_auth.CorporationAdminRequest{
 		Corporation: &abaeve_auth.Corporation{
 			Id:         int64(1),
 			Name:       "Test Corporation",
@@ -512,7 +512,7 @@ func TestEntityAdminHandler_CorporationUpdate_WithNonExistingAlliance(t *testing
 	).Times(0)
 
 	eah := EntityAdminHandler{}
-	request := abaeve_auth.CoporationAdminRequest{
+	request := abaeve_auth.CorporationAdminRequest{
 		Corporation: &abaeve_auth.Corporation{
 			Id:         int64(1),
 			Name:       "Test Corporation",
@@ -562,7 +562,7 @@ func TestEntityAdminHandler_CorporationUpdate_WithSaveError(t *testing.T) {
 	).Return(errors.New(iamSorryDave))
 
 	eah := EntityAdminHandler{}
-	request := abaeve_auth.CoporationAdminRequest{
+	request := abaeve_auth.CorporationAdminRequest{
 		Corporation: &abaeve_auth.Corporation{
 			Id:         int64(1),
 			Name:       "Test Corporation",
