@@ -1,0 +1,14 @@
+[Unit]
+Description=auth-srv service
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+User=chremoas
+Environment=GOMAXPROCS=2
+Restart=on-failure
+ExecStart=/opt/chremoas/auth-srv --configuration_file=/etc/chremoas/auth-srv.yaml
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target
