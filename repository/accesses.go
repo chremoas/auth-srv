@@ -219,6 +219,7 @@ func (acc *accessesRepo) doubleEntityRoleQuery(entityOneId, entityTwoId, roleId 
 		return rows, errors.New("Inserted more than one record?")
 	}
 
+	stmt.Close()
 	tx.Commit()
 
 	return rows, nil
@@ -248,9 +249,10 @@ func (acc *accessesRepo) singleEntityRoleQuery(entityId, roleId int64, query str
 
 	if rows != int64(1) {
 		tx.Rollback()
-		return rows, errors.New("Inserted more than one record?")
+		return rows, errors.New("inserted more than one record")
 	}
 
+	stmt.Close()
 	tx.Commit()
 
 	return rows, nil
@@ -280,6 +282,8 @@ func (acc *accessesRepo) FindByChatId(chatId string) ([]string, error) {
 		//TODO: Is this innefficient?  Should I be going about growing my array differently?
 		roles = append(roles, chatRoleName)
 	}
+
+	statement.Close()
 
 	return roles, nil
 }
