@@ -28,7 +28,7 @@ pipeline:
         target: PLUGIN_USERNAME
       - source: registry_pass
         target: PLUGIN_PASSWORD
-    tags: [ latest, 1.0.1 ]
+    tags: [ latest, 1.0.2 ]
     when:
       event: [ tag ]
 
@@ -41,7 +41,7 @@ pipeline:
         target: PLUGIN_USERNAME
       - source: registry_pass
         target: PLUGIN_PASSWORD
-    tags: [ latest, 1.0.1-SNAPSHOT ]
+    tags: [ latest, 1.0.2-SNAPSHOT ]
     when:
       branch: [ release/* ]
 
@@ -55,7 +55,7 @@ pipeline:
     port: 22
     script:
       - docker login -u ${registry_user} -p ${registry_pass} registry.maurer-it.net
-      - docker service update --with-registry-auth --image=registry.maurer-it.net/auth-srv:1.0.1-SNAPSHOT auth-srv-dev
+      - docker service update --with-registry-auth --image=registry.maurer-it.net/auth-srv:1.0.2-SNAPSHOT auth-srv-dev
     when:
       branch: [ release/* ]
 
@@ -69,7 +69,7 @@ pipeline:
     port: 22
     script:
       - docker login -u ${registry_user} -p ${registry_pass} registry.maurer-it.net
-      - docker service create --name auth-srv --network chremoas --with-registry-auth registry.maurer-it.net/auth-srv:1.0.1
+      - docker service create --name auth-srv --network chremoas --with-registry-auth registry.maurer-it.net/auth-srv:1.0.2
     when:
       event: deployment
       environment: production
