@@ -3,8 +3,8 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"github.com/abaeve/auth-srv/model"
-	"github.com/abaeve/auth-srv/util"
+	"github.com/chremoas/auth-srv/model"
+	"github.com/chremoas/auth-srv/util"
 	"github.com/jinzhu/gorm"
 )
 

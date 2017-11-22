@@ -3,8 +3,8 @@ package handler
 import (
 	"context"
 	"errors"
-	"github.com/abaeve/auth-srv/model"
-	"github.com/abaeve/auth-srv/proto"
+	"github.com/chremoas/auth-srv/model"
+	"github.com/chremoas/auth-srv/proto"
 	"testing"
 )
 

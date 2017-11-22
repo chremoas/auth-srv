@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"github.com/abaeve/auth-srv/model"
-	"github.com/abaeve/auth-srv/util"
+	"github.com/chremoas/auth-srv/model"
+	"github.com/chremoas/auth-srv/util"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	"testing"

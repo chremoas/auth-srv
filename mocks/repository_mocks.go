@@ -4,7 +4,7 @@
 package mocks
 
 import (
-	model "github.com/abaeve/auth-srv/model"
+	model "github.com/chremoas/auth-srv/model"
 	gomock "github.com/golang/mock/gomock"
 )
 

@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"github.com/abaeve/auth-srv/proto"
-	"github.com/abaeve/auth-srv/repository"
+	"github.com/chremoas/auth-srv/proto"
+	"github.com/chremoas/auth-srv/repository"
 	"github.com/micro/go-micro/client"
 	"golang.org/x/net/context"
 )
