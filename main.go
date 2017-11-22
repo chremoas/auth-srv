@@ -2,10 +2,10 @@ package main
 
 import (
 	"errors"
-	"github.com/abaeve/auth-srv/handler"
-	"github.com/abaeve/auth-srv/proto"
-	"github.com/abaeve/auth-srv/repository"
-	"github.com/abaeve/services-common/config"
+	"github.com/chremoas/auth-srv/handler"
+	"github.com/chremoas/auth-srv/proto"
+	"github.com/chremoas/auth-srv/repository"
+	"github.com/chremoas/services-common/config"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/micro/go-micro"
 )
