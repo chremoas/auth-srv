@@ -216,7 +216,7 @@ func (acc *accessesRepo) doubleEntityRoleQuery(entityOneId, entityTwoId, roleId 
 
 	if rows != int64(1) {
 		tx.Rollback()
-		return rows, errors.New("Inserted more than one record?")
+		return rows, errors.New("nserted more than one record?")
 	}
 
 	stmt.Close()
