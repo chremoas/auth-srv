@@ -745,7 +745,7 @@ func Test_doubleEntityRoleQuery_WithMultipleInsertions(t *testing.T) {
 		ChatServiceGroup: "TEST_ROLE1",
 	})
 
-	expectedError := "inserted more than one record?"
+	expectedError := "inserted more than one record"
 
 	if err == nil {
 		t.Error("Expected an error but received nil")
@@ -805,7 +805,7 @@ func Test_singleEntityRoleQuery_WithMultipleInsertions(t *testing.T) {
 		ChatServiceGroup: "TEST_ROLE1",
 	})
 
-	expectedError := "inserted more than one record?"
+	expectedError := "inserted more than one record"
 
 	if err == nil {
 		t.Error("Expected an error but received nil")
