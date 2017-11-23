@@ -6,7 +6,7 @@ go:
   - 1.8
 before_install:
   - go get github.com/mattn/goveralls
-  - go get github.com/abaeve/services-common/config
+  - go get github.com/chremoas/services-common/config
   - mysql -e 'CREATE DATABASE authservices;'
   - mysql -u root --default-character-set=utf8 authservices < sql/ddl.sql
 script:
