@@ -12,12 +12,14 @@ type AllianceRepository interface {
 	Save(alliance *model.Alliance) error
 	FindByAllianceId(allianceId int64) *model.Alliance
 	FindAll() []*model.Alliance
+	Delete(allianceId int64) error
 }
 
 type CorporationRepository interface {
 	Save(corporation *model.Corporation) error
 	FindByCorporationId(corporationId int64) *model.Corporation
 	FindAll() []*model.Corporation
+	Delete(corporationId int64) error
 }
 
 type CharacterRepository interface {
@@ -25,6 +27,7 @@ type CharacterRepository interface {
 	FindByCharacterId(characterId int64) *model.Character
 	FindByAutenticationCode(authCode string) *model.Character
 	FindAll() []*model.Character
+	Delete(characterId int64) error
 }
 
 type UserRepository interface {
@@ -109,6 +112,10 @@ func (all *allianceRepository) FindAll() []*model.Alliance {
 	return alliances
 }
 
+func (all *allianceRepository) Delete(allianceId int64) error {
+	return nil
+}
+
 //END AllianceRepo accessor methods
 
 //BGN Corporation accessor methods
@@ -147,6 +154,10 @@ func (corp *corporationRepository) FindAll() []*model.Corporation {
 	corp.db.Find(&corporations)
 
 	return corporations
+}
+
+func (corp *corporationRepository) Delete(corporationId int64) error {
+	return nil
 }
 
 //END Corporation accessor methods
@@ -205,6 +216,10 @@ func (chr *characterRepository) FindAll() []*model.Character {
 	chr.db.Find(&characters)
 
 	return characters
+}
+
+func (chr *characterRepository) Delete(characterId int64) error {
+	return nil
 }
 
 //END Character accessor methods

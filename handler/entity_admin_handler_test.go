@@ -30,6 +30,7 @@ func TestEntityAdminHandler_AllianceUpdate(t *testing.T) {
 			Name:   "Test Alliance",
 			Ticker: "TSTA",
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -94,6 +95,7 @@ func TestEntityAdminHandler_AllianceUpdate_WithInvalidAllianceId(t *testing.T) {
 			Name:   "Test Alliance",
 			Ticker: "TSTA",
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -132,6 +134,7 @@ func TestEntityAdminHandler_AllianceUpdate_WithInvalidAllianceName(t *testing.T)
 			Id:     int64(1),
 			Ticker: "TSTA",
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -170,6 +173,7 @@ func TestEntityAdminHandler_AllianceUpdate_WithInvalidAllianceTicker(t *testing.
 			Id:   int64(1),
 			Name: "Test Alliance",
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -209,6 +213,7 @@ func TestEntityAdminHandler_AllianceUpdate_WithSaveError(t *testing.T) {
 			Name:   "Test Alliance",
 			Ticker: "TSTA",
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -259,6 +264,7 @@ func TestEntityAdminHandler_CorporationUpdate(t *testing.T) {
 			Ticker:     "TSTC",
 			AllianceId: allianceId,
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -293,6 +299,7 @@ func TestEntityAdminHandler_CorporationUpdate_WithNoAlliance(t *testing.T) {
 			Name:   "Test Corporation",
 			Ticker: "TSTC",
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -379,6 +386,7 @@ func TestEntityAdminHandler_CorporationUpdate_WithInvalidCorpId(t *testing.T) {
 			Ticker:     "TSTC",
 			AllianceId: allianceId,
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -427,6 +435,7 @@ func TestEntityAdminHandler_CorporationUpdate_WithInvalidCorpName(t *testing.T) 
 			Ticker:     "TSTC",
 			AllianceId: allianceId,
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -475,6 +484,7 @@ func TestEntityAdminHandler_CorporationUpdate_WithInvalidCorpTicker(t *testing.T
 			Name:       "Test Corporation",
 			AllianceId: allianceId,
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -519,6 +529,7 @@ func TestEntityAdminHandler_CorporationUpdate_WithNonExistingAlliance(t *testing
 			Ticker:     "TSTC",
 			AllianceId: allianceId,
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -569,6 +580,7 @@ func TestEntityAdminHandler_CorporationUpdate_WithSaveError(t *testing.T) {
 			Ticker:     "TSTC",
 			AllianceId: allianceId,
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -615,6 +627,7 @@ func TestEntityAdminHandler_CharacterUpdate(t *testing.T) {
 			Name:          "Test Character",
 			CorporationId: int64(1),
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -694,6 +707,7 @@ func TestEntityAdminHandler_CharacterUpdate_WithInvalidCharId(t *testing.T) {
 			Name:          "Test Character",
 			CorporationId: int64(1),
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -739,6 +753,7 @@ func TestEntityAdminHandler_CharacterUpdate_WithInvalidCharName(t *testing.T) {
 			Id:            int64(1),
 			CorporationId: int64(1),
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -785,6 +800,7 @@ func TestEntityAdminHandler_CharacterUpdate_WithInvalidCorpId(t *testing.T) {
 			Name:          "Test Character",
 			CorporationId: int64(0),
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -830,6 +846,7 @@ func TestEntityAdminHandler_CharacterUpdate_WithCorpIdNotSet(t *testing.T) {
 			Id:   int64(1),
 			Name: "Test Character",
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -870,6 +887,7 @@ func TestEntityAdminHandler_CharacterUpdate_WithNonExistingCorp(t *testing.T) {
 			Name:          "Test Character",
 			CorporationId: int64(1),
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -916,6 +934,7 @@ func TestEntityAdminHandler_CharacterUpdate_WithSaveError(t *testing.T) {
 			Name:          "Test Character",
 			CorporationId: int64(1),
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
