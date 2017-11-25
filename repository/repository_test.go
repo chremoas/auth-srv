@@ -486,7 +486,8 @@ func Test_CharactersCRUD_ThroughREPO(t *testing.T) {
 	Convey("RetrieveByAuthenticationCode", t, func() {
 		characterAsRetrieved := CharacterRepo.FindByAutenticationCode("123456789")
 
-		So(characterAsRetrieved, ShouldResemble, character[0])
+		So(characterAsRetrieved.CharacterId, ShouldEqual, character[0].CharacterId)
+		So(characterAsRetrieved.CharacterName, ShouldEqual, character[0].CharacterName)
 	})
 
 	Convey("RetrieveByAuthenticationCode_WhereAuthCodeDoesn'tExist", t, func() {
@@ -505,7 +506,9 @@ func Test_CharactersCRUD_ThroughREPO(t *testing.T) {
 
 		charRepo.db.Where("character_id = 2").Find(&characterAsRetrieved)
 
-		So(characterAsRetrieved, ShouldResemble, characterAsCreated)
+		So(characterAsRetrieved.CharacterId, ShouldEqual, characterAsCreated.CharacterId)
+		So(characterAsRetrieved.CharacterName, ShouldEqual, characterAsCreated.CharacterName)
+		So(characterAsRetrieved.CorporationId, ShouldEqual, characterAsCreated.CorporationId)
 	})
 
 	Convey("Create_WithBadId", t, func() {
