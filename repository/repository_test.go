@@ -408,7 +408,7 @@ func Test_CorporationsCRUD_ThroughREPO(t *testing.T) {
 		So(corporationAsRetrieved.CorporationName, ShouldEqual, corporation.CorporationName)
 		So(corporationAsRetrieved.CorporationTicker, ShouldEqual, corporation.CorporationTicker)
 		So(corporationAsRetrieved.AllianceId, ShouldEqual, corporation.AllianceId)
-		So(&corporationAsRetrieved.Alliance.AllianceId, ShouldEqual, &alliance.AllianceId)
+		So(corporationAsRetrieved.Alliance.AllianceId, ShouldResemble, alliance.AllianceId)
 		So(corporationAsRetrieved.Alliance.AllianceName, ShouldEqual, alliance.AllianceName)
 		So(corporationAsRetrieved.Alliance.AllianceTicker, ShouldEqual, alliance.AllianceTicker)
 	})
@@ -440,7 +440,7 @@ func Test_CorporationsCRUD_ThroughREPO(t *testing.T) {
 		So(corporationAsRetrieved.CorporationId, ShouldEqual, corporationAsCreated.CorporationId)
 		So(corporationAsRetrieved.CorporationName, ShouldEqual, corporationAsCreated.CorporationName)
 		So(corporationAsRetrieved.CorporationTicker, ShouldEqual, corporationAsCreated.CorporationTicker)
-		So(&corporationAsRetrieved.AllianceId, ShouldEqual, &corporationAsCreated.AllianceId)
+		So(corporationAsRetrieved.AllianceId, ShouldResemble, corporationAsCreated.AllianceId)
 	})
 
 	Convey("CreateWithoutId", t, func() {
