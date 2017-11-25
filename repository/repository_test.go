@@ -487,7 +487,9 @@ func Test_CharactersCRUD_ThroughREPO(t *testing.T) {
 	Convey("RetrieveByCharacterId", t, func() {
 		characterAsRetrieved := CharacterRepo.FindByCharacterId(character[0].CharacterId)
 
-		So(characterAsRetrieved, ShouldResemble, character)
+		So(characterAsRetrieved.CharacterId, ShouldEqual, character[0].CharacterId)
+		So(characterAsRetrieved.CharacterName, ShouldEqual, character[0].CharacterName)
+		So(characterAsRetrieved.CorporationId, ShouldEqual, character[0].CorporationId)
 	})
 
 	Convey("RetrieveByCharacterId_WhereCharacterDoesn'tExist", t, func() {
