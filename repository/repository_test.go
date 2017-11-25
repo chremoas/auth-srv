@@ -340,7 +340,9 @@ func Test_AlliancesCRUD_ThroughREPO(t *testing.T) {
 
 		allianceAsRetrieved = AllianceRepo.FindByAllianceId(alliance.AllianceId)
 
-		So(allianceAsRetrieved, ShouldResemble, alliance)
+		So(allianceAsRetrieved.AllianceId, ShouldEqual, alliance.AllianceId)
+		So(allianceAsRetrieved.AllianceName, ShouldEqual, alliance.AllianceName)
+		So(allianceAsRetrieved.AllianceTicker, ShouldEqual, alliance.AllianceTicker)
 	})
 
 	Convey("RetrieveByAllianceId_WhereAllianceDoesn'tExist",t, func() {
@@ -361,7 +363,9 @@ func Test_AlliancesCRUD_ThroughREPO(t *testing.T) {
 
 		allianceRepo.db.Where("alliance_id = 2").Find(&allianceAsRetrieved)
 
-		So(allianceAsRetrieved, ShouldResemble, allianceAsCreated)
+		So(allianceAsRetrieved.AllianceId, ShouldEqual, allianceAsCreated.AllianceId)
+		So(allianceAsRetrieved.AllianceName, ShouldEqual, allianceAsCreated.AllianceName)
+		So(allianceAsRetrieved.AllianceTicker, ShouldEqual, allianceAsCreated.AllianceTicker)
 	})
 
 	Convey("CreateWithoutId", t, func() {
@@ -400,7 +404,13 @@ func Test_CorporationsCRUD_ThroughREPO(t *testing.T) {
 
 		corporationAsRetrieved = CorporationRepo.FindByCorporationId(corporation.CorporationId)
 
-		So(corporationAsRetrieved, ShouldResemble, corporation)
+		So(corporationAsRetrieved.CorporationId, ShouldEqual, corporation.CorporationId)
+		So(corporationAsRetrieved.CorporationName, ShouldEqual, corporation.CorporationName)
+		So(corporationAsRetrieved.CorporationTicker, ShouldEqual, corporation.CorporationTicker)
+		So(corporationAsRetrieved.AllianceId, ShouldEqual, corporation.AllianceId)
+		So(corporationAsRetrieved.Alliance.AllianceId, ShouldEqual, alliance.AllianceId)
+		So(corporationAsRetrieved.Alliance.AllianceName, ShouldEqual, alliance.AllianceName)
+		So(corporationAsRetrieved.Alliance.AllianceTicker, ShouldEqual, alliance.AllianceTicker)
 	})
 
 	Convey("RetrieveByCorporationId_WhereCorporationDoesn'tExist", t, func() {
@@ -427,7 +437,10 @@ func Test_CorporationsCRUD_ThroughREPO(t *testing.T) {
 
 		corpRepo.db.Where("corporation_id = 2").Find(&corporationAsRetrieved)
 
-		So(corporationAsRetrieved, ShouldResemble, corporationAsCreated)
+		So(corporationAsRetrieved.CorporationId, ShouldEqual, corporationAsCreated.CorporationId)
+		So(corporationAsRetrieved.CorporationName, ShouldEqual, corporationAsCreated.CorporationName)
+		So(corporationAsRetrieved.CorporationTicker, ShouldEqual, corporationAsCreated.CorporationTicker)
+		So(corporationAsRetrieved.AllianceId, ShouldEqual, corporationAsCreated.AllianceId)
 	})
 
 	Convey("CreateWithoutId", t, func() {
