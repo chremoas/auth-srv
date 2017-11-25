@@ -390,6 +390,22 @@ func Test_AlliancesCRUD_ThroughREPO(t *testing.T) {
 		So(len(alliances), ShouldEqual, 2)
 	})
 
+	Convey("Delete", t, func() {
+		var allianceAsRetrieved model.Alliance
+		var corporations []*model.Corporation
+		err := allianceRepo.Delete(alliance.AllianceId)
+
+		So(err, ShouldBeNil)
+
+		allianceRepo.db.Where("alliance_id = ?", alliance.AllianceId).Find(&allianceAsRetrieved)
+
+		So(allianceAsRetrieved, ShouldResemble, model.Alliance{})
+
+		DB.Where("alliance_id = ?", alliance.AllianceId).Find(&corporations)
+
+		So(len(corporations), ShouldEqual, 0)
+	})
+
 	allianceRepo.db.Rollback()
 	SharedTearDown()
 }
@@ -397,6 +413,7 @@ func Test_AlliancesCRUD_ThroughREPO(t *testing.T) {
 func Test_CorporationsCRUD_ThroughREPO(t *testing.T) {
 	alliance, corporation, _, _, _ := SharedSetup(t)
 	corpRepo := CorporationRepo.(*corporationRepository)
+	db := corpRepo.db
 	corpRepo.db = corpRepo.db.Begin()
 
 	Convey("RetrieveByCorporationId", t, func() {
@@ -475,6 +492,31 @@ func Test_CorporationsCRUD_ThroughREPO(t *testing.T) {
 		So(len(corporations), ShouldEqual, 2)
 	})
 
+	Convey("Delete", t, func() {
+		var corporationAsRetrieved model.Corporation
+		var charactersAsRetrieved []*model.Character
+
+		//Characters have to have a corporation and we're mandating that anything updating this database update characters first
+		//Create a new corp and move the characters there and THEN perform the operation
+		newCorp := model.Corporation{CorporationId: 10, CorporationName: "Your New Home", CorporationTicker: "YNH"}
+		corpRepo.Save(&newCorp)
+		corpRepo.db.Exec("update characters set corporation_id = ? where corporation_id = ?", newCorp.CorporationId, corporation.CorporationId)
+		corpRepo.db.Commit()
+		corpRepo.db = db.Begin()
+
+		err := corpRepo.Delete(corporation.CorporationId)
+
+		So(err, ShouldBeNil)
+
+		corpRepo.db.Where("corporation_id = ?", corporation.CorporationId).Find(&corporationAsRetrieved)
+
+		So(corporationAsRetrieved, ShouldResemble, model.Corporation{})
+
+		DB.Where("corporation_id = ?", corporation.CorporationId).Find(&charactersAsRetrieved)
+
+		So(len(charactersAsRetrieved), ShouldEqual, 0)
+	})
+
 	corpRepo.db.Rollback()
 	SharedTearDown()
 }
@@ -545,6 +587,32 @@ func Test_CharactersCRUD_ThroughREPO(t *testing.T) {
 		characters := CharacterRepo.FindAll()
 
 		So(len(characters), ShouldEqual, 3)
+	})
+
+	Convey("Delete", t, func() {
+		var characterAsRetrieved model.Character
+		var authenticationCodeAsRetrieved model.AuthenticationCode
+		err := charRepo.Delete(character[0].CharacterId)
+
+		So(err, ShouldBeNil)
+
+		charRepo.db.Where("character_id = ?", character[0].CharacterId).Find(&characterAsRetrieved)
+
+		So(characterAsRetrieved, ShouldResemble, model.Character{})
+
+		charRepo.db.Where("character_id = ?", character[0].CharacterId).Find(&authenticationCodeAsRetrieved)
+
+		So(authenticationCodeAsRetrieved, ShouldResemble, model.AuthenticationCode{})
+
+		type userCharacterMap struct {
+			userId      int64
+			characterId int64
+		}
+
+		var ucm userCharacterMap
+		charRepo.db.Raw("select * from user_character_map where character_id = ?", character[0].CharacterId).Scan(&ucm)
+
+		So(ucm, ShouldResemble, userCharacterMap{})
 	})
 
 	charRepo.db.Rollback()
