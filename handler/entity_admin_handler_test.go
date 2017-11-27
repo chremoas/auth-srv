@@ -7,6 +7,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"golang.org/x/net/context"
 	"testing"
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 var iamSorryDave string = "I'm sorry, Dave. I'm afraid I can't do that."
@@ -30,6 +31,7 @@ func TestEntityAdminHandler_AllianceUpdate(t *testing.T) {
 			Name:   "Test Alliance",
 			Ticker: "TSTA",
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -94,6 +96,7 @@ func TestEntityAdminHandler_AllianceUpdate_WithInvalidAllianceId(t *testing.T) {
 			Name:   "Test Alliance",
 			Ticker: "TSTA",
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -132,6 +135,7 @@ func TestEntityAdminHandler_AllianceUpdate_WithInvalidAllianceName(t *testing.T)
 			Id:     int64(1),
 			Ticker: "TSTA",
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -170,6 +174,7 @@ func TestEntityAdminHandler_AllianceUpdate_WithInvalidAllianceTicker(t *testing.
 			Id:   int64(1),
 			Name: "Test Alliance",
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -209,6 +214,7 @@ func TestEntityAdminHandler_AllianceUpdate_WithSaveError(t *testing.T) {
 			Name:   "Test Alliance",
 			Ticker: "TSTA",
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -227,6 +233,64 @@ func TestEntityAdminHandler_AllianceUpdate_WithSaveError(t *testing.T) {
 	if response.ErrorText != expectedErrorText {
 		t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, response.ErrorText)
 	}
+}
+
+func TestEntityAdminHandler_AllianceUpdate_Delete(t *testing.T) {
+	mockCtrl, _, _, _, _, mockAlliRepo, _, _ := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	gomock.InOrder(
+		mockAlliRepo.EXPECT().Delete(int64(1)).Return(nil),
+		mockAlliRepo.EXPECT().Delete(int64(1)).Return(errors.New("dave I failed you while deleting the alliance")),
+		mockAlliRepo.EXPECT().Delete(int64(1)).Return(errors.New("dave I failed you while updating corporations")),
+	)
+
+	eah := EntityAdminHandler{}
+
+	Convey("Delete no error", t, func() {
+		response := abaeve_auth.EntityAdminResponse{}
+		err := eah.AllianceUpdate(context.Background(), &abaeve_auth.AllianceAdminRequest{
+			Alliance: &abaeve_auth.Alliance{
+				Id: 1,
+				Name:   "Test Alliance",
+				Ticker: "TSTA",
+			},
+			Operation: abaeve_auth.EntityOperation_REMOVE,
+		}, &response)
+
+		So(err, ShouldBeNil)
+		So(response, ShouldResemble, abaeve_auth.EntityAdminResponse{Success: true})
+	})
+
+	Convey("Delete with error deleting alliance", t, func() {
+		response := abaeve_auth.EntityAdminResponse{}
+		err := eah.AllianceUpdate(context.Background(), &abaeve_auth.AllianceAdminRequest{
+			Alliance: &abaeve_auth.Alliance{
+				Id: 1,
+				Name:   "Test Alliance",
+				Ticker: "TSTA",
+			},
+			Operation: abaeve_auth.EntityOperation_REMOVE,
+		}, &response)
+
+		So(err, ShouldNotBeNil)
+		So(err.Error(), ShouldEqual, "dave I failed you while deleting the alliance")
+	})
+
+	Convey("Delete with error updating corporations", t, func() {
+		response := abaeve_auth.EntityAdminResponse{}
+		err := eah.AllianceUpdate(context.Background(), &abaeve_auth.AllianceAdminRequest{
+			Alliance: &abaeve_auth.Alliance{
+				Id: 1,
+				Name:   "Test Alliance",
+				Ticker: "TSTA",
+			},
+			Operation: abaeve_auth.EntityOperation_REMOVE,
+		}, &response)
+
+		So(err, ShouldNotBeNil)
+		So(err.Error(), ShouldEqual, "dave I failed you while updating corporations")
+	})
 }
 
 func TestEntityAdminHandler_CorporationUpdate(t *testing.T) {
@@ -259,6 +323,7 @@ func TestEntityAdminHandler_CorporationUpdate(t *testing.T) {
 			Ticker:     "TSTC",
 			AllianceId: allianceId,
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -293,6 +358,7 @@ func TestEntityAdminHandler_CorporationUpdate_WithNoAlliance(t *testing.T) {
 			Name:   "Test Corporation",
 			Ticker: "TSTC",
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -379,6 +445,7 @@ func TestEntityAdminHandler_CorporationUpdate_WithInvalidCorpId(t *testing.T) {
 			Ticker:     "TSTC",
 			AllianceId: allianceId,
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -427,6 +494,7 @@ func TestEntityAdminHandler_CorporationUpdate_WithInvalidCorpName(t *testing.T) 
 			Ticker:     "TSTC",
 			AllianceId: allianceId,
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -475,6 +543,7 @@ func TestEntityAdminHandler_CorporationUpdate_WithInvalidCorpTicker(t *testing.T
 			Name:       "Test Corporation",
 			AllianceId: allianceId,
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -519,6 +588,7 @@ func TestEntityAdminHandler_CorporationUpdate_WithNonExistingAlliance(t *testing
 			Ticker:     "TSTC",
 			AllianceId: allianceId,
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -569,6 +639,7 @@ func TestEntityAdminHandler_CorporationUpdate_WithSaveError(t *testing.T) {
 			Ticker:     "TSTC",
 			AllianceId: allianceId,
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -587,6 +658,48 @@ func TestEntityAdminHandler_CorporationUpdate_WithSaveError(t *testing.T) {
 	if response.ErrorText != expectedErrorText {
 		t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, response.ErrorText)
 	}
+}
+
+func TestEntityAdminHandler_CorporationUpdate_Delete(t *testing.T) {
+	mockCtrl, _, _, _, mockCorpRepo, _, _, _ := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	gomock.InOrder(
+		mockCorpRepo.EXPECT().Delete(int64(1)).Return(nil),
+		mockCorpRepo.EXPECT().Delete(int64(1)).Return(errors.New("dave I failed you while deleting the corporation")),
+	)
+
+	eah := EntityAdminHandler{}
+
+	Convey("Delete no error", t, func() {
+		response := abaeve_auth.EntityAdminResponse{}
+		err := eah.CorporationUpdate(context.Background(), &abaeve_auth.CorporationAdminRequest{
+			Corporation: &abaeve_auth.Corporation{
+				Id: 1,
+				Name:   "Test Corp",
+				Ticker: "TSTC",
+			},
+			Operation: abaeve_auth.EntityOperation_REMOVE,
+		}, &response)
+
+		So(err, ShouldBeNil)
+		So(response, ShouldResemble, abaeve_auth.EntityAdminResponse{Success: true})
+	})
+
+	Convey("Delete with error deleting corporation", t, func() {
+		response := abaeve_auth.EntityAdminResponse{}
+		err := eah.CorporationUpdate(context.Background(), &abaeve_auth.CorporationAdminRequest{
+			Corporation: &abaeve_auth.Corporation{
+				Id: 1,
+				Name:   "Test Corp",
+				Ticker: "TSTC",
+			},
+			Operation: abaeve_auth.EntityOperation_REMOVE,
+		}, &response)
+
+		So(err, ShouldNotBeNil)
+		So(err.Error(), ShouldEqual, "dave I failed you while deleting the corporation")
+	})
 }
 
 func TestEntityAdminHandler_CharacterUpdate(t *testing.T) {
@@ -615,6 +728,7 @@ func TestEntityAdminHandler_CharacterUpdate(t *testing.T) {
 			Name:          "Test Character",
 			CorporationId: int64(1),
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -694,6 +808,7 @@ func TestEntityAdminHandler_CharacterUpdate_WithInvalidCharId(t *testing.T) {
 			Name:          "Test Character",
 			CorporationId: int64(1),
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -739,6 +854,7 @@ func TestEntityAdminHandler_CharacterUpdate_WithInvalidCharName(t *testing.T) {
 			Id:            int64(1),
 			CorporationId: int64(1),
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -785,6 +901,7 @@ func TestEntityAdminHandler_CharacterUpdate_WithInvalidCorpId(t *testing.T) {
 			Name:          "Test Character",
 			CorporationId: int64(0),
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -830,6 +947,7 @@ func TestEntityAdminHandler_CharacterUpdate_WithCorpIdNotSet(t *testing.T) {
 			Id:   int64(1),
 			Name: "Test Character",
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -870,6 +988,7 @@ func TestEntityAdminHandler_CharacterUpdate_WithNonExistingCorp(t *testing.T) {
 			Name:          "Test Character",
 			CorporationId: int64(1),
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -916,6 +1035,7 @@ func TestEntityAdminHandler_CharacterUpdate_WithSaveError(t *testing.T) {
 			Name:          "Test Character",
 			CorporationId: int64(1),
 		},
+		Operation: abaeve_auth.EntityOperation_ADD_OR_UPDATE,
 	}
 	response := abaeve_auth.EntityAdminResponse{}
 
@@ -934,4 +1054,79 @@ func TestEntityAdminHandler_CharacterUpdate_WithSaveError(t *testing.T) {
 	if response.ErrorText != expectedErrorText {
 		t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, response.ErrorText)
 	}
+}
+
+func TestEntityAdminHandler_CharacterUpdate_Delete(t *testing.T) {
+	mockCtrl, _, _, mockCharRepo, _, _, _, _ := SharedSetup(t)
+	defer mockCtrl.Finish()
+
+	gomock.InOrder(
+		mockCharRepo.EXPECT().Delete(int64(1)).Return(nil),
+		mockCharRepo.EXPECT().Delete(int64(1)).Return(errors.New("dave I failed you while deleting the authentication codes")),
+		mockCharRepo.EXPECT().Delete(int64(1)).Return(errors.New("dave I failed you while deleting the user_character_map")),
+		mockCharRepo.EXPECT().Delete(int64(1)).Return(errors.New("dave I failed you while deleting the character")),
+	)
+
+	eah := EntityAdminHandler{}
+
+	Convey("Delete no error", t, func() {
+		response := abaeve_auth.EntityAdminResponse{}
+		err := eah.CharacterUpdate(context.Background(), &abaeve_auth.CharacterAdminRequest{
+			Character: &abaeve_auth.Character{
+				Id: 1,
+				Name:   "Test Character",
+				CorporationId: 1,
+			},
+			Operation: abaeve_auth.EntityOperation_REMOVE,
+		}, &response)
+
+		So(err, ShouldBeNil)
+		So(response, ShouldResemble, abaeve_auth.EntityAdminResponse{Success: true})
+	})
+
+	Convey("Delete with error deleting authentication codes", t, func() {
+		response := abaeve_auth.EntityAdminResponse{}
+		err := eah.CharacterUpdate(context.Background(), &abaeve_auth.CharacterAdminRequest{
+			Character: &abaeve_auth.Character{
+				Id: 1,
+				Name:   "Test Character",
+				CorporationId: 1,
+			},
+			Operation: abaeve_auth.EntityOperation_REMOVE,
+		}, &response)
+
+		So(err, ShouldNotBeNil)
+		So(err.Error(), ShouldEqual, "dave I failed you while deleting the authentication codes")
+	})
+
+	//The below two tests are actually redundant from the context of the AdminHandler but I'm putting them here for documentation purposes.
+	Convey("Delete with error user_character_map ", t, func() {
+		response := abaeve_auth.EntityAdminResponse{}
+		err := eah.CharacterUpdate(context.Background(), &abaeve_auth.CharacterAdminRequest{
+			Character: &abaeve_auth.Character{
+				Id: 1,
+				Name:   "Test Character",
+				CorporationId: 1,
+			},
+			Operation: abaeve_auth.EntityOperation_REMOVE,
+		}, &response)
+
+		So(err, ShouldNotBeNil)
+		So(err.Error(), ShouldEqual, "dave I failed you while deleting the user_character_map")
+	})
+
+	Convey("Delete with error deleting character", t, func() {
+		response := abaeve_auth.EntityAdminResponse{}
+		err := eah.CharacterUpdate(context.Background(), &abaeve_auth.CharacterAdminRequest{
+			Character: &abaeve_auth.Character{
+				Id: 1,
+				Name:   "Test Character",
+				CorporationId: 1,
+			},
+			Operation: abaeve_auth.EntityOperation_REMOVE,
+		}, &response)
+
+		So(err, ShouldNotBeNil)
+		So(err.Error(), ShouldEqual, "dave I failed you while deleting the character")
+	})
 }

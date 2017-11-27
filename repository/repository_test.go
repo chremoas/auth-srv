@@ -6,6 +6,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	"testing"
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func SharedSetup(t *testing.T) (model.Alliance, model.Corporation, [2]model.Character, model.User, [2]model.AuthenticationCode) {
@@ -110,6 +111,16 @@ func SharedTearDown() {
 
 	tx := DB.Begin()
 
+	tx.Exec("delete from alliance_character_leadership_role_map")
+	tx.Exec("delete from alliance_corporation_role_map")
+	tx.Exec("delete from alliance_role_map")
+	tx.Exec("delete from character_role_map")
+	tx.Exec("delete from corp_character_leadership_role_map")
+	tx.Exec("delete from corporation_role_map")
+
+	tx.Commit()
+	tx = DB.Begin()
+
 	tx.Find(&authCodes)
 	tx.Find(&users)
 	tx.Find(&characters)
@@ -151,7 +162,7 @@ func SharedTearDown() {
 	//</editor-fold>
 }
 
-func TestCreateAndRetrieveThroughGORM(t *testing.T) {
+func Test_CreateAndRetrieve_ThroughGORM(t *testing.T) {
 	var err error
 	_, corporation, character, user, _ := SharedSetup(t)
 
@@ -329,148 +340,148 @@ func TestCreateAndRetrieveThroughGORM(t *testing.T) {
 	SharedTearDown()
 }
 
-func TestCreateAndRetrieveAlliancesThroughREPO(t *testing.T) {
-	alliance, _, _, _, _ := SharedSetup(t)
+func Test_AlliancesCRUD_ThroughREPO(t *testing.T) {
+	alliance, corporation, characters, _, _ := SharedSetup(t)
 	allianceRepo := AllianceRepo.(*allianceRepository)
-	allianceRepo.db = allianceRepo.db.Begin()
 
-	t.Run("RetrieveByAllianceId", func(t *testing.T) {
+	Convey("RetrieveByAllianceId", t, func() {
 		var allianceAsRetrieved *model.Alliance
 
 		allianceAsRetrieved = AllianceRepo.FindByAllianceId(alliance.AllianceId)
 
-		if allianceAsRetrieved.AllianceId != alliance.AllianceId {
-			t.Fatalf("Retrieved alliance's alliance id: (%d) does not equal original: (%d)",
-				allianceAsRetrieved.AllianceId, alliance.AllianceId)
-		}
-
-		if allianceAsRetrieved.AllianceTicker != alliance.AllianceTicker {
-			t.Fatalf("Retrieved alliance's ticker: (%s) does not equal original: (%s)",
-				allianceAsRetrieved.AllianceTicker, alliance.AllianceTicker)
-		}
-
-		if allianceAsRetrieved.AllianceName != alliance.AllianceName {
-			t.Fatalf("Retrieved alliance's name: (%s) does not equal original: (%s)",
-				allianceAsRetrieved.AllianceName, alliance.AllianceName)
-		}
+		So(allianceAsRetrieved.AllianceId, ShouldEqual, alliance.AllianceId)
+		So(allianceAsRetrieved.AllianceName, ShouldEqual, alliance.AllianceName)
+		So(allianceAsRetrieved.AllianceTicker, ShouldEqual, alliance.AllianceTicker)
 	})
 
-	t.Run("RetrieveByAllianceId_WhereAllianceDoesn'tExist", func(t *testing.T) {
+	Convey("RetrieveByAllianceId_WhereAllianceDoesn'tExist",t, func() {
 		var allianceAsRetrieved *model.Alliance
 
 		allianceAsRetrieved = AllianceRepo.FindByAllianceId(20000)
 
-		if allianceAsRetrieved != nil {
-			t.Error("Received an alliance when one wasn't expected")
-		}
+		So(allianceAsRetrieved, ShouldBeNil)
 	})
 
-	t.Run("Create", func(t *testing.T) {
+	Convey("Create", t, func() {
 		var allianceAsRetrieved model.Alliance
 		allianceAsCreated := model.Alliance{AllianceId: 2, AllianceName: "Test Alliacnce 2", AllianceTicker: "TST2"}
 
 		err := AllianceRepo.Save(&allianceAsCreated)
 
-		if err != nil {
-			t.Fatalf("Had an error while saving test alliance: %s", err)
-		}
+		So(err, ShouldBeNil)
 
 		allianceRepo.db.Where("alliance_id = 2").Find(&allianceAsRetrieved)
 
-		if allianceAsRetrieved.AllianceId != allianceAsCreated.AllianceId {
-			t.Fatalf("Retrieved alliance's alliance id: (%d) does not equal original: (%d)",
-				allianceAsRetrieved.AllianceId, allianceAsCreated.AllianceId)
-		}
-
-		if allianceAsRetrieved.AllianceTicker != allianceAsCreated.AllianceTicker {
-			t.Fatalf("Retrieved alliance's ticker: (%s) does not equal original: (%s)",
-				allianceAsRetrieved.AllianceTicker, allianceAsCreated.AllianceTicker)
-		}
-
-		if allianceAsRetrieved.AllianceName != allianceAsCreated.AllianceName {
-			t.Fatalf("Retrieved alliance's name: (%s) does not equal original: (%s)",
-				allianceAsRetrieved.AllianceName, allianceAsCreated.AllianceName)
-		}
+		So(allianceAsRetrieved.AllianceId, ShouldEqual, allianceAsCreated.AllianceId)
+		So(allianceAsRetrieved.AllianceName, ShouldEqual, allianceAsCreated.AllianceName)
+		So(allianceAsRetrieved.AllianceTicker, ShouldEqual, allianceAsCreated.AllianceTicker)
 	})
 
-	t.Run("CreateWithoutId", func(t *testing.T) {
+	Convey("CreateWithoutId", t, func() {
 		allianceAsCreated := model.Alliance{AllianceName: "Test Alliance No ID", AllianceTicker: "TST3"}
 
 		err := AllianceRepo.Save(&allianceAsCreated)
 
-		if err == nil {
-			t.Fatal("Expected error but got none.")
-		}
+		So(err, ShouldNotBeNil)
+		So(err.Error(), ShouldEqual, "Primary key must not be 0")
 	})
 
-	t.Run("FindAll", func(t *testing.T) {
+	Convey("FindAll", t, func() {
 		allianceAsCreated := model.Alliance{AllianceId: 2, AllianceName: "Test Alliance No ID", AllianceTicker: "TST3"}
 
 		//First lets create one, so we can get 2 back
 		err := AllianceRepo.Save(&allianceAsCreated)
 
-		if err != nil {
-			t.Fatal("Didn't expect an error here")
-		}
+		So(err, ShouldBeNil)
 
 		alliances := AllianceRepo.FindAll()
 
-		if len(alliances) != 2 {
-			t.Errorf("Expected 2 but found (%d)", len(alliances))
-		}
+		So(len(alliances), ShouldEqual, 2)
 	})
 
-	allianceRepo.db.Rollback()
+	Convey("Delete", t, func() {
+		var allianceAsRetrieved model.Alliance
+		var corporations []*model.Corporation
+		err := allianceRepo.Delete(alliance.AllianceId)
+
+		So(err, ShouldBeNil)
+
+		allianceRepo.db.Where("alliance_id = ?", alliance.AllianceId).Find(&allianceAsRetrieved)
+
+		So(allianceAsRetrieved, ShouldResemble, model.Alliance{})
+
+		DB.Where("alliance_id = ?", alliance.AllianceId).Find(&corporations)
+
+		So(len(corporations), ShouldEqual, 0)
+	})
+
+	Convey("Delete also deletes role links", t, func() {
+		var allianceAsRetrieved model.Alliance
+		var corporations []*model.Corporation
+
+		role := model.Role{
+			ChatServiceGroup: "some group",
+			RoleName: "some name",
+		}
+		RoleRepo.Save(&role)
+		AllianceRepo.Save(&alliance)
+
+		err := AccessRepo.SaveAllianceAndCorpRole(alliance.AllianceId, corporation.CorporationId, &role)
+
+		So(err, ShouldBeNil)
+
+		err = AccessRepo.SaveAllianceRole(alliance.AllianceId, &role)
+
+		So(err, ShouldBeNil)
+
+		err = AccessRepo.SaveAllianceCharacterLeadershipRole(alliance.AllianceId, characters[0].CharacterId, &role)
+
+		So(err, ShouldBeNil)
+
+		err = allianceRepo.Delete(alliance.AllianceId)
+
+		So(err, ShouldBeNil)
+
+		allianceRepo.db.Where("alliance_id = ?", alliance.AllianceId).Find(&allianceAsRetrieved)
+
+		So(allianceAsRetrieved, ShouldResemble, model.Alliance{})
+
+		DB.Where("alliance_id = ?", alliance.AllianceId).Find(&corporations)
+
+		So(len(corporations), ShouldEqual, 0)
+	})
+
 	SharedTearDown()
 }
 
-func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
-	alliance, corporation, _, _, _ := SharedSetup(t)
+func Test_CorporationsCRUD_ThroughREPO(t *testing.T) {
+	alliance, corporation, characters, _, _ := SharedSetup(t)
 	corpRepo := CorporationRepo.(*corporationRepository)
-	corpRepo.db = corpRepo.db.Begin()
+	//db := corpRepo.db
 
-	t.Run("RetrieveByCorporationId", func(t *testing.T) {
+	Convey("RetrieveByCorporationId", t, func() {
 		var corporationAsRetrieved *model.Corporation
 
 		corporationAsRetrieved = CorporationRepo.FindByCorporationId(corporation.CorporationId)
 
-		if corporationAsRetrieved.CorporationId != corporation.CorporationId {
-			t.Fatalf("Retrieved corporation's id: (%d) does not equal original: (%d)",
-				corporationAsRetrieved.CorporationId, corporation.CorporationId)
-		}
-
-		if corporationAsRetrieved.CorporationName != corporation.CorporationName {
-			t.Fatalf("Retrieved corporation's name: (%s) does not equal original: (%s)",
-				corporationAsRetrieved.CorporationName, corporation.CorporationName)
-		}
-
-		if corporationAsRetrieved.CorporationTicker != corporation.CorporationTicker {
-			t.Fatalf("Retrieved corporation's ticket: (%s) does not equal original: (%s)",
-				corporationAsRetrieved.CorporationTicker, corporation.CorporationTicker)
-		}
-
-		if *corporationAsRetrieved.AllianceId != *corporation.AllianceId {
-			t.Fatalf("Retrieved corporation's alliance id: (%+v) does not equal original: (%+v)",
-				*corporationAsRetrieved.AllianceId, *corporation.AllianceId)
-		}
-
-		if corporationAsRetrieved.Alliance.AllianceId != corporation.Alliance.AllianceId {
-			t.Fatalf("Retrieved corporation's alliance/alliance id: (%d) does not equal original: (%d)",
-				corporationAsRetrieved.Alliance.AllianceId, corporation.Alliance.AllianceId)
-		}
+		So(corporationAsRetrieved.CorporationId, ShouldEqual, corporation.CorporationId)
+		So(corporationAsRetrieved.CorporationName, ShouldEqual, corporation.CorporationName)
+		So(corporationAsRetrieved.CorporationTicker, ShouldEqual, corporation.CorporationTicker)
+		So(corporationAsRetrieved.AllianceId, ShouldResemble, corporation.AllianceId)
+		So(corporationAsRetrieved.Alliance.AllianceId, ShouldEqual, alliance.AllianceId)
+		So(corporationAsRetrieved.Alliance.AllianceName, ShouldEqual, alliance.AllianceName)
+		So(corporationAsRetrieved.Alliance.AllianceTicker, ShouldEqual, alliance.AllianceTicker)
 	})
 
-	t.Run("RetrieveByCorporationId_WhereCorporationDoesn'tExist", func(t *testing.T) {
+	Convey("RetrieveByCorporationId_WhereCorporationDoesn'tExist", t, func() {
 		var corporationAsRetrieved *model.Corporation
 
 		corporationAsRetrieved = CorporationRepo.FindByCorporationId(20000)
 
-		if corporationAsRetrieved != nil {
-			t.Error("Retrieved a corporation when one wasn't expected")
-		}
+		So(corporationAsRetrieved, ShouldBeNil)
 	})
 
-	t.Run("Create", func(t *testing.T) {
+	Convey("Create", t, func() {
 		var corporationAsRetrieved model.Corporation
 		corporationAsCreated := model.Corporation{
 			CorporationId:     2,
@@ -482,34 +493,17 @@ func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
 
 		err := CorporationRepo.Save(&corporationAsCreated)
 
-		if err != nil {
-			t.Fatalf("Had an error while saving the test corporation: %s", err)
-		}
+		So(err, ShouldBeNil)
 
 		corpRepo.db.Where("corporation_id = 2").Find(&corporationAsRetrieved)
 
-		if corporationAsRetrieved.CorporationId != corporationAsCreated.CorporationId {
-			t.Fatalf("Retrieved corporation's id: (%d) does not equal original: (%d)",
-				corporationAsRetrieved.CorporationId, corporationAsCreated.CorporationId)
-		}
-
-		if corporationAsRetrieved.CorporationName != corporationAsCreated.CorporationName {
-			t.Fatalf("Retrieved corporation's name: (%s) does not equal original: (%s)",
-				corporationAsRetrieved.CorporationName, corporationAsCreated.CorporationName)
-		}
-
-		if corporationAsRetrieved.CorporationTicker != corporationAsCreated.CorporationTicker {
-			t.Fatalf("Retrieved corporation's ticket: (%s) does not equal original: (%s)",
-				corporationAsRetrieved.CorporationTicker, corporation.CorporationTicker)
-		}
-
-		if *corporationAsRetrieved.AllianceId != *corporationAsCreated.AllianceId {
-			t.Fatalf("Retrieved corporation's alliance id: (%+v) does not equal original: (%+v)",
-				*corporationAsRetrieved.AllianceId, *corporationAsCreated.AllianceId)
-		}
+		So(corporationAsRetrieved.CorporationId, ShouldEqual, corporationAsCreated.CorporationId)
+		So(corporationAsRetrieved.CorporationName, ShouldEqual, corporationAsCreated.CorporationName)
+		So(corporationAsRetrieved.CorporationTicker, ShouldEqual, corporationAsCreated.CorporationTicker)
+		So(corporationAsRetrieved.AllianceId, ShouldResemble, corporationAsCreated.AllianceId)
 	})
 
-	t.Run("CreateWithoutId", func(t *testing.T) {
+	Convey("CreateWithoutId", t, func() {
 		corporationAsCreated := model.Corporation{
 			CorporationName:   "Test Corporation 2",
 			CorporationTicker: "TST2",
@@ -519,12 +513,11 @@ func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
 
 		err := CorporationRepo.Save(&corporationAsCreated)
 
-		if err == nil {
-			t.Fatal("Expected error but got none.")
-		}
+		So(err, ShouldNotBeNil)
+		So(err.Error(), ShouldEqual, "Primary key must not be 0")
 	})
 
-	t.Run("FindAll", func(t *testing.T) {
+	Convey("FindAll", t, func() {
 		corporationAsCreated := model.Corporation{
 			CorporationId:     2,
 			CorporationName:   "Test Corporation 2",
@@ -535,137 +528,200 @@ func TestCreateAndRetrieveCorporationsThroughREPO(t *testing.T) {
 
 		err := CorporationRepo.Save(&corporationAsCreated)
 
-		if err != nil {
-			t.Fatalf("Had an error while saving the test corporation: %s", err)
-		}
+		So(err, ShouldBeNil)
 
 		corporations := CorporationRepo.FindAll()
 
-		if len(corporations) != 2 {
-			t.Errorf("Expected 2 but found (%d)", len(corporations))
-		}
+		So(len(corporations), ShouldEqual, 2)
 	})
 
-	corpRepo.db.Rollback()
+	Convey("Delete", t, func() {
+		var corporationAsRetrieved model.Corporation
+		var charactersAsRetrieved []*model.Character
+
+		//Characters have to have a corporation and we're mandating that anything updating this database update characters first
+		//Create a new corp and move the characters there and THEN perform the operation
+		newCorp := model.Corporation{CorporationId: 10, CorporationName: "Your New Home", CorporationTicker: "YNH"}
+		corpRepo.Save(&newCorp)
+		corpRepo.db.Exec("update characters set corporation_id = ? where corporation_id = ?", newCorp.CorporationId, corporation.CorporationId)
+
+		err := corpRepo.Delete(corporation.CorporationId)
+
+		So(err, ShouldBeNil)
+
+		corpRepo.db.Where("corporation_id = ?", corporation.CorporationId).Find(&corporationAsRetrieved)
+
+		So(corporationAsRetrieved, ShouldResemble, model.Corporation{})
+
+		DB.Where("corporation_id = ?", corporation.CorporationId).Find(&charactersAsRetrieved)
+
+		So(len(charactersAsRetrieved), ShouldEqual, 0)
+	})
+
+	Convey("Delete also deletes role links", t, func() {
+		var corporationAsRetrieved model.Corporation
+
+		role := model.Role{
+			ChatServiceGroup: "some group",
+			RoleName: "some name",
+		}
+		RoleRepo.Save(&role)
+		CorporationRepo.Save(&corporation)
+
+		err := AccessRepo.SaveAllianceAndCorpRole(alliance.AllianceId, corporation.CorporationId, &role)
+
+		So(err, ShouldBeNil)
+
+		err = AccessRepo.SaveCorporationCharacterLeadershipRole(corporation.CorporationId, characters[0].CharacterId, &role)
+
+		So(err, ShouldBeNil)
+
+		err = AccessRepo.SaveCorporationRole(corporation.CorporationId, &role)
+
+		So(err, ShouldBeNil)
+
+		err = corpRepo.Delete(corporation.CorporationId)
+
+		So(err, ShouldBeNil)
+
+		corpRepo.db.Where("corporation_id = ?", alliance.AllianceId).Find(&corporationAsRetrieved)
+
+		So(corporationAsRetrieved, ShouldResemble, model.Corporation{})
+	})
+
 	SharedTearDown()
 }
 
-func TestCreateAndRetrieveCharactersThroughREPO(t *testing.T) {
-	_, _, character, _, _ := SharedSetup(t)
+func Test_CharactersCRUD_ThroughREPO(t *testing.T) {
+	alliance, corporation, character, _, _ := SharedSetup(t)
 	charRepo := CharacterRepo.(*characterRepository)
-	charRepo.db = charRepo.db.Begin()
 
-	t.Run("RetrieveByCharacterId", func(t *testing.T) {
+	Convey("RetrieveByCharacterId", t, func() {
 		characterAsRetrieved := CharacterRepo.FindByCharacterId(character[0].CharacterId)
-		corporationAsRetrieved := characterAsRetrieved.Corporation
 
-		if character[0].Corporation.CorporationId != corporationAsRetrieved.CorporationId {
-			t.Fatalf("Retrieved character's corporation (%d) doesn't equal original characters corporation: (%d)",
-				corporationAsRetrieved.CorporationId, character[0].Corporation.CorporationId)
-		}
-
-		if character[0].CorporationId != characterAsRetrieved.CorporationId {
-			t.Fatalf("Retrieved character's corporation id: (%d) doesn't equal origin characters corporation: (%d)",
-				characterAsRetrieved.CorporationId, character[0].CorporationId)
-		}
+		So(characterAsRetrieved.CharacterId, ShouldEqual, character[0].CharacterId)
+		So(characterAsRetrieved.CharacterName, ShouldEqual, character[0].CharacterName)
+		So(characterAsRetrieved.CorporationId, ShouldEqual, character[0].CorporationId)
 	})
 
-	t.Run("RetrieveByCharacterId_WhereCharacterDoesn'tExist", func(t *testing.T) {
+	Convey("RetrieveByCharacterId_WhereCharacterDoesn'tExist", t, func() {
 		characterAsRetrieved := CharacterRepo.FindByCharacterId(20000)
 
-		if characterAsRetrieved != nil {
-			t.Error("Received a character when none were expected")
-		}
+		So(characterAsRetrieved, ShouldBeNil)
 	})
 
-	t.Run("RetrieveByAuthenticationCode", func(t *testing.T) {
+	Convey("RetrieveByAuthenticationCode", t, func() {
 		characterAsRetrieved := CharacterRepo.FindByAutenticationCode("123456789")
 
-		if characterAsRetrieved.CharacterId != 1 {
-			t.Fatalf("Retrieved characters character id: (%d) doesn't equal original: (%d)",
-				characterAsRetrieved.CharacterId, character[0].CharacterId)
-		}
+		So(characterAsRetrieved.CharacterId, ShouldEqual, character[0].CharacterId)
+		So(characterAsRetrieved.CharacterName, ShouldEqual, character[0].CharacterName)
 	})
 
-	t.Run("RetrieveByAuthenticationCode_WhereAuthCodeDoesn'tExist", func(t *testing.T) {
+	Convey("RetrieveByAuthenticationCode_WhereAuthCodeDoesn'tExist", t, func() {
 		characterAsRetrieved := CharacterRepo.FindByAutenticationCode("fjksadljfahuoifsoda")
 
-		if characterAsRetrieved != nil {
-			t.Error("Retrieved a character when none were expected")
-		}
+		So(characterAsRetrieved, ShouldBeNil)
 	})
 
-	t.Run("Create", func(t *testing.T) {
+	Convey("Create", t, func() {
 		characterAsCreated := model.Character{CharacterId: 2, CorporationId: 1, Token: "123456", CharacterName: "Test Character 2"}
 		var characterAsRetrieved model.Character
 
 		err := CharacterRepo.Save(&characterAsCreated)
 
-		if err != nil {
-			t.Fatalf("Had an error saving the character: %s", err)
-		}
+		So(err, ShouldBeNil)
 
 		charRepo.db.Where("character_id = 2").Find(&characterAsRetrieved)
 
-		if characterAsRetrieved.CharacterId != characterAsCreated.CharacterId {
-			t.Fatalf("Retrieved characters id: (%d) does not equal the created one: (%d)",
-				characterAsRetrieved.CharacterId, characterAsCreated.CharacterId)
-		}
-
-		if characterAsRetrieved.CharacterName != characterAsCreated.CharacterName {
-			t.Fatalf("Retrieved characters name: (%s) does not equal the created one: (%s)",
-				characterAsRetrieved.CharacterName, characterAsCreated.CharacterName)
-		}
-
-		if characterAsRetrieved.Token != characterAsCreated.Token {
-			t.Fatalf("Retrieved characters token: (%s) does not equal the created one: (%s)",
-				characterAsRetrieved.Token, characterAsCreated.Token)
-		}
-
-		if characterAsRetrieved.CorporationId != characterAsCreated.CorporationId {
-			t.Fatalf("Retrieved characters corporation id: (%d) does not equal the created one: (%d)",
-				characterAsRetrieved.CorporationId, characterAsCreated.CorporationId)
-		}
+		So(characterAsRetrieved.CharacterId, ShouldEqual, characterAsCreated.CharacterId)
+		So(characterAsRetrieved.CharacterName, ShouldEqual, characterAsCreated.CharacterName)
+		So(characterAsRetrieved.CorporationId, ShouldEqual, characterAsCreated.CorporationId)
 	})
 
-	t.Run("Create_WithBadId", func(t *testing.T) {
+	Convey("Create_WithBadId", t, func() {
 		characterAsCreated := model.Character{CharacterId: 0, CorporationId: 1, Token: "123456", CharacterName: "Test Character 2"}
 
 		err := CharacterRepo.Save(&characterAsCreated)
 
-		if err == nil {
-			t.Fatal("Received nil when an error was expected")
-		}
-
-		if err.Error() != "Primary key must not be 0" {
-			t.Fatalf("Expected error text: (Primary key must not be 0) but received: (%s)", err)
-		}
+		So(err, ShouldNotBeNil)
+		So(err.Error(), ShouldEqual, "Primary key must not be 0")
 	})
 
-	t.Run("FindAll", func(t *testing.T) {
+	Convey("FindAll", t, func() {
 		characterAsCreated := model.Character{CharacterId: 2, CorporationId: 1, Token: "123456", CharacterName: "Test Character 2"}
 
 		err := CharacterRepo.Save(&characterAsCreated)
 
-		if err != nil {
-			t.Fatalf("Had an error saving the character: %s", err)
-		}
+		So(err, ShouldBeNil)
 
 		characters := CharacterRepo.FindAll()
 
-		if len(characters) != 3 {
-			t.Errorf("Expected 3 but found (%d)", len(characters))
-		}
+		So(len(characters), ShouldEqual, 3)
 	})
 
-	charRepo.db.Rollback()
+	Convey("Delete", t, func() {
+		var characterAsRetrieved model.Character
+		var authenticationCodeAsRetrieved model.AuthenticationCode
+		err := charRepo.Delete(character[0].CharacterId)
+
+		So(err, ShouldBeNil)
+
+		charRepo.db.Where("character_id = ?", character[0].CharacterId).Find(&characterAsRetrieved)
+
+		So(characterAsRetrieved, ShouldResemble, model.Character{})
+
+		charRepo.db.Where("character_id = ?", character[0].CharacterId).Find(&authenticationCodeAsRetrieved)
+
+		So(authenticationCodeAsRetrieved, ShouldResemble, model.AuthenticationCode{})
+
+		type userCharacterMap struct {
+			userId      int64
+			characterId int64
+		}
+
+		var ucm userCharacterMap
+		charRepo.db.Raw("select * from user_character_map where character_id = ?", character[0].CharacterId).Scan(&ucm)
+
+		So(ucm, ShouldResemble, userCharacterMap{})
+	})
+
+	Convey("Delete also deletes role links", t, func() {
+		var characterAsRetrieved model.Character
+
+		role := model.Role{
+			ChatServiceGroup: "some group",
+			RoleName: "some name",
+		}
+		RoleRepo.Save(&role)
+		CharacterRepo.Save(&character[0])
+
+		err := AccessRepo.SaveAllianceCharacterLeadershipRole(alliance.AllianceId, character[0].CharacterId, &role)
+
+		So(err, ShouldBeNil)
+
+		err = AccessRepo.SaveCorporationCharacterLeadershipRole(corporation.CorporationId, character[0].CharacterId, &role)
+
+		So(err, ShouldBeNil)
+
+		err = AccessRepo.SaveCharacterRole(character[0].CharacterId, &role)
+
+		So(err, ShouldBeNil)
+
+		err = charRepo.Delete(character[0].CharacterId)
+
+		So(err, ShouldBeNil)
+
+		charRepo.db.Where("character_id = ?", character[0].CharacterId).Find(&characterAsRetrieved)
+
+		So(characterAsRetrieved, ShouldResemble, model.Character{})
+	})
+
 	SharedTearDown()
 }
 
-func TestCreateAndRetrieveUsersThroughREPO(t *testing.T) {
+func Test_CreateAndRetrieve_UsersThroughREPO(t *testing.T) {
 	_, _, character, user, authCode := SharedSetup(t)
 	usersRepo := UserRepo.(*userRepository)
-	usersRepo.db = usersRepo.db.Begin()
 
 	t.Run("RetrieveByChatIdNoUser", func(t *testing.T) {
 		userAsRetrieved := UserRepo.FindByChatId("123456")
@@ -750,11 +806,10 @@ func TestCreateAndRetrieveUsersThroughREPO(t *testing.T) {
 		}
 	})
 
-	usersRepo.db.Rollback()
 	SharedTearDown()
 }
 
-func TestLinkCharacterToUserWithInvalidAuthCode(t *testing.T) {
+func Test_LinkCharacterToUser_WithInvalidAuthCode(t *testing.T) {
 	_, _, character, user, authCode := SharedSetup(t)
 
 	user2 := model.User{UserId: 2, ChatId: "12345678901"}
@@ -807,11 +862,7 @@ func TestLinkCharacterToUserWithInvalidAuthCode(t *testing.T) {
 	SharedTearDown()
 }
 
-//func TestLinkCharacterToUserWithUsedAuthCode(t *testing.T) {
-//	_, _, character, user, authCode := SharedSetup(t)
-//}
-
-func TestLinkCharacterToUserWithNonExistingCharacter(t *testing.T) {
+func Test_LinkCharacterToUser_WithNonExistingCharacter(t *testing.T) {
 	_, _, _, user, _ := SharedSetup(t)
 	usersRepo := UserRepo.(*userRepository)
 
@@ -823,10 +874,9 @@ func TestLinkCharacterToUserWithNonExistingCharacter(t *testing.T) {
 	}
 }
 
-func TestCreateRolesThroughREPO(t *testing.T) {
+func Test_RolesCRUD_ThroughREPO(t *testing.T) {
 	SharedSetup(t)
 	rolesRepo := RoleRepo.(*roleRepository)
-	rolesRepo.db = rolesRepo.db.Begin()
 
 	t.Run("CreateNoChatServiceGroup", func(t *testing.T) {
 		var roleAsRetrieved model.Role
@@ -899,14 +949,12 @@ func TestCreateRolesThroughREPO(t *testing.T) {
 		}
 	})
 
-	rolesRepo.db.Rollback()
 	SharedTearDown()
 }
 
-func TestCreateAndRetrieveAuthenticationCodesThroughREPO(t *testing.T) {
+func Test_CreateAndRetrieveAuthenticationCodes_ThroughREPO(t *testing.T) {
 	_, _, characters, _, _ := SharedSetup(t)
 	authCodeRepo := AuthenticationCodeRepo.(*authCodeRepository)
-	authCodeRepo.db = authCodeRepo.db.Begin()
 
 	t.Run("Create", func(t *testing.T) {
 		var authCodesAsRetrieved []model.AuthenticationCode
@@ -934,7 +982,6 @@ func TestCreateAndRetrieveAuthenticationCodesThroughREPO(t *testing.T) {
 		}
 	})
 
-	authCodeRepo.db.Rollback()
 	SharedTearDown()
 }
 
