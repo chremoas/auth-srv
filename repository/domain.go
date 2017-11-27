@@ -12,12 +12,14 @@ type AllianceRepository interface {
 	Save(alliance *model.Alliance) error
 	FindByAllianceId(allianceId int64) *model.Alliance
 	FindAll() []*model.Alliance
+	Delete(allianceId int64) error
 }
 
 type CorporationRepository interface {
 	Save(corporation *model.Corporation) error
 	FindByCorporationId(corporationId int64) *model.Corporation
 	FindAll() []*model.Corporation
+	Delete(corporationId int64) error
 }
 
 type CharacterRepository interface {
@@ -25,6 +27,7 @@ type CharacterRepository interface {
 	FindByCharacterId(characterId int64) *model.Character
 	FindByAutenticationCode(authCode string) *model.Character
 	FindAll() []*model.Character
+	Delete(characterId int64) error
 }
 
 type UserRepository interface {
@@ -109,6 +112,32 @@ func (all *allianceRepository) FindAll() []*model.Alliance {
 	return alliances
 }
 
+func (all *allianceRepository) Delete(allianceId int64) error {
+	err := all.db.Exec("update corporations set alliance_id = null where alliance_id = ?", allianceId).Error
+	if err != nil {
+		return err
+	}
+
+	err = all.db.Exec("delete from alliance_character_leadership_role_map where alliance_id = ?", allianceId).Error
+	if err != nil {
+		return err
+	}
+
+	err = all.db.Exec("delete from alliance_corporation_role_map where alliance_id = ?", allianceId).Error
+	if err != nil {
+		return err
+	}
+
+	err = all.db.Exec("delete from alliance_role_map where alliance_id = ?", allianceId).Error
+	if err != nil {
+		return err
+	}
+
+	result := all.db.Where("alliance_id = ?", allianceId).Delete(&model.Alliance{})
+
+	return result.Error
+}
+
 //END AllianceRepo accessor methods
 
 //BGN Corporation accessor methods
@@ -147,6 +176,25 @@ func (corp *corporationRepository) FindAll() []*model.Corporation {
 	corp.db.Find(&corporations)
 
 	return corporations
+}
+
+func (corp *corporationRepository) Delete(corporationId int64) error {
+	err := corp.db.Exec("delete from alliance_corporation_role_map where corporation_id = ?", corporationId).Error
+	if err != nil {
+		return err
+	}
+
+	err = corp.db.Exec("delete from corp_character_leadership_role_map where corporation_id = ?", corporationId).Error
+	if err != nil {
+		return err
+	}
+
+	err = corp.db.Exec("delete from corporation_role_map where corporation_id = ?", corporationId).Error
+	if err != nil {
+		return err
+	}
+
+	return corp.db.Where("corporation_id = ?", corporationId).Delete(&model.Corporation{}).Error
 }
 
 //END Corporation accessor methods
@@ -205,6 +253,43 @@ func (chr *characterRepository) FindAll() []*model.Character {
 	chr.db.Find(&characters)
 
 	return characters
+}
+
+func (chr *characterRepository) Delete(characterId int64) error {
+	tx := chr.db.Begin()
+	err := chr.db.Where("character_id = ?", characterId).Delete(&model.AuthenticationCode{}).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	err = chr.db.Exec("delete from user_character_map where character_id = ?", characterId).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	err = chr.db.Exec("delete from alliance_character_leadership_role_map where character_id = ?", characterId).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	err = chr.db.Exec("delete from corp_character_leadership_role_map where character_id = ?", characterId).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	err = chr.db.Exec("delete from character_role_map where character_id = ?", characterId).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	defer tx.Commit()
+
+	return chr.db.Where("character_id = ?", characterId).Delete(&model.Character{}).Error
 }
 
 //END Character accessor methods
@@ -306,6 +391,7 @@ func (rle *roleRepository) Delete(roleName string) error {
 	if result.RowsAffected == 0 {
 		return fmt.Errorf("No such role: %s", roleName)
 	}
+
 	return nil
 }
 

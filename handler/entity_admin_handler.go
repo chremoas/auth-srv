@@ -12,6 +12,7 @@ type EntityAdminHandler struct {
 	Client client.Client
 }
 
+//TODO: Do I really give a shit on delete whether or not the attributes besides id's are valid?
 func (eah *EntityAdminHandler) AllianceUpdate(ctx context.Context, request *abaeve_auth.AllianceAdminRequest, response *abaeve_auth.EntityAdminResponse) error {
 	if request.Alliance == nil {
 		response.Success = false
@@ -37,18 +38,25 @@ func (eah *EntityAdminHandler) AllianceUpdate(ctx context.Context, request *abae
 		return nil
 	}
 
-	alliance := model.Alliance{
-		AllianceId:     request.Alliance.Id,
-		AllianceName:   request.Alliance.Name,
-		AllianceTicker: request.Alliance.Ticker,
-	}
+	if request.Operation == abaeve_auth.EntityOperation_ADD_OR_UPDATE {
+		alliance := model.Alliance{
+			AllianceId:     request.Alliance.Id,
+			AllianceName:   request.Alliance.Name,
+			AllianceTicker: request.Alliance.Ticker,
+		}
 
-	err := repository.AllianceRepo.Save(&alliance)
-
-	if err != nil {
-		response.Success = false
-		response.ErrorText = "Error while saving: " + err.Error()
-		return nil
+		err := repository.AllianceRepo.Save(&alliance)
+		if err != nil {
+			//TODO: Find the consumers that may be expecting a non-error response and using the responses Success property and change that
+			response.Success = false
+			response.ErrorText = "Error while saving: " + err.Error()
+			return nil
+		}
+	} else if request.Operation == abaeve_auth.EntityOperation_REMOVE {
+		err := repository.AllianceRepo.Delete(request.Alliance.Id)
+		if err != nil {
+			return err
+		}
 	}
 
 	response.Success = true
@@ -80,29 +88,36 @@ func (eah *EntityAdminHandler) CorporationUpdate(ctx context.Context, request *a
 		return nil
 	}
 
-	corporation := model.Corporation{
-		CorporationId:     request.Corporation.Id,
-		CorporationName:   request.Corporation.Name,
-		CorporationTicker: request.Corporation.Ticker,
-	}
-
-	if request.Corporation.AllianceId != 0 {
-		alliance := repository.AllianceRepo.FindByAllianceId(request.Corporation.AllianceId)
-		if alliance == nil {
-			response.Success = false
-			response.ErrorText = "Invalid Alliance Id, Alliance doesn't exist"
-			return nil
-		} else {
-			corporation.AllianceId = &request.Corporation.AllianceId
+	if request.Operation == abaeve_auth.EntityOperation_ADD_OR_UPDATE {
+		corporation := model.Corporation{
+			CorporationId:     request.Corporation.Id,
+			CorporationName:   request.Corporation.Name,
+			CorporationTicker: request.Corporation.Ticker,
 		}
-	}
 
-	err := repository.CorporationRepo.Save(&corporation)
+		if request.Corporation.AllianceId != 0 {
+			alliance := repository.AllianceRepo.FindByAllianceId(request.Corporation.AllianceId)
+			if alliance == nil {
+				response.Success = false
+				response.ErrorText = "Invalid Alliance Id, Alliance doesn't exist"
+				return nil
+			} else {
+				corporation.AllianceId = &request.Corporation.AllianceId
+			}
+		}
 
-	if err != nil {
-		response.Success = false
-		response.ErrorText = "Error while saving: " + err.Error()
-		return nil
+		err := repository.CorporationRepo.Save(&corporation)
+		if err != nil {
+			//TODO: Find the consumers that may be expecting a non-error response and using the responses Success property and change that
+			response.Success = false
+			response.ErrorText = "Error while saving: " + err.Error()
+			return nil
+		}
+	} else if request.Operation == abaeve_auth.EntityOperation_REMOVE {
+		err := repository.CorporationRepo.Delete(request.Corporation.Id)
+		if err != nil {
+			return err
+		}
 	}
 
 	response.Success = true
@@ -134,25 +149,33 @@ func (eah *EntityAdminHandler) CharacterUpdate(ctx context.Context, request *aba
 		return nil
 	}
 
-	corporation := repository.CorporationRepo.FindByCorporationId(request.Character.CorporationId)
-	if corporation == nil {
-		response.Success = false
-		response.ErrorText = "Invalid Corporation Id, Corporation doesn't exist"
-		return nil
-	}
+	if request.Operation == abaeve_auth.EntityOperation_ADD_OR_UPDATE {
+		corporation := repository.CorporationRepo.FindByCorporationId(request.Character.CorporationId)
+		if corporation == nil {
+			response.Success = false
+			response.ErrorText = "Invalid Corporation Id, Corporation doesn't exist"
+			return nil
+		}
 
-	character := model.Character{
-		CharacterId:   request.Character.Id,
-		CharacterName: request.Character.Name,
-		CorporationId: request.Character.CorporationId,
-	}
+		character := model.Character{
+			CharacterId:   request.Character.Id,
+			CharacterName: request.Character.Name,
+			CorporationId: request.Character.CorporationId,
+		}
 
-	err := repository.CharacterRepo.Save(&character)
+		err := repository.CharacterRepo.Save(&character)
 
-	if err != nil {
-		response.Success = false
-		response.ErrorText = "Error while saving: " + err.Error()
-		return nil
+		if err != nil {
+			//TODO: Find the consumers that may be expecting a non-error response and using the responses Success property and change that
+			response.Success = false
+			response.ErrorText = "Error while saving: " + err.Error()
+			return nil
+		}
+	} else if request.Operation == abaeve_auth.EntityOperation_REMOVE {
+		err := repository.CharacterRepo.Delete(request.Character.Id)
+		if err != nil {
+			return err
+		}
 	}
 
 	response.Success = true
