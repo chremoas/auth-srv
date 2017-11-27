@@ -111,6 +111,16 @@ func SharedTearDown() {
 
 	tx := DB.Begin()
 
+	tx.Exec("delete from alliance_character_leadership_role_map")
+	tx.Exec("delete from alliance_corporation_role_map")
+	tx.Exec("delete from alliance_role_map")
+	tx.Exec("delete from character_role_map")
+	tx.Exec("delete from corp_character_leadership_role_map")
+	tx.Exec("delete from corporation_role_map")
+
+	tx.Commit()
+	tx = DB.Begin()
+
 	tx.Find(&authCodes)
 	tx.Find(&users)
 	tx.Find(&characters)
@@ -331,9 +341,8 @@ func Test_CreateAndRetrieve_ThroughGORM(t *testing.T) {
 }
 
 func Test_AlliancesCRUD_ThroughREPO(t *testing.T) {
-	alliance, _, _, _, _ := SharedSetup(t)
+	alliance, corporation, characters, _, _ := SharedSetup(t)
 	allianceRepo := AllianceRepo.(*allianceRepository)
-	allianceRepo.db = allianceRepo.db.Begin()
 
 	Convey("RetrieveByAllianceId", t, func() {
 		var allianceAsRetrieved *model.Alliance
@@ -406,15 +415,49 @@ func Test_AlliancesCRUD_ThroughREPO(t *testing.T) {
 		So(len(corporations), ShouldEqual, 0)
 	})
 
-	allianceRepo.db.Rollback()
+	Convey("Delete also deletes role links", t, func() {
+		var allianceAsRetrieved model.Alliance
+		var corporations []*model.Corporation
+
+		role := model.Role{
+			ChatServiceGroup: "some group",
+			RoleName: "some name",
+		}
+		RoleRepo.Save(&role)
+		AllianceRepo.Save(&alliance)
+
+		err := AccessRepo.SaveAllianceAndCorpRole(alliance.AllianceId, corporation.CorporationId, &role)
+
+		So(err, ShouldBeNil)
+
+		err = AccessRepo.SaveAllianceRole(alliance.AllianceId, &role)
+
+		So(err, ShouldBeNil)
+
+		err = AccessRepo.SaveAllianceCharacterLeadershipRole(alliance.AllianceId, characters[0].CharacterId, &role)
+
+		So(err, ShouldBeNil)
+
+		err = allianceRepo.Delete(alliance.AllianceId)
+
+		So(err, ShouldBeNil)
+
+		allianceRepo.db.Where("alliance_id = ?", alliance.AllianceId).Find(&allianceAsRetrieved)
+
+		So(allianceAsRetrieved, ShouldResemble, model.Alliance{})
+
+		DB.Where("alliance_id = ?", alliance.AllianceId).Find(&corporations)
+
+		So(len(corporations), ShouldEqual, 0)
+	})
+
 	SharedTearDown()
 }
 
 func Test_CorporationsCRUD_ThroughREPO(t *testing.T) {
-	alliance, corporation, _, _, _ := SharedSetup(t)
+	alliance, corporation, characters, _, _ := SharedSetup(t)
 	corpRepo := CorporationRepo.(*corporationRepository)
-	db := corpRepo.db
-	corpRepo.db = corpRepo.db.Begin()
+	//db := corpRepo.db
 
 	Convey("RetrieveByCorporationId", t, func() {
 		var corporationAsRetrieved *model.Corporation
@@ -501,8 +544,6 @@ func Test_CorporationsCRUD_ThroughREPO(t *testing.T) {
 		newCorp := model.Corporation{CorporationId: 10, CorporationName: "Your New Home", CorporationTicker: "YNH"}
 		corpRepo.Save(&newCorp)
 		corpRepo.db.Exec("update characters set corporation_id = ? where corporation_id = ?", newCorp.CorporationId, corporation.CorporationId)
-		corpRepo.db.Commit()
-		corpRepo.db = db.Begin()
 
 		err := corpRepo.Delete(corporation.CorporationId)
 
@@ -517,14 +558,43 @@ func Test_CorporationsCRUD_ThroughREPO(t *testing.T) {
 		So(len(charactersAsRetrieved), ShouldEqual, 0)
 	})
 
-	corpRepo.db.Rollback()
+	Convey("Delete also deletes role links", t, func() {
+		var corporationAsRetrieved model.Corporation
+
+		role := model.Role{
+			ChatServiceGroup: "some group",
+			RoleName: "some name",
+		}
+		RoleRepo.Save(&role)
+		CorporationRepo.Save(&corporation)
+
+		err := AccessRepo.SaveAllianceAndCorpRole(alliance.AllianceId, corporation.CorporationId, &role)
+
+		So(err, ShouldBeNil)
+
+		err = AccessRepo.SaveCorporationCharacterLeadershipRole(corporation.CorporationId, characters[0].CharacterId, &role)
+
+		So(err, ShouldBeNil)
+
+		err = AccessRepo.SaveCorporationRole(corporation.CorporationId, &role)
+
+		So(err, ShouldBeNil)
+
+		err = corpRepo.Delete(corporation.CorporationId)
+
+		So(err, ShouldBeNil)
+
+		corpRepo.db.Where("corporation_id = ?", alliance.AllianceId).Find(&corporationAsRetrieved)
+
+		So(corporationAsRetrieved, ShouldResemble, model.Corporation{})
+	})
+
 	SharedTearDown()
 }
 
 func Test_CharactersCRUD_ThroughREPO(t *testing.T) {
-	_, _, character, _, _ := SharedSetup(t)
+	alliance, corporation, character, _, _ := SharedSetup(t)
 	charRepo := CharacterRepo.(*characterRepository)
-	charRepo.db = charRepo.db.Begin()
 
 	Convey("RetrieveByCharacterId", t, func() {
 		characterAsRetrieved := CharacterRepo.FindByCharacterId(character[0].CharacterId)
@@ -615,14 +685,43 @@ func Test_CharactersCRUD_ThroughREPO(t *testing.T) {
 		So(ucm, ShouldResemble, userCharacterMap{})
 	})
 
-	charRepo.db.Rollback()
+	Convey("Delete also deletes role links", t, func() {
+		var characterAsRetrieved model.Character
+
+		role := model.Role{
+			ChatServiceGroup: "some group",
+			RoleName: "some name",
+		}
+		RoleRepo.Save(&role)
+		CharacterRepo.Save(&character[0])
+
+		err := AccessRepo.SaveAllianceCharacterLeadershipRole(alliance.AllianceId, character[0].CharacterId, &role)
+
+		So(err, ShouldBeNil)
+
+		err = AccessRepo.SaveCorporationCharacterLeadershipRole(corporation.CorporationId, character[0].CharacterId, &role)
+
+		So(err, ShouldBeNil)
+
+		err = AccessRepo.SaveCharacterRole(character[0].CharacterId, &role)
+
+		So(err, ShouldBeNil)
+
+		err = charRepo.Delete(character[0].CharacterId)
+
+		So(err, ShouldBeNil)
+
+		charRepo.db.Where("character_id = ?", character[0].CharacterId).Find(&characterAsRetrieved)
+
+		So(characterAsRetrieved, ShouldResemble, model.Character{})
+	})
+
 	SharedTearDown()
 }
 
 func Test_CreateAndRetrieve_UsersThroughREPO(t *testing.T) {
 	_, _, character, user, authCode := SharedSetup(t)
 	usersRepo := UserRepo.(*userRepository)
-	usersRepo.db = usersRepo.db.Begin()
 
 	t.Run("RetrieveByChatIdNoUser", func(t *testing.T) {
 		userAsRetrieved := UserRepo.FindByChatId("123456")
@@ -707,7 +806,6 @@ func Test_CreateAndRetrieve_UsersThroughREPO(t *testing.T) {
 		}
 	})
 
-	usersRepo.db.Rollback()
 	SharedTearDown()
 }
 
@@ -779,7 +877,6 @@ func Test_LinkCharacterToUser_WithNonExistingCharacter(t *testing.T) {
 func Test_RolesCRUD_ThroughREPO(t *testing.T) {
 	SharedSetup(t)
 	rolesRepo := RoleRepo.(*roleRepository)
-	rolesRepo.db = rolesRepo.db.Begin()
 
 	t.Run("CreateNoChatServiceGroup", func(t *testing.T) {
 		var roleAsRetrieved model.Role
@@ -852,14 +949,12 @@ func Test_RolesCRUD_ThroughREPO(t *testing.T) {
 		}
 	})
 
-	rolesRepo.db.Rollback()
 	SharedTearDown()
 }
 
 func Test_CreateAndRetrieveAuthenticationCodes_ThroughREPO(t *testing.T) {
 	_, _, characters, _, _ := SharedSetup(t)
 	authCodeRepo := AuthenticationCodeRepo.(*authCodeRepository)
-	authCodeRepo.db = authCodeRepo.db.Begin()
 
 	t.Run("Create", func(t *testing.T) {
 		var authCodesAsRetrieved []model.AuthenticationCode
@@ -887,7 +982,6 @@ func Test_CreateAndRetrieveAuthenticationCodes_ThroughREPO(t *testing.T) {
 		}
 	})
 
-	authCodeRepo.db.Rollback()
 	SharedTearDown()
 }
 
