@@ -10,4 +10,4 @@ before_install:
   - mysql -e 'CREATE DATABASE authservices;'
   - mysql -u root --default-character-set=utf8 authservices < sql/ddl.sql
 script:
-  - $HOME/gopath/bin/goveralls -service=travis-ci -ignore=proto/auth-srv.pb.go,main.go,mocks/repository_mocks.go,mocks/micro_client_mock.go,mocks/proto_mocks.go,mocks/accesses_mocks.go
+  - $HOME/gopath/bin/goveralls -service=travis-ci -ignore=proto/auth-srv.pb.go,main.go,mocks/repository_mocks.go,mocks/micro_client_mock.go,mocks/proto_mocks.go,mocks/accesses_mocks.go,proto/mocks/*,proto/mocks/matchers/*
