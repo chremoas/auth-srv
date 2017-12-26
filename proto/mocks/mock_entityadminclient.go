@@ -4,7 +4,7 @@
 package authsrv_mocks
 
 import (
-	context "context"
+	context "golang.org/x/net/context"
 	proto "github.com/chremoas/auth-srv/proto"
 	client "github.com/micro/go-micro/client"
 	pegomock "github.com/petergtz/pegomock"

@@ -3,7 +3,7 @@ package matchers
 import (
 	"reflect"
 	"github.com/petergtz/pegomock"
-	context "context"
+	context "golang.org/x/net/context"
 )
 
 func AnyContextContext() context.Context {
