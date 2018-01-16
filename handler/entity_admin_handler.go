@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/chremoas/auth-srv/model"
 	"github.com/chremoas/auth-srv/proto"
 	"github.com/chremoas/auth-srv/repository"
@@ -15,27 +16,19 @@ type EntityAdminHandler struct {
 //TODO: Do I really give a shit on delete whether or not the attributes besides id's are valid?
 func (eah *EntityAdminHandler) AllianceUpdate(ctx context.Context, request *abaeve_auth.AllianceAdminRequest, response *abaeve_auth.EntityAdminResponse) error {
 	if request.Alliance == nil {
-		response.Success = false
-		response.ErrorText = "Invalid Alliance (nil)"
-		return nil
+		return fmt.Errorf("Invalid Alliance (nil)")
 	}
 
 	if request.Alliance.Id == 0 {
-		response.Success = false
-		response.ErrorText = "Invalid Alliance Id (0/nil)"
-		return nil
+		return fmt.Errorf("Invalid Alliance Id (0/nil)")
 	}
 
 	if len(request.Alliance.Name) == 0 {
-		response.Success = false
-		response.ErrorText = "Invalid Alliance Name (empty/nil)"
-		return nil
+		return fmt.Errorf("Invalid Alliance Name (empty/nil)")
 	}
 
 	if len(request.Alliance.Ticker) == 0 {
-		response.Success = false
-		response.ErrorText = "Invalid Alliance Ticker (empty/nil)"
-		return nil
+		return fmt.Errorf("Invalid Alliance Ticker (empty/nil)")
 	}
 
 	if request.Operation == abaeve_auth.EntityOperation_ADD_OR_UPDATE {
@@ -48,9 +41,9 @@ func (eah *EntityAdminHandler) AllianceUpdate(ctx context.Context, request *abae
 		err := repository.AllianceRepo.Save(&alliance)
 		if err != nil {
 			//TODO: Find the consumers that may be expecting a non-error response and using the responses Success property and change that
-			response.Success = false
-			response.ErrorText = "Error while saving: " + err.Error()
-			return nil
+			// Should we append to this error or send the raw error back?
+			//response.ErrorText = "Error while saving: " + err.Error()
+			return err
 		}
 	} else if request.Operation == abaeve_auth.EntityOperation_REMOVE {
 		err := repository.AllianceRepo.Delete(request.Alliance.Id)
@@ -65,27 +58,19 @@ func (eah *EntityAdminHandler) AllianceUpdate(ctx context.Context, request *abae
 
 func (eah *EntityAdminHandler) CorporationUpdate(ctx context.Context, request *abaeve_auth.CorporationAdminRequest, response *abaeve_auth.EntityAdminResponse) error {
 	if request.Corporation == nil {
-		response.Success = false
-		response.ErrorText = "Invalid Corporation (nil)"
-		return nil
+		return fmt.Errorf("Invalid Corporation (nil)")
 	}
 
 	if request.Corporation.Id == 0 {
-		response.Success = false
-		response.ErrorText = "Invalid Corporation Id (0/nil)"
-		return nil
+		return fmt.Errorf("Invalid Corporation Id (0/nil)")
 	}
 
 	if len(request.Corporation.Name) == 0 {
-		response.Success = false
-		response.ErrorText = "Invalid Corporation Name (empty/nil)"
-		return nil
+		return fmt.Errorf("Invalid Corporation Name (empty/nil)")
 	}
 
 	if len(request.Corporation.Ticker) == 0 {
-		response.Success = false
-		response.ErrorText = "Invalid Corporation Ticker (empty/nil)"
-		return nil
+		return fmt.Errorf("Invalid Corporation Ticker (empty/nil)")
 	}
 
 	if request.Operation == abaeve_auth.EntityOperation_ADD_OR_UPDATE {
@@ -98,9 +83,7 @@ func (eah *EntityAdminHandler) CorporationUpdate(ctx context.Context, request *a
 		if request.Corporation.AllianceId != 0 {
 			alliance := repository.AllianceRepo.FindByAllianceId(request.Corporation.AllianceId)
 			if alliance == nil {
-				response.Success = false
-				response.ErrorText = "Invalid Alliance Id, Alliance doesn't exist"
-				return nil
+				return fmt.Errorf("Invalid Alliance Id, Alliance doesn't exist")
 			} else {
 				corporation.AllianceId = &request.Corporation.AllianceId
 			}
@@ -109,9 +92,9 @@ func (eah *EntityAdminHandler) CorporationUpdate(ctx context.Context, request *a
 		err := repository.CorporationRepo.Save(&corporation)
 		if err != nil {
 			//TODO: Find the consumers that may be expecting a non-error response and using the responses Success property and change that
-			response.Success = false
-			response.ErrorText = "Error while saving: " + err.Error()
-			return nil
+			// Should we append to this error or send the raw error back?
+			//response.ErrorText = "Error while saving: " + err.Error()
+			return err
 		}
 	} else if request.Operation == abaeve_auth.EntityOperation_REMOVE {
 		err := repository.CorporationRepo.Delete(request.Corporation.Id)
@@ -126,35 +109,25 @@ func (eah *EntityAdminHandler) CorporationUpdate(ctx context.Context, request *a
 
 func (eah *EntityAdminHandler) CharacterUpdate(ctx context.Context, request *abaeve_auth.CharacterAdminRequest, response *abaeve_auth.EntityAdminResponse) error {
 	if request.Character == nil {
-		response.Success = false
-		response.ErrorText = "Invalid Character (nil)"
-		return nil
+		return fmt.Errorf("Invalid Character (nil)")
 	}
 
 	if request.Character.Id == 0 {
-		response.Success = false
-		response.ErrorText = "Invalid Character Id (0/nil)"
-		return nil
+		return fmt.Errorf("Invalid Character Id (0/nil)")
 	}
 
 	if len(request.Character.Name) == 0 {
-		response.Success = false
-		response.ErrorText = "Invalid Character Name (empty/nil)"
-		return nil
+		return fmt.Errorf("Invalid Character Name (empty/nil)")
 	}
 
 	if request.Character.CorporationId == 0 {
-		response.Success = false
-		response.ErrorText = "Invalid Corporation Id (0/nil)"
-		return nil
+		return fmt.Errorf("Invalid Corporation Id (0/nil)")
 	}
 
 	if request.Operation == abaeve_auth.EntityOperation_ADD_OR_UPDATE {
 		corporation := repository.CorporationRepo.FindByCorporationId(request.Character.CorporationId)
 		if corporation == nil {
-			response.Success = false
-			response.ErrorText = "Invalid Corporation Id, Corporation doesn't exist"
-			return nil
+			return fmt.Errorf("Invalid Corporation Id, Corporation doesn't exist")
 		}
 
 		character := model.Character{
@@ -167,9 +140,9 @@ func (eah *EntityAdminHandler) CharacterUpdate(ctx context.Context, request *aba
 
 		if err != nil {
 			//TODO: Find the consumers that may be expecting a non-error response and using the responses Success property and change that
-			response.Success = false
-			response.ErrorText = "Error while saving: " + err.Error()
-			return nil
+			// Should we append to this error or send the raw error back?
+			//response.ErrorText = "Error while saving: " + err.Error()
+			return err
 		}
 	} else if request.Operation == abaeve_auth.EntityOperation_REMOVE {
 		err := repository.CharacterRepo.Delete(request.Character.Id)
@@ -184,22 +157,16 @@ func (eah *EntityAdminHandler) CharacterUpdate(ctx context.Context, request *aba
 
 func (eah *EntityAdminHandler) RoleUpdate(ctx context.Context, request *abaeve_auth.RoleAdminRequest, response *abaeve_auth.EntityAdminResponse) error {
 	if request.Role == nil {
-		response.Success = false
-		response.ErrorText = "Invalid Role (nil)"
-		return nil
+		return fmt.Errorf("Invalid Role (nil)")
 	}
 
 	if len(request.Role.RoleName) == 0 {
-		response.Success = false
-		response.ErrorText = "Invalid Role Name (0/nil)"
-		return nil
+		return fmt.Errorf("Invalid Role Name (0/nil)")
 	}
 
 	if request.Operation == abaeve_auth.EntityOperation_ADD_OR_UPDATE {
 		if len(request.Role.ChatServiceGroup) == 0 {
-			response.Success = false
-			response.ErrorText = "Invalid Chat Service Group (empty/nil)"
-			return nil
+			return fmt.Errorf("Invalid Chat Service Group (empty/nil)")
 		}
 	}
 
@@ -223,9 +190,7 @@ func (eah *EntityAdminHandler) RoleUpdate(ctx context.Context, request *abaeve_a
 	}
 
 	if err != nil {
-		response.Success = false
-		response.ErrorText = "Error: " + err.Error()
-		return nil
+		return err
 	}
 
 	response.Success = true

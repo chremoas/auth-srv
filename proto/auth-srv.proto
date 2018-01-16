@@ -160,7 +160,6 @@ message Alliance {
 
 message EntityAdminResponse {
     bool Success = 1;
-    string ErrorText = 2;
 }
 
 message AllianceAdminRequest {

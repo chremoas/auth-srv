@@ -5,9 +5,9 @@ import (
 	"github.com/chremoas/auth-srv/model"
 	"github.com/chremoas/auth-srv/proto"
 	"github.com/golang/mock/gomock"
+	. "github.com/smartystreets/goconvey/convey"
 	"golang.org/x/net/context"
 	"testing"
-	. "github.com/smartystreets/goconvey/convey"
 )
 
 var iamSorryDave string = "I'm sorry, Dave. I'm afraid I can't do that."
@@ -65,17 +65,12 @@ func TestEntityAdminHandler_AllianceUpdate_WithInvalidAlliance(t *testing.T) {
 	err := eah.AllianceUpdate(context.Background(), &request, &response)
 
 	if err != nil {
-		t.Errorf("Expected nil error but received: (%s)", err)
-	}
-
-	if response.Success {
+		expectedErrorText := "Invalid Alliance (nil)"
+		if err.Error() != expectedErrorText {
+			t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, err.Error())
+		}
+	} else {
 		t.Error("Received successful when unsuccessful was expected")
-	}
-
-	expectedErrorText := "Invalid Alliance (nil)"
-
-	if response.ErrorText != expectedErrorText {
-		t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, response.ErrorText)
 	}
 }
 
@@ -103,17 +98,13 @@ func TestEntityAdminHandler_AllianceUpdate_WithInvalidAllianceId(t *testing.T) {
 	err := eah.AllianceUpdate(context.Background(), &request, &response)
 
 	if err != nil {
-		t.Errorf("Expected nil error but received: (%s)", err)
-	}
+		expectedErrorText := "Invalid Alliance Id (0/nil)"
 
-	if response.Success {
+		if err.Error() != expectedErrorText {
+			t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, err.Error())
+		}
+	} else {
 		t.Error("Received successful when unsuccessful was expected")
-	}
-
-	expectedErrorText := "Invalid Alliance Id (0/nil)"
-
-	if response.ErrorText != expectedErrorText {
-		t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, response.ErrorText)
 	}
 }
 
@@ -142,17 +133,13 @@ func TestEntityAdminHandler_AllianceUpdate_WithInvalidAllianceName(t *testing.T)
 	err := eah.AllianceUpdate(context.Background(), &request, &response)
 
 	if err != nil {
-		t.Errorf("Expected nil error but received: (%s)", err)
-	}
+		expectedErrorText := "Invalid Alliance Name (empty/nil)"
 
-	if response.Success {
+		if err.Error() != expectedErrorText {
+			t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, err.Error())
+		}
+	} else {
 		t.Error("Received successful when unsuccessful was expected")
-	}
-
-	expectedErrorText := "Invalid Alliance Name (empty/nil)"
-
-	if response.ErrorText != expectedErrorText {
-		t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, response.ErrorText)
 	}
 }
 
@@ -181,17 +168,13 @@ func TestEntityAdminHandler_AllianceUpdate_WithInvalidAllianceTicker(t *testing.
 	err := eah.AllianceUpdate(context.Background(), &request, &response)
 
 	if err != nil {
-		t.Errorf("Expected nil error but received: (%s)", err)
-	}
+		expectedErrorText := "Invalid Alliance Ticker (empty/nil)"
 
-	if response.Success {
+		if err.Error() != expectedErrorText {
+			t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, err.Error())
+		}
+	} else {
 		t.Error("Received successful when unsuccessful was expected")
-	}
-
-	expectedErrorText := "Invalid Alliance Ticker (empty/nil)"
-
-	if response.ErrorText != expectedErrorText {
-		t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, response.ErrorText)
 	}
 }
 
@@ -221,17 +204,13 @@ func TestEntityAdminHandler_AllianceUpdate_WithSaveError(t *testing.T) {
 	err := eah.AllianceUpdate(context.Background(), &request, &response)
 
 	if err != nil {
-		t.Errorf("Expected nil error but received: (%s)", err)
-	}
+		expectedErrorText := "Error while saving: " + iamSorryDave
 
-	if response.Success {
+		if err.Error() != expectedErrorText {
+			t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, err.Error())
+		}
+	} else {
 		t.Error("Received successful when unsuccessful was expected")
-	}
-
-	expectedErrorText := "Error while saving: " + iamSorryDave
-
-	if response.ErrorText != expectedErrorText {
-		t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, response.ErrorText)
 	}
 }
 
@@ -251,7 +230,7 @@ func TestEntityAdminHandler_AllianceUpdate_Delete(t *testing.T) {
 		response := abaeve_auth.EntityAdminResponse{}
 		err := eah.AllianceUpdate(context.Background(), &abaeve_auth.AllianceAdminRequest{
 			Alliance: &abaeve_auth.Alliance{
-				Id: 1,
+				Id:     1,
 				Name:   "Test Alliance",
 				Ticker: "TSTA",
 			},
@@ -266,7 +245,7 @@ func TestEntityAdminHandler_AllianceUpdate_Delete(t *testing.T) {
 		response := abaeve_auth.EntityAdminResponse{}
 		err := eah.AllianceUpdate(context.Background(), &abaeve_auth.AllianceAdminRequest{
 			Alliance: &abaeve_auth.Alliance{
-				Id: 1,
+				Id:     1,
 				Name:   "Test Alliance",
 				Ticker: "TSTA",
 			},
@@ -281,7 +260,7 @@ func TestEntityAdminHandler_AllianceUpdate_Delete(t *testing.T) {
 		response := abaeve_auth.EntityAdminResponse{}
 		err := eah.AllianceUpdate(context.Background(), &abaeve_auth.AllianceAdminRequest{
 			Alliance: &abaeve_auth.Alliance{
-				Id: 1,
+				Id:     1,
 				Name:   "Test Alliance",
 				Ticker: "TSTA",
 			},
@@ -402,18 +381,15 @@ func TestEntityAdminHandler_CorporationUpdate_WithInvalidCorp(t *testing.T) {
 	err := eah.CorporationUpdate(context.Background(), &request, &response)
 
 	if err != nil {
-		t.Errorf("Expected nil error but received: (%s)", err)
-	}
+		expectedErrorText := "Invalid Corporation (nil)"
 
-	if response.Success {
+		if err.Error() != expectedErrorText {
+			t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, err.Error())
+		}
+	} else {
 		t.Error("Received successful when unsuccessful was expected")
 	}
 
-	expectedErrorText := "Invalid Corporation (nil)"
-
-	if response.ErrorText != expectedErrorText {
-		t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, response.ErrorText)
-	}
 }
 
 func TestEntityAdminHandler_CorporationUpdate_WithInvalidCorpId(t *testing.T) {
@@ -452,17 +428,13 @@ func TestEntityAdminHandler_CorporationUpdate_WithInvalidCorpId(t *testing.T) {
 	err := eah.CorporationUpdate(context.Background(), &request, &response)
 
 	if err != nil {
-		t.Errorf("Expected nil error but received: (%s)", err)
-	}
+		expectedErrorText := "Invalid Corporation Id (0/nil)"
 
-	if response.Success {
+		if err.Error() != expectedErrorText {
+			t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, err.Error())
+		}
+	} else {
 		t.Error("Received successful when unsuccessful was expected")
-	}
-
-	expectedErrorText := "Invalid Corporation Id (0/nil)"
-
-	if response.ErrorText != expectedErrorText {
-		t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, response.ErrorText)
 	}
 }
 
@@ -501,18 +473,15 @@ func TestEntityAdminHandler_CorporationUpdate_WithInvalidCorpName(t *testing.T) 
 	err := eah.CorporationUpdate(context.Background(), &request, &response)
 
 	if err != nil {
-		t.Errorf("Expected nil error but received: (%s)", err)
-	}
+		expectedErrorText := "Invalid Corporation Name (empty/nil)"
 
-	if response.Success {
+		if err.Error() != expectedErrorText {
+			t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, err.Error())
+		}
+	} else {
 		t.Error("Received successful when unsuccessful was expected")
 	}
 
-	expectedErrorText := "Invalid Corporation Name (empty/nil)"
-
-	if response.ErrorText != expectedErrorText {
-		t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, response.ErrorText)
-	}
 }
 
 func TestEntityAdminHandler_CorporationUpdate_WithInvalidCorpTicker(t *testing.T) {
@@ -550,18 +519,15 @@ func TestEntityAdminHandler_CorporationUpdate_WithInvalidCorpTicker(t *testing.T
 	err := eah.CorporationUpdate(context.Background(), &request, &response)
 
 	if err != nil {
-		t.Errorf("Expected nil error but received: (%s)", err)
-	}
+		expectedErrorText := "Invalid Corporation Ticker (empty/nil)"
 
-	if response.Success {
+		if err.Error() != expectedErrorText {
+			t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, err.Error())
+		}
+	} else {
 		t.Error("Received successful when unsuccessful was expected")
 	}
 
-	expectedErrorText := "Invalid Corporation Ticker (empty/nil)"
-
-	if response.ErrorText != expectedErrorText {
-		t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, response.ErrorText)
-	}
 }
 
 func TestEntityAdminHandler_CorporationUpdate_WithNonExistingAlliance(t *testing.T) {
@@ -595,18 +561,15 @@ func TestEntityAdminHandler_CorporationUpdate_WithNonExistingAlliance(t *testing
 	err := eah.CorporationUpdate(context.Background(), &request, &response)
 
 	if err != nil {
-		t.Errorf("Expected nil error but received: (%s)", err)
-	}
+		expectedErrorText := "Invalid Alliance Id, Alliance doesn't exist"
 
-	if response.Success {
+		if err.Error() != expectedErrorText {
+			t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, err.Error())
+		}
+	} else {
 		t.Error("Received successful when unsuccessful was expected")
 	}
 
-	expectedErrorText := "Invalid Alliance Id, Alliance doesn't exist"
-
-	if response.ErrorText != expectedErrorText {
-		t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, response.ErrorText)
-	}
 }
 
 func TestEntityAdminHandler_CorporationUpdate_WithSaveError(t *testing.T) {
@@ -646,17 +609,13 @@ func TestEntityAdminHandler_CorporationUpdate_WithSaveError(t *testing.T) {
 	err := eah.CorporationUpdate(context.Background(), &request, &response)
 
 	if err != nil {
-		t.Errorf("Expected nil error but received: (%s)", err)
-	}
+		expectedErrorText := "Error while saving: " + iamSorryDave
 
-	if response.Success {
+		if err.Error() != expectedErrorText {
+			t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, err.Error())
+		}
+	} else {
 		t.Error("Received successful when unsuccessful was expected")
-	}
-
-	expectedErrorText := "Error while saving: " + iamSorryDave
-
-	if response.ErrorText != expectedErrorText {
-		t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, response.ErrorText)
 	}
 }
 
@@ -675,7 +634,7 @@ func TestEntityAdminHandler_CorporationUpdate_Delete(t *testing.T) {
 		response := abaeve_auth.EntityAdminResponse{}
 		err := eah.CorporationUpdate(context.Background(), &abaeve_auth.CorporationAdminRequest{
 			Corporation: &abaeve_auth.Corporation{
-				Id: 1,
+				Id:     1,
 				Name:   "Test Corp",
 				Ticker: "TSTC",
 			},
@@ -690,7 +649,7 @@ func TestEntityAdminHandler_CorporationUpdate_Delete(t *testing.T) {
 		response := abaeve_auth.EntityAdminResponse{}
 		err := eah.CorporationUpdate(context.Background(), &abaeve_auth.CorporationAdminRequest{
 			Corporation: &abaeve_auth.Corporation{
-				Id: 1,
+				Id:     1,
 				Name:   "Test Corp",
 				Ticker: "TSTC",
 			},
@@ -769,17 +728,13 @@ func TestEntityAdminHandler_CharacterUpdate_WithNoChar(t *testing.T) {
 	err := eah.CharacterUpdate(context.Background(), &request, &response)
 
 	if err != nil {
-		t.Errorf("Expected nil error but received: (%s)", err)
-	}
+		expectedErrorText := "Invalid Character (nil)"
 
-	if response.Success {
+		if err.Error() != expectedErrorText {
+			t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, err.Error())
+		}
+	} else {
 		t.Error("Received successful when unsuccessful was expected")
-	}
-
-	expectedErrorText := "Invalid Character (nil)"
-
-	if response.ErrorText != expectedErrorText {
-		t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, response.ErrorText)
 	}
 }
 
@@ -815,17 +770,13 @@ func TestEntityAdminHandler_CharacterUpdate_WithInvalidCharId(t *testing.T) {
 	err := eah.CharacterUpdate(context.Background(), &request, &response)
 
 	if err != nil {
-		t.Errorf("Expected nil error but received: (%s)", err)
-	}
+		expectedErrorText := "Invalid Character Id (0/nil)"
 
-	if response.Success {
+		if err.Error() != expectedErrorText {
+			t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, err.Error())
+		}
+	} else {
 		t.Error("Received successful when unsuccessful was expected")
-	}
-
-	expectedErrorText := "Invalid Character Id (0/nil)"
-
-	if response.ErrorText != expectedErrorText {
-		t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, response.ErrorText)
 	}
 }
 
@@ -861,17 +812,13 @@ func TestEntityAdminHandler_CharacterUpdate_WithInvalidCharName(t *testing.T) {
 	err := eah.CharacterUpdate(context.Background(), &request, &response)
 
 	if err != nil {
-		t.Errorf("Expected nil error but received: (%s)", err)
-	}
+		expectedErrorText := "Invalid Character Name (empty/nil)"
 
-	if response.Success {
+		if err.Error() != expectedErrorText {
+			t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, err.Error())
+		}
+	} else {
 		t.Error("Received successful when unsuccessful was expected")
-	}
-
-	expectedErrorText := "Invalid Character Name (empty/nil)"
-
-	if response.ErrorText != expectedErrorText {
-		t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, response.ErrorText)
 	}
 }
 
@@ -908,17 +855,13 @@ func TestEntityAdminHandler_CharacterUpdate_WithInvalidCorpId(t *testing.T) {
 	err := eah.CharacterUpdate(context.Background(), &request, &response)
 
 	if err != nil {
-		t.Errorf("Expected nil error but received: (%s)", err)
-	}
+		expectedErrorText := "Invalid Corporation Id (0/nil)"
 
-	if response.Success {
+		if err.Error() != expectedErrorText {
+			t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, err.Error())
+		}
+	} else {
 		t.Error("Received successful when unsuccessful was expected")
-	}
-
-	expectedErrorText := "Invalid Corporation Id (0/nil)"
-
-	if response.ErrorText != expectedErrorText {
-		t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, response.ErrorText)
 	}
 }
 
@@ -954,17 +897,13 @@ func TestEntityAdminHandler_CharacterUpdate_WithCorpIdNotSet(t *testing.T) {
 	err := eah.CharacterUpdate(context.Background(), &request, &response)
 
 	if err != nil {
-		t.Errorf("Expected nil error but received: (%s)", err)
-	}
+		expectedErrorText := "Invalid Corporation Id (0/nil)"
 
-	if response.Success {
+		if err.Error() != expectedErrorText {
+			t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, err.Error())
+		}
+	} else {
 		t.Error("Received successful when unsuccessful was expected")
-	}
-
-	expectedErrorText := "Invalid Corporation Id (0/nil)"
-
-	if response.ErrorText != expectedErrorText {
-		t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, response.ErrorText)
 	}
 }
 
@@ -995,17 +934,13 @@ func TestEntityAdminHandler_CharacterUpdate_WithNonExistingCorp(t *testing.T) {
 	err := eah.CharacterUpdate(context.Background(), &request, &response)
 
 	if err != nil {
-		t.Errorf("Expected nil error but received: (%s)", err)
-	}
+		expectedErrorText := "Invalid Corporation Id, Corporation doesn't exist"
 
-	if response.Success {
+		if err.Error() != expectedErrorText {
+			t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, err.Error())
+		}
+	} else {
 		t.Error("Received successful when unsuccessful was expected")
-	}
-
-	expectedErrorText := "Invalid Corporation Id, Corporation doesn't exist"
-
-	if response.ErrorText != expectedErrorText {
-		t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, response.ErrorText)
 	}
 }
 
@@ -1042,17 +977,13 @@ func TestEntityAdminHandler_CharacterUpdate_WithSaveError(t *testing.T) {
 	err := eah.CharacterUpdate(context.Background(), &request, &response)
 
 	if err != nil {
-		t.Errorf("Expected nil error but received: (%s)", err)
-	}
+		expectedErrorText := "Error while saving: " + iamSorryDave
 
-	if response.Success {
+		if err.Error() != expectedErrorText {
+			t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, err.Error())
+		}
+	} else {
 		t.Error("Received successful when unsuccessful was expected")
-	}
-
-	expectedErrorText := "Error while saving: " + iamSorryDave
-
-	if response.ErrorText != expectedErrorText {
-		t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, response.ErrorText)
 	}
 }
 
@@ -1073,8 +1004,8 @@ func TestEntityAdminHandler_CharacterUpdate_Delete(t *testing.T) {
 		response := abaeve_auth.EntityAdminResponse{}
 		err := eah.CharacterUpdate(context.Background(), &abaeve_auth.CharacterAdminRequest{
 			Character: &abaeve_auth.Character{
-				Id: 1,
-				Name:   "Test Character",
+				Id:            1,
+				Name:          "Test Character",
 				CorporationId: 1,
 			},
 			Operation: abaeve_auth.EntityOperation_REMOVE,
@@ -1088,8 +1019,8 @@ func TestEntityAdminHandler_CharacterUpdate_Delete(t *testing.T) {
 		response := abaeve_auth.EntityAdminResponse{}
 		err := eah.CharacterUpdate(context.Background(), &abaeve_auth.CharacterAdminRequest{
 			Character: &abaeve_auth.Character{
-				Id: 1,
-				Name:   "Test Character",
+				Id:            1,
+				Name:          "Test Character",
 				CorporationId: 1,
 			},
 			Operation: abaeve_auth.EntityOperation_REMOVE,
@@ -1104,8 +1035,8 @@ func TestEntityAdminHandler_CharacterUpdate_Delete(t *testing.T) {
 		response := abaeve_auth.EntityAdminResponse{}
 		err := eah.CharacterUpdate(context.Background(), &abaeve_auth.CharacterAdminRequest{
 			Character: &abaeve_auth.Character{
-				Id: 1,
-				Name:   "Test Character",
+				Id:            1,
+				Name:          "Test Character",
 				CorporationId: 1,
 			},
 			Operation: abaeve_auth.EntityOperation_REMOVE,
@@ -1119,8 +1050,8 @@ func TestEntityAdminHandler_CharacterUpdate_Delete(t *testing.T) {
 		response := abaeve_auth.EntityAdminResponse{}
 		err := eah.CharacterUpdate(context.Background(), &abaeve_auth.CharacterAdminRequest{
 			Character: &abaeve_auth.Character{
-				Id: 1,
-				Name:   "Test Character",
+				Id:            1,
+				Name:          "Test Character",
 				CorporationId: 1,
 			},
 			Operation: abaeve_auth.EntityOperation_REMOVE,
