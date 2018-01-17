@@ -66,6 +66,7 @@ func TestEntityAdminHandler_AllianceUpdate_WithInvalidAlliance(t *testing.T) {
 
 	if err != nil {
 		expectedErrorText := "Invalid Alliance (nil)"
+
 		if err.Error() != expectedErrorText {
 			t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, err.Error())
 		}
@@ -204,10 +205,8 @@ func TestEntityAdminHandler_AllianceUpdate_WithSaveError(t *testing.T) {
 	err := eah.AllianceUpdate(context.Background(), &request, &response)
 
 	if err != nil {
-		expectedErrorText := "Error while saving: " + iamSorryDave
-
-		if err.Error() != expectedErrorText {
-			t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, err.Error())
+		if err.Error() != iamSorryDave {
+			t.Errorf("Expected: (%s) but received: (%s)", iamSorryDave, err.Error())
 		}
 	} else {
 		t.Error("Received successful when unsuccessful was expected")
@@ -609,10 +608,8 @@ func TestEntityAdminHandler_CorporationUpdate_WithSaveError(t *testing.T) {
 	err := eah.CorporationUpdate(context.Background(), &request, &response)
 
 	if err != nil {
-		expectedErrorText := "Error while saving: " + iamSorryDave
-
-		if err.Error() != expectedErrorText {
-			t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, err.Error())
+		if err.Error() != iamSorryDave {
+			t.Errorf("Expected: (%s) but received: (%s)", iamSorryDave, err.Error())
 		}
 	} else {
 		t.Error("Received successful when unsuccessful was expected")
@@ -977,10 +974,8 @@ func TestEntityAdminHandler_CharacterUpdate_WithSaveError(t *testing.T) {
 	err := eah.CharacterUpdate(context.Background(), &request, &response)
 
 	if err != nil {
-		expectedErrorText := "Error while saving: " + iamSorryDave
-
-		if err.Error() != expectedErrorText {
-			t.Errorf("Expected: (%s) but received: (%s)", expectedErrorText, err.Error())
+		if err.Error() != iamSorryDave {
+			t.Errorf("Expected: (%s) but received: (%s)", iamSorryDave, err.Error())
 		}
 	} else {
 		t.Error("Received successful when unsuccessful was expected")
