@@ -118,21 +118,6 @@ func (all *allianceRepository) Delete(allianceId int64) error {
 		return err
 	}
 
-	err = all.db.Exec("delete from alliance_character_leadership_role_map where alliance_id = ?", allianceId).Error
-	if err != nil {
-		return err
-	}
-
-	err = all.db.Exec("delete from alliance_corporation_role_map where alliance_id = ?", allianceId).Error
-	if err != nil {
-		return err
-	}
-
-	err = all.db.Exec("delete from alliance_role_map where alliance_id = ?", allianceId).Error
-	if err != nil {
-		return err
-	}
-
 	result := all.db.Where("alliance_id = ?", allianceId).Delete(&model.Alliance{})
 
 	return result.Error
@@ -179,21 +164,7 @@ func (corp *corporationRepository) FindAll() []*model.Corporation {
 }
 
 func (corp *corporationRepository) Delete(corporationId int64) error {
-	err := corp.db.Exec("delete from alliance_corporation_role_map where corporation_id = ?", corporationId).Error
-	if err != nil {
-		return err
-	}
-
-	err = corp.db.Exec("delete from corp_character_leadership_role_map where corporation_id = ?", corporationId).Error
-	if err != nil {
-		return err
-	}
-
-	err = corp.db.Exec("delete from corporation_role_map where corporation_id = ?", corporationId).Error
-	if err != nil {
-		return err
-	}
-
+	// FIX: This doesn't seem to have anything left now that that the role maps are gone. -brian
 	return corp.db.Where("corporation_id = ?", corporationId).Delete(&model.Corporation{}).Error
 }
 
@@ -264,24 +235,6 @@ func (chr *characterRepository) Delete(characterId int64) error {
 	}
 
 	err = chr.db.Exec("delete from user_character_map where character_id = ?", characterId).Error
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	err = chr.db.Exec("delete from alliance_character_leadership_role_map where character_id = ?", characterId).Error
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	err = chr.db.Exec("delete from corp_character_leadership_role_map where character_id = ?", characterId).Error
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	err = chr.db.Exec("delete from character_role_map where character_id = ?", characterId).Error
 	if err != nil {
 		tx.Rollback()
 		return err

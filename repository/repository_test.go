@@ -111,16 +111,6 @@ func SharedTearDown() {
 
 	tx := DB.Begin()
 
-	tx.Exec("delete from alliance_character_leadership_role_map")
-	tx.Exec("delete from alliance_corporation_role_map")
-	tx.Exec("delete from alliance_role_map")
-	tx.Exec("delete from character_role_map")
-	tx.Exec("delete from corp_character_leadership_role_map")
-	tx.Exec("delete from corporation_role_map")
-
-	tx.Commit()
-	tx = DB.Begin()
-
 	tx.Find(&authCodes)
 	tx.Find(&users)
 	tx.Find(&characters)

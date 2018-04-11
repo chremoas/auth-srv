@@ -1,3 +1,4 @@
+/* FIX: Many references to role maps here. Need to fix. -brian */
 /*
 Test scenario
 'Rando Corp 1 Member' has the following roles
@@ -94,126 +95,6 @@ INSERT INTO user_character_map (user_id, character_id) VALUES
 /*</editor-fold>*/
 
 /*<editor-fold desc="Role Mappings">*/
-INSERT INTO alliance_corporation_role_map (alliance_id, corporation_id, role_id) VALUES
-  (
-    (SELECT alliance_id
-     FROM alliances
-     WHERE alliance_name = 'Rando Alliance 1'),
-    (SELECT corporation_id
-     FROM corporations
-     WHERE corporation_name = 'Rando Corp 1'),
-    (SELECT role_id
-     FROM roles
-     WHERE role_name = 'RANDO_ROLE_1')
-  );
-INSERT INTO alliance_corporation_role_map (alliance_id, corporation_id, role_id) VALUES
-  (
-    (SELECT alliance_id
-     FROM alliances
-     WHERE alliance_name = 'Rando Alliance 1'),
-    (SELECT corporation_id
-     FROM corporations
-     WHERE corporation_name = 'Rando Corp 1'),
-    (SELECT role_id
-     FROM roles
-     WHERE role_name = 'RANDO_ROLE_2')
-  );
-INSERT INTO alliance_corporation_role_map (alliance_id, corporation_id, role_id) VALUES
-  (
-    (SELECT alliance_id
-     FROM alliances
-     WHERE alliance_name = 'Rando Alliance 1'),
-    (SELECT corporation_id
-     FROM corporations
-     WHERE corporation_name = 'Rando Corp 3'),
-    (SELECT role_id
-     FROM roles
-     WHERE role_name = 'RANDO_ROLE_3')
-  );
-INSERT INTO alliance_corporation_role_map (alliance_id, corporation_id, role_id) VALUES
-  (
-    (SELECT alliance_id
-     FROM alliances
-     WHERE alliance_name = 'Rando Alliance 1'),
-    (SELECT corporation_id
-     FROM corporations
-     WHERE corporation_name = 'Rando Corp 2'),
-    (SELECT role_id
-     FROM roles
-     WHERE role_name = 'RANDO_ROLE_6')
-  );
-INSERT INTO alliance_role_map (role_id, alliance_id) VALUES
-  (
-    (SELECT role_id
-     FROM roles
-     WHERE role_name = 'RANDO_ALLIANCE_ROLE'),
-    (SELECT alliance_id
-     FROM alliances
-     WHERE alliance_name = 'Rando Alliance 1')
-  );
-INSERT INTO corporation_role_map (role_id, corporation_id) VALUES
-  (
-    (SELECT role_id
-     FROM roles
-     WHERE role_name = 'RANDO_ROLE_4'),
-    (SELECT corporation_id
-     FROM corporations
-     WHERE corporation_name = 'Rando Corp 1')
-  );
-INSERT INTO corporation_role_map (role_id, corporation_id) VALUES
-  (
-    (SELECT role_id
-     FROM roles
-     WHERE role_name = 'RANDO_ROLE_5'),
-    (SELECT corporation_id
-     FROM corporations
-     WHERE corporation_name = 'Rando Corp 2')
-  );
-INSERT INTO character_role_map (character_id, role_id) VALUES
-  (
-    (SELECT character_id
-     FROM characters
-     WHERE character_name = 'Rando Corp 1 Member'),
-    (SELECT role_id
-     FROM roles
-     WHERE role_name = 'SUPER_AWESOME_ADMIN')
-  );
-INSERT INTO alliance_character_leadership_role_map (alliance_id, character_id, role_id) VALUES
-  (
-    (SELECT alliance_id
-     FROM alliances
-     WHERE alliance_name = 'Rando Alliance 1'),
-    (SELECT character_id
-     FROM characters
-     WHERE character_name = 'Rando Corp 1 Member'),
-    (SELECT role_id
-     FROM roles
-     WHERE role_name = 'RANDO_ALLIANCE_1_LEADERSHIP_ROLE')
-  );
-INSERT INTO alliance_character_leadership_role_map (alliance_id, character_id, role_id) VALUES
-  (
-    (SELECT alliance_id
-     FROM alliances
-     WHERE alliance_name = 'Rando Alliance 1'),
-    (SELECT character_id
-     FROM characters
-     WHERE character_name = 'Rando Corp 2 Member'),
-    (SELECT role_id
-     FROM roles
-     WHERE role_name = 'RANDO_ALLIANCE_1_LEADERSHIP_ROLE')
-  );
-INSERT INTO corp_character_leadership_role_map (corporation_id, character_id, role_id) VALUES
-  (
-    (SELECT corporation_id
-     FROM corporations
-     WHERE corporation_name = 'Rando Corp 2'),
-    (SELECT character_id
-     FROM characters
-     WHERE character_name = 'Rando Corp 2 Member'),
-    (SELECT role_id
-     FROM roles
-     WHERE role_name = 'RANDO_CORP_1_LEADERSHIP_ROLE')
-  );
 /*</editor-fold>*/
 
 SELECT
@@ -292,13 +173,7 @@ Starting over
 /*
  */
 DELETE FROM authentication_codes;
-DELETE FROM alliance_corporation_role_map;
-DELETE FROM alliance_role_map;
-DELETE FROM corporation_role_map;
-DELETE FROM character_role_map;
 DELETE FROM user_character_map;
-DELETE FROM alliance_character_leadership_role_map;
-DELETE FROM corp_character_leadership_role_map;
 DELETE FROM characters;
 DELETE FROM corporations;
 DELETE FROM alliances;
