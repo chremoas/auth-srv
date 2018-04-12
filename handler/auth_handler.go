@@ -132,12 +132,6 @@ func (ah *AuthHandler) Confirm(context context.Context, request *abaeve_auth.Aut
 		return errors.New("Error linking user: " + err.Error())
 	}
 
-	roles, err := repository.AccessRepo.FindByChatId(user.ChatId)
-
-	if err != nil {
-		return errors.New("Error finding roles: " + err.Error())
-	}
-
 	response.Success = true
 	response.CharacterName = character.CharacterName
 
