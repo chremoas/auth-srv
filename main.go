@@ -13,10 +13,17 @@ import (
 
 var version = "1.0.0"
 var name = "auth"
-var logger *zap.Logger
 
 func main() {
 	service := config.NewService(version, "srv", name, initialize)
+
+	// TODO pick stuff up from the config
+	logger, err := zap.NewProduction()
+	if err != nil {
+		panic(err)
+	}
+	defer logger.Sync()
+	logger.Info("Initialized logger")
 
 	abaeve_auth.RegisterUserAuthenticationHandler(service.Server(), &handler.AuthHandler{service.Client(), logger})
 	abaeve_auth.RegisterEntityQueryHandler(service.Server(), &handler.EntityQueryHandler{service.Client(), logger})
@@ -30,16 +37,6 @@ func main() {
 }
 
 func initialize(configuration *config.Configuration) error {
-	var err error
-
-	// TODO pick stuff up from the config
-	logger, err = zap.NewProduction()
-	if err != nil {
-		return err
-	}
-	defer logger.Sync()
-	logger.Info("Initialized logger")
-
 	connectionString, err := configuration.NewConnectionString()
 	if err != nil {
 		return err
