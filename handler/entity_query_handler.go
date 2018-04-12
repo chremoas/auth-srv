@@ -6,6 +6,7 @@ import (
 	"github.com/micro/go-micro/client"
 	"golang.org/x/net/context"
 	"go.uber.org/zap"
+	"fmt"
 )
 
 type EntityQueryHandler struct {
@@ -61,6 +62,17 @@ func (eqh *EntityQueryHandler) GetCorporations(ctx context.Context, request *aba
 
 func (eqh *EntityQueryHandler) GetCharacters(ctx context.Context, request *abaeve_auth.EntityQueryRequest, response *abaeve_auth.CharactersResponse) error {
 	eqh.Logger.Info("Call to GetCharacters()")
+
+	// This is just for testing because I know auth-esi-poller calls this endpoint
+	foo, err := repository.AccessRepo.GetMembership()
+	if err != nil {
+		fmt.Printf("err: %+v\n", err)
+	}
+	for f := range foo {
+		fmt.Printf("foo: %+v\n", foo[f].AllianceName)
+	}
+	// End testing
+
 
 	dbCharacters := repository.CharacterRepo.FindAll()
 	respCharacters := []*abaeve_auth.Character{}

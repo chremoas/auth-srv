@@ -2,27 +2,12 @@
 package repository
 
 import (
-	"errors"
-	"github.com/chremoas/auth-srv/model"
 	"github.com/jmoiron/sqlx"
 )
 
 type AccessesRepository interface {
-	SaveAllianceAndCorpRole(allianceId, corporationId int64, role *model.Role) error
-	SaveAllianceRole(allianceId int64, role *model.Role) error
-	SaveCorporationRole(corporationId int64, role *model.Role) error
-	SaveCharacterRole(characterId int64, role *model.Role) error
-	SaveAllianceCharacterLeadershipRole(allianceId, characterId int64, role *model.Role) error
-	SaveCorporationCharacterLeadershipRole(corporationId, characterId int64, role *model.Role) error
-
-	DeleteAllianceAndCorpRole(allianceId, corporationId int64, role *model.Role) (int64, error)
-	DeleteAllianceRole(allianceId int64, role *model.Role) (int64, error)
-	DeleteCorporationRole(corporationId int64, role *model.Role) (int64, error)
-	DeleteCharacterRole(characterId int64, role *model.Role) (int64, error)
-	DeleteAllianceCharacterLeadershipRole(allianceId, characterId int64, role *model.Role) (int64, error)
-	DeleteCorporationCharacterLeadershipRole(corporationId, characterId int64, role *model.Role) (int64, error)
-
 	FindByChatId(chatId string) ([]string, error)
+	GetMembership() (members []membership, err error)
 }
 
 type accessesRepo struct {
@@ -101,165 +86,6 @@ SELECT
 WHERE user.chat_id = ?
 `
 
-const (
-	allianceCorpInsert = "insert into alliance_corporation_role_map (alliance_id, corporation_id, role_id) values (?, ?, ?)"
-
-	allianceCorpDelete = "delete from alliance_corporation_role_map where alliance_id = ? and corporation_id = ? and role_id = ?"
-
-	allianceInsert = "insert into alliance_role_map (alliance_id, role_id) values (?, ?)"
-
-	allianceDelete = "delete from alliance_role_map where alliance_id = ? and role_id = ?"
-
-	corporationInsert = "insert into corporation_role_map (corporation_id, role_id) values (?, ?)"
-
-	corporationDelete = "delete from corporation_role_map where corporation_id = ? and role_id = ?"
-
-	characterInsert = "insert into character_role_map (character_id, role_id) values (?, ?)"
-
-	characterDelete = "delete from character_role_map where character_id = ? and role_id = ?"
-
-	characterAllianceInsert = "insert into alliance_character_leadership_role_map (alliance_id, character_id, role_id) values(?, ?, ?)"
-
-	characterAllianceDelete = "delete from alliance_character_leadership_role_map where alliance_id = ? and character_id = ? and role_id = ?"
-
-	characterCorpInsert = "insert into corp_character_leadership_role_map (corporation_id, character_id, role_id) values (?, ?, ?)"
-
-	characterCorpDelete = "delete from corp_character_leadership_role_map where corporation_id = ? and character_id = ? and role_id = ?"
-)
-
-// Saves a role that is linked to an alliance AND a corporation
-// alliance_coporation_role_map table
-func (acc *accessesRepo) SaveAllianceAndCorpRole(allianceId, corporationId int64, role *model.Role) error {
-	_, err := acc.doubleEntityRoleQuery(allianceId, corporationId, role.RoleId, allianceCorpInsert)
-	return err
-}
-
-// Saves a role that is linked to an alliance
-// alliance_role_map table
-func (acc *accessesRepo) SaveAllianceRole(allianceId int64, role *model.Role) error {
-	_, err := acc.singleEntityRoleQuery(allianceId, role.RoleId, allianceInsert)
-	return err
-}
-
-// Saves a role that is linked to a corporation
-// corporation_role_map table
-func (acc *accessesRepo) SaveCorporationRole(corporationId int64, role *model.Role) error {
-	_, err := acc.singleEntityRoleQuery(corporationId, role.RoleId, corporationInsert)
-	return err
-}
-
-// Saves a role that is linked to a character
-// character_role_map table
-func (acc *accessesRepo) SaveCharacterRole(characterId int64, role *model.Role) error {
-	_, err := acc.singleEntityRoleQuery(characterId, role.RoleId, characterInsert)
-	return err
-}
-
-// Saves a role that is linked to an alliance and a character in an alliance leadership position
-// alliance_character_leadership_role_map table
-func (acc *accessesRepo) SaveAllianceCharacterLeadershipRole(allianceId, characterId int64, role *model.Role) error {
-	_, err := acc.doubleEntityRoleQuery(allianceId, characterId, role.RoleId, characterAllianceInsert)
-	return err
-}
-
-// Saves a role that is linked to a corporation and a character in a corporation leadership position
-// corp_character_leadership_role_map table
-func (acc *accessesRepo) SaveCorporationCharacterLeadershipRole(corporationId, characterId int64, role *model.Role) error {
-	_, err := acc.doubleEntityRoleQuery(corporationId, characterId, role.RoleId, characterCorpInsert)
-	return err
-}
-
-func (acc *accessesRepo) DeleteAllianceAndCorpRole(allianceId, corporationId int64, role *model.Role) (int64, error) {
-	return acc.doubleEntityRoleQuery(allianceId, corporationId, role.RoleId, allianceCorpDelete)
-}
-
-func (acc *accessesRepo) DeleteAllianceRole(allianceId int64, role *model.Role) (int64, error) {
-	return acc.singleEntityRoleQuery(allianceId, role.RoleId, allianceDelete)
-}
-
-func (acc *accessesRepo) DeleteCorporationRole(corporationId int64, role *model.Role) (int64, error) {
-	return acc.singleEntityRoleQuery(corporationId, role.RoleId, corporationDelete)
-}
-
-func (acc *accessesRepo) DeleteCharacterRole(characterId int64, role *model.Role) (int64, error) {
-	return acc.singleEntityRoleQuery(characterId, role.RoleId, characterDelete)
-}
-
-func (acc *accessesRepo) DeleteAllianceCharacterLeadershipRole(allianceId, characterId int64, role *model.Role) (int64, error) {
-	return acc.doubleEntityRoleQuery(allianceId, characterId, role.RoleId, characterAllianceDelete)
-}
-
-func (acc *accessesRepo) DeleteCorporationCharacterLeadershipRole(corporationId, characterId int64, role *model.Role) (int64, error) {
-	return acc.doubleEntityRoleQuery(corporationId, characterId, role.RoleId, characterCorpDelete)
-}
-
-// Will take the two entityId's, roleId and query (as long as it follows the insert into table (entityOneId, entityTwoId, roleId) values (?, ?, ?))
-// flow and execute it in a transaction returning any error that happened.
-func (acc *accessesRepo) doubleEntityRoleQuery(entityOneId, entityTwoId, roleId int64, query string) (int64, error) {
-	tx, err := acc.db.Begin()
-	if err != nil {
-		return 0, errors.New("Error opening a transaction: " + err.Error())
-	}
-
-	stmt, err := tx.Prepare(query)
-	if err != nil {
-		tx.Rollback()
-		return 0, errors.New("Error during prepare: " + err.Error())
-	}
-
-	result, err := stmt.Exec(entityOneId, entityTwoId, roleId)
-	if err != nil {
-		tx.Rollback()
-		return 0, errors.New("Error during exec: " + err.Error())
-	}
-
-	rows, _ := result.RowsAffected()
-
-	if rows != int64(1) {
-		tx.Rollback()
-		return rows, errors.New("inserted more than one record")
-	}
-
-	stmt.Close()
-	tx.Commit()
-
-	return rows, nil
-}
-
-// Will take the entityId, roleId and query (as long as it follows the insert into table (entityId, roleId) values (?, ?))
-// flow and execute it in a transaction returning any error that happened.
-func (acc *accessesRepo) singleEntityRoleQuery(entityId, roleId int64, query string) (int64, error) {
-	tx, err := acc.db.Begin()
-	if err != nil {
-		return 0, errors.New("Error opening a transaction: " + err.Error())
-	}
-
-	stmt, err := tx.Prepare(query)
-	if err != nil {
-		tx.Rollback()
-		return 0, errors.New("Error during prepare: " + err.Error())
-	}
-
-	result, err := stmt.Exec(entityId, roleId)
-	if err != nil {
-		tx.Rollback()
-		return 0, errors.New("Error during exec: " + err.Error())
-	}
-
-	rows, _ := result.RowsAffected()
-
-	if rows != int64(1) {
-		tx.Rollback()
-		return rows, errors.New("inserted more than one record")
-	}
-
-	stmt.Close()
-	tx.Commit()
-
-	return rows, nil
-}
-
-// Will be the main usage in anything automated.  This method will lookup all the available roles for the given
 // Chat user id and return them as a map[string]string where the key is the role and the value is the chat
 // group to apply.
 func (acc *accessesRepo) FindByChatId(chatId string) ([]string, error) {
@@ -287,4 +113,48 @@ func (acc *accessesRepo) FindByChatId(chatId string) ([]string, error) {
 	statement.Close()
 
 	return roles, nil
+}
+
+var getMembership = `
+SELECT a.alliance_name
+    , a.alliance_ticker
+    , c.corporation_name
+    , c.corporation_ticker
+    , u.chat_id
+FROM corporations c
+INNER JOIN alliances a
+    ON c.alliance_id = a.alliance_id
+INNER JOIN characters ch
+    ON c.corporation_id = ch.corporation_id
+INNER JOIN user_character_map ucm
+    ON ch.character_id = ucm.character_id
+INNER JOIN users u
+    ON u.user_id = ucm.user_id;
+`
+
+type membership struct {
+	AllianceName   string `db:"alliance_name"`
+	AllianceTicker string `db:"alliance_ticker"`
+	CorpName       string `db:"corporation_name"`
+	CorpTicker     string `db:"corporation_ticker"`
+	ChatId         string `db:"chat_id"`
+}
+
+func (acc *accessesRepo) GetMembership() (members []membership, err error) {
+	rows, err := acc.db.Queryx(getMembership)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for idx := 0; rows.Next(); idx++ {
+		var m membership
+
+		if err = rows.StructScan(&m); err != nil {
+			return nil, err
+		}
+		members = append(members, m)
+	}
+
+	return members, nil
 }
