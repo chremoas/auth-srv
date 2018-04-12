@@ -8,6 +8,7 @@ import (
 	"github.com/chremoas/auth-srv/proto"
 	"github.com/chremoas/auth-srv/repository"
 	"github.com/micro/go-micro/client"
+	"go.uber.org/zap"
 	"golang.org/x/net/context"
 )
 
@@ -21,9 +22,12 @@ func (ae *authError) Error() string {
 
 type AuthHandler struct {
 	Client client.Client
+	Logger *zap.Logger
 }
 
 func (ah *AuthHandler) Create(context context.Context, request *abaeve_auth.AuthCreateRequest, response *abaeve_auth.AuthCreateResponse) error {
+	ah.Logger.Info("Call to Create()")
+
 	var alliance *model.Alliance
 
 	//We MIGHT NOT have any kind of alliance information
@@ -109,6 +113,8 @@ func (ah *AuthHandler) Create(context context.Context, request *abaeve_auth.Auth
 }
 
 func (ah *AuthHandler) Confirm(context context.Context, request *abaeve_auth.AuthConfirmRequest, response *abaeve_auth.AuthConfirmResponse) error {
+	ah.Logger.Info("Call to Confirm()")
+
 	character := repository.CharacterRepo.FindByAutenticationCode(request.AuthenticationCode)
 
 	if character == nil {
