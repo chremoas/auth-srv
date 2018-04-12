@@ -138,29 +138,8 @@ func (ah *AuthHandler) Confirm(context context.Context, request *abaeve_auth.Aut
 		return errors.New("Error finding roles: " + err.Error())
 	}
 
-	response.Roles = roles
 	response.Success = true
 	response.CharacterName = character.CharacterName
-
-	return nil
-}
-
-func (ah *AuthHandler) GetRoles(ctx context.Context, request *abaeve_auth.GetRolesRequest, response *abaeve_auth.AuthConfirmResponse) error {
-	user := repository.UserRepo.FindByChatId(request.UserId)
-
-	if user == nil {
-		response.Success = false
-		return nil
-	}
-
-	roles, err := repository.AccessRepo.FindByChatId(request.UserId)
-
-	if err != nil {
-		return errors.New("Error finding roles: " + err.Error())
-	}
-
-	response.Success = true
-	response.Roles = roles
 
 	return nil
 }

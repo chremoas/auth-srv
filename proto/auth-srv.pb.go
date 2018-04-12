@@ -12,13 +12,8 @@ It has these top-level messages:
 	AuthCreateResponse
 	AuthConfirmRequest
 	AuthConfirmResponse
-	GetRolesRequest
-	AuthAdminRequest
-	AuthAdminResponse
 	CharactersResponse
 	Character
-	RoleResponse
-	Role
 	CorporationsResponse
 	Corporation
 	AlliancesResponse
@@ -27,7 +22,6 @@ It has these top-level messages:
 	AllianceAdminRequest
 	CorporationAdminRequest
 	CharacterAdminRequest
-	RoleAdminRequest
 	EntityQueryRequest
 */
 package abaeve_auth
@@ -198,9 +192,8 @@ func (m *AuthConfirmRequest) GetAuthenticationCode() string {
 }
 
 type AuthConfirmResponse struct {
-	Success       bool     `protobuf:"varint,1,opt,name=Success" json:"Success,omitempty"`
-	CharacterName string   `protobuf:"bytes,2,opt,name=CharacterName" json:"CharacterName,omitempty"`
-	Roles         []string `protobuf:"bytes,3,rep,name=Roles" json:"Roles,omitempty"`
+	Success       bool   `protobuf:"varint,1,opt,name=Success" json:"Success,omitempty"`
+	CharacterName string `protobuf:"bytes,2,opt,name=CharacterName" json:"CharacterName,omitempty"`
 }
 
 func (m *AuthConfirmResponse) Reset()                    { *m = AuthConfirmResponse{} }
@@ -222,117 +215,6 @@ func (m *AuthConfirmResponse) GetCharacterName() string {
 	return ""
 }
 
-func (m *AuthConfirmResponse) GetRoles() []string {
-	if m != nil {
-		return m.Roles
-	}
-	return nil
-}
-
-type GetRolesRequest struct {
-	UserId string `protobuf:"bytes,1,opt,name=UserId" json:"UserId,omitempty"`
-}
-
-func (m *GetRolesRequest) Reset()                    { *m = GetRolesRequest{} }
-func (m *GetRolesRequest) String() string            { return proto.CompactTextString(m) }
-func (*GetRolesRequest) ProtoMessage()               {}
-func (*GetRolesRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
-
-func (m *GetRolesRequest) GetUserId() string {
-	if m != nil {
-		return m.UserId
-	}
-	return ""
-}
-
-type AuthAdminRequest struct {
-	EntityId     []int64      `protobuf:"varint,1,rep,packed,name=EntityId" json:"EntityId,omitempty"`
-	EntityName   []string     `protobuf:"bytes,2,rep,name=EntityName" json:"EntityName,omitempty"`
-	EntityTicker []string     `protobuf:"bytes,3,rep,name=EntityTicker" json:"EntityTicker,omitempty"`
-	EntityType   []EntityType `protobuf:"varint,4,rep,packed,name=EntityType,enum=abaeve.auth.EntityType" json:"EntityType,omitempty"`
-	Role         string       `protobuf:"bytes,5,opt,name=Role" json:"Role,omitempty"`
-}
-
-func (m *AuthAdminRequest) Reset()                    { *m = AuthAdminRequest{} }
-func (m *AuthAdminRequest) String() string            { return proto.CompactTextString(m) }
-func (*AuthAdminRequest) ProtoMessage()               {}
-func (*AuthAdminRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
-
-func (m *AuthAdminRequest) GetEntityId() []int64 {
-	if m != nil {
-		return m.EntityId
-	}
-	return nil
-}
-
-func (m *AuthAdminRequest) GetEntityName() []string {
-	if m != nil {
-		return m.EntityName
-	}
-	return nil
-}
-
-func (m *AuthAdminRequest) GetEntityTicker() []string {
-	if m != nil {
-		return m.EntityTicker
-	}
-	return nil
-}
-
-func (m *AuthAdminRequest) GetEntityType() []EntityType {
-	if m != nil {
-		return m.EntityType
-	}
-	return nil
-}
-
-func (m *AuthAdminRequest) GetRole() string {
-	if m != nil {
-		return m.Role
-	}
-	return ""
-}
-
-type AuthAdminResponse struct {
-	EntityId   []int64      `protobuf:"varint,1,rep,packed,name=EntityId" json:"EntityId,omitempty"`
-	EntityName []string     `protobuf:"bytes,2,rep,name=EntityName" json:"EntityName,omitempty"`
-	EntityType []EntityType `protobuf:"varint,3,rep,packed,name=EntityType,enum=abaeve.auth.EntityType" json:"EntityType,omitempty"`
-	Success    bool         `protobuf:"varint,4,opt,name=Success" json:"Success,omitempty"`
-}
-
-func (m *AuthAdminResponse) Reset()                    { *m = AuthAdminResponse{} }
-func (m *AuthAdminResponse) String() string            { return proto.CompactTextString(m) }
-func (*AuthAdminResponse) ProtoMessage()               {}
-func (*AuthAdminResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
-
-func (m *AuthAdminResponse) GetEntityId() []int64 {
-	if m != nil {
-		return m.EntityId
-	}
-	return nil
-}
-
-func (m *AuthAdminResponse) GetEntityName() []string {
-	if m != nil {
-		return m.EntityName
-	}
-	return nil
-}
-
-func (m *AuthAdminResponse) GetEntityType() []EntityType {
-	if m != nil {
-		return m.EntityType
-	}
-	return nil
-}
-
-func (m *AuthAdminResponse) GetSuccess() bool {
-	if m != nil {
-		return m.Success
-	}
-	return false
-}
-
 type CharactersResponse struct {
 	List []*Character `protobuf:"bytes,1,rep,name=List" json:"List,omitempty"`
 }
@@ -340,7 +222,7 @@ type CharactersResponse struct {
 func (m *CharactersResponse) Reset()                    { *m = CharactersResponse{} }
 func (m *CharactersResponse) String() string            { return proto.CompactTextString(m) }
 func (*CharactersResponse) ProtoMessage()               {}
-func (*CharactersResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
+func (*CharactersResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
 
 func (m *CharactersResponse) GetList() []*Character {
 	if m != nil {
@@ -358,7 +240,7 @@ type Character struct {
 func (m *Character) Reset()                    { *m = Character{} }
 func (m *Character) String() string            { return proto.CompactTextString(m) }
 func (*Character) ProtoMessage()               {}
-func (*Character) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
+func (*Character) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
 
 func (m *Character) GetId() int64 {
 	if m != nil {
@@ -381,46 +263,6 @@ func (m *Character) GetCorporationId() int64 {
 	return 0
 }
 
-type RoleResponse struct {
-	List []*Role `protobuf:"bytes,1,rep,name=List" json:"List,omitempty"`
-}
-
-func (m *RoleResponse) Reset()                    { *m = RoleResponse{} }
-func (m *RoleResponse) String() string            { return proto.CompactTextString(m) }
-func (*RoleResponse) ProtoMessage()               {}
-func (*RoleResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
-
-func (m *RoleResponse) GetList() []*Role {
-	if m != nil {
-		return m.List
-	}
-	return nil
-}
-
-type Role struct {
-	RoleName         string `protobuf:"bytes,1,opt,name=RoleName" json:"RoleName,omitempty"`
-	ChatServiceGroup string `protobuf:"bytes,2,opt,name=ChatServiceGroup" json:"ChatServiceGroup,omitempty"`
-}
-
-func (m *Role) Reset()                    { *m = Role{} }
-func (m *Role) String() string            { return proto.CompactTextString(m) }
-func (*Role) ProtoMessage()               {}
-func (*Role) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
-
-func (m *Role) GetRoleName() string {
-	if m != nil {
-		return m.RoleName
-	}
-	return ""
-}
-
-func (m *Role) GetChatServiceGroup() string {
-	if m != nil {
-		return m.ChatServiceGroup
-	}
-	return ""
-}
-
 type CorporationsResponse struct {
 	List []*Corporation `protobuf:"bytes,1,rep,name=List" json:"List,omitempty"`
 }
@@ -428,7 +270,7 @@ type CorporationsResponse struct {
 func (m *CorporationsResponse) Reset()                    { *m = CorporationsResponse{} }
 func (m *CorporationsResponse) String() string            { return proto.CompactTextString(m) }
 func (*CorporationsResponse) ProtoMessage()               {}
-func (*CorporationsResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
+func (*CorporationsResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
 
 func (m *CorporationsResponse) GetList() []*Corporation {
 	if m != nil {
@@ -447,7 +289,7 @@ type Corporation struct {
 func (m *Corporation) Reset()                    { *m = Corporation{} }
 func (m *Corporation) String() string            { return proto.CompactTextString(m) }
 func (*Corporation) ProtoMessage()               {}
-func (*Corporation) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
+func (*Corporation) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
 
 func (m *Corporation) GetId() int64 {
 	if m != nil {
@@ -484,7 +326,7 @@ type AlliancesResponse struct {
 func (m *AlliancesResponse) Reset()                    { *m = AlliancesResponse{} }
 func (m *AlliancesResponse) String() string            { return proto.CompactTextString(m) }
 func (*AlliancesResponse) ProtoMessage()               {}
-func (*AlliancesResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
+func (*AlliancesResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
 
 func (m *AlliancesResponse) GetList() []*Alliance {
 	if m != nil {
@@ -502,7 +344,7 @@ type Alliance struct {
 func (m *Alliance) Reset()                    { *m = Alliance{} }
 func (m *Alliance) String() string            { return proto.CompactTextString(m) }
 func (*Alliance) ProtoMessage()               {}
-func (*Alliance) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
+func (*Alliance) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
 
 func (m *Alliance) GetId() int64 {
 	if m != nil {
@@ -526,27 +368,19 @@ func (m *Alliance) GetTicker() string {
 }
 
 type EntityAdminResponse struct {
-	Success   bool   `protobuf:"varint,1,opt,name=Success" json:"Success,omitempty"`
-	ErrorText string `protobuf:"bytes,2,opt,name=ErrorText" json:"ErrorText,omitempty"`
+	Success bool `protobuf:"varint,1,opt,name=Success" json:"Success,omitempty"`
 }
 
 func (m *EntityAdminResponse) Reset()                    { *m = EntityAdminResponse{} }
 func (m *EntityAdminResponse) String() string            { return proto.CompactTextString(m) }
 func (*EntityAdminResponse) ProtoMessage()               {}
-func (*EntityAdminResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{15} }
+func (*EntityAdminResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
 
 func (m *EntityAdminResponse) GetSuccess() bool {
 	if m != nil {
 		return m.Success
 	}
 	return false
-}
-
-func (m *EntityAdminResponse) GetErrorText() string {
-	if m != nil {
-		return m.ErrorText
-	}
-	return ""
 }
 
 type AllianceAdminRequest struct {
@@ -557,7 +391,7 @@ type AllianceAdminRequest struct {
 func (m *AllianceAdminRequest) Reset()                    { *m = AllianceAdminRequest{} }
 func (m *AllianceAdminRequest) String() string            { return proto.CompactTextString(m) }
 func (*AllianceAdminRequest) ProtoMessage()               {}
-func (*AllianceAdminRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{16} }
+func (*AllianceAdminRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
 
 func (m *AllianceAdminRequest) GetAlliance() *Alliance {
 	if m != nil {
@@ -581,7 +415,7 @@ type CorporationAdminRequest struct {
 func (m *CorporationAdminRequest) Reset()                    { *m = CorporationAdminRequest{} }
 func (m *CorporationAdminRequest) String() string            { return proto.CompactTextString(m) }
 func (*CorporationAdminRequest) ProtoMessage()               {}
-func (*CorporationAdminRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{17} }
+func (*CorporationAdminRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
 
 func (m *CorporationAdminRequest) GetCorporation() *Corporation {
 	if m != nil {
@@ -605,7 +439,7 @@ type CharacterAdminRequest struct {
 func (m *CharacterAdminRequest) Reset()                    { *m = CharacterAdminRequest{} }
 func (m *CharacterAdminRequest) String() string            { return proto.CompactTextString(m) }
 func (*CharacterAdminRequest) ProtoMessage()               {}
-func (*CharacterAdminRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{18} }
+func (*CharacterAdminRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
 
 func (m *CharacterAdminRequest) GetCharacter() *Character {
 	if m != nil {
@@ -621,30 +455,6 @@ func (m *CharacterAdminRequest) GetOperation() EntityOperation {
 	return EntityOperation_ADD_OR_UPDATE
 }
 
-type RoleAdminRequest struct {
-	Role      *Role           `protobuf:"bytes,1,opt,name=Role" json:"Role,omitempty"`
-	Operation EntityOperation `protobuf:"varint,2,opt,name=Operation,enum=abaeve.auth.EntityOperation" json:"Operation,omitempty"`
-}
-
-func (m *RoleAdminRequest) Reset()                    { *m = RoleAdminRequest{} }
-func (m *RoleAdminRequest) String() string            { return proto.CompactTextString(m) }
-func (*RoleAdminRequest) ProtoMessage()               {}
-func (*RoleAdminRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19} }
-
-func (m *RoleAdminRequest) GetRole() *Role {
-	if m != nil {
-		return m.Role
-	}
-	return nil
-}
-
-func (m *RoleAdminRequest) GetOperation() EntityOperation {
-	if m != nil {
-		return m.Operation
-	}
-	return EntityOperation_ADD_OR_UPDATE
-}
-
 type EntityQueryRequest struct {
 	EntityType EntityType `protobuf:"varint,1,opt,name=EntityType,enum=abaeve.auth.EntityType" json:"EntityType,omitempty"`
 }
@@ -652,7 +462,7 @@ type EntityQueryRequest struct {
 func (m *EntityQueryRequest) Reset()                    { *m = EntityQueryRequest{} }
 func (m *EntityQueryRequest) String() string            { return proto.CompactTextString(m) }
 func (*EntityQueryRequest) ProtoMessage()               {}
-func (*EntityQueryRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{20} }
+func (*EntityQueryRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
 
 func (m *EntityQueryRequest) GetEntityType() EntityType {
 	if m != nil {
@@ -666,13 +476,8 @@ func init() {
 	proto.RegisterType((*AuthCreateResponse)(nil), "abaeve.auth.AuthCreateResponse")
 	proto.RegisterType((*AuthConfirmRequest)(nil), "abaeve.auth.AuthConfirmRequest")
 	proto.RegisterType((*AuthConfirmResponse)(nil), "abaeve.auth.AuthConfirmResponse")
-	proto.RegisterType((*GetRolesRequest)(nil), "abaeve.auth.GetRolesRequest")
-	proto.RegisterType((*AuthAdminRequest)(nil), "abaeve.auth.AuthAdminRequest")
-	proto.RegisterType((*AuthAdminResponse)(nil), "abaeve.auth.AuthAdminResponse")
 	proto.RegisterType((*CharactersResponse)(nil), "abaeve.auth.CharactersResponse")
 	proto.RegisterType((*Character)(nil), "abaeve.auth.Character")
-	proto.RegisterType((*RoleResponse)(nil), "abaeve.auth.RoleResponse")
-	proto.RegisterType((*Role)(nil), "abaeve.auth.Role")
 	proto.RegisterType((*CorporationsResponse)(nil), "abaeve.auth.CorporationsResponse")
 	proto.RegisterType((*Corporation)(nil), "abaeve.auth.Corporation")
 	proto.RegisterType((*AlliancesResponse)(nil), "abaeve.auth.AlliancesResponse")
@@ -681,7 +486,6 @@ func init() {
 	proto.RegisterType((*AllianceAdminRequest)(nil), "abaeve.auth.AllianceAdminRequest")
 	proto.RegisterType((*CorporationAdminRequest)(nil), "abaeve.auth.CorporationAdminRequest")
 	proto.RegisterType((*CharacterAdminRequest)(nil), "abaeve.auth.CharacterAdminRequest")
-	proto.RegisterType((*RoleAdminRequest)(nil), "abaeve.auth.RoleAdminRequest")
 	proto.RegisterType((*EntityQueryRequest)(nil), "abaeve.auth.EntityQueryRequest")
 	proto.RegisterEnum("abaeve.auth.EntityType", EntityType_name, EntityType_value)
 	proto.RegisterEnum("abaeve.auth.EntityOperation", EntityOperation_name, EntityOperation_value)
@@ -699,8 +503,6 @@ type UserAuthenticationClient interface {
 	Create(ctx context.Context, in *AuthCreateRequest, opts ...client.CallOption) (*AuthCreateResponse, error)
 	// Called by the auth-bot or another system to state that they've linked a character to their account
 	Confirm(ctx context.Context, in *AuthConfirmRequest, opts ...client.CallOption) (*AuthConfirmResponse, error)
-	// Called to get all roles for an already authed user
-	GetRoles(ctx context.Context, in *GetRolesRequest, opts ...client.CallOption) (*AuthConfirmResponse, error)
 }
 
 type userAuthenticationClient struct {
@@ -741,16 +543,6 @@ func (c *userAuthenticationClient) Confirm(ctx context.Context, in *AuthConfirmR
 	return out, nil
 }
 
-func (c *userAuthenticationClient) GetRoles(ctx context.Context, in *GetRolesRequest, opts ...client.CallOption) (*AuthConfirmResponse, error) {
-	req := c.c.NewRequest(c.serviceName, "UserAuthentication.GetRoles", in)
-	out := new(AuthConfirmResponse)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // Server API for UserAuthentication service
 
 type UserAuthenticationHandler interface {
@@ -758,8 +550,6 @@ type UserAuthenticationHandler interface {
 	Create(context.Context, *AuthCreateRequest, *AuthCreateResponse) error
 	// Called by the auth-bot or another system to state that they've linked a character to their account
 	Confirm(context.Context, *AuthConfirmRequest, *AuthConfirmResponse) error
-	// Called to get all roles for an already authed user
-	GetRoles(context.Context, *GetRolesRequest, *AuthConfirmResponse) error
 }
 
 func RegisterUserAuthenticationHandler(s server.Server, hdlr UserAuthenticationHandler, opts ...server.HandlerOption) {
@@ -778,17 +568,12 @@ func (h *UserAuthentication) Confirm(ctx context.Context, in *AuthConfirmRequest
 	return h.UserAuthenticationHandler.Confirm(ctx, in, out)
 }
 
-func (h *UserAuthentication) GetRoles(ctx context.Context, in *GetRolesRequest, out *AuthConfirmResponse) error {
-	return h.UserAuthenticationHandler.GetRoles(ctx, in, out)
-}
-
 // Client API for EntityQuery service
 
 type EntityQueryClient interface {
 	GetAlliances(ctx context.Context, in *EntityQueryRequest, opts ...client.CallOption) (*AlliancesResponse, error)
 	GetCorporations(ctx context.Context, in *EntityQueryRequest, opts ...client.CallOption) (*CorporationsResponse, error)
 	GetCharacters(ctx context.Context, in *EntityQueryRequest, opts ...client.CallOption) (*CharactersResponse, error)
-	GetRoles(ctx context.Context, in *EntityQueryRequest, opts ...client.CallOption) (*RoleResponse, error)
 }
 
 type entityQueryClient struct {
@@ -839,23 +624,12 @@ func (c *entityQueryClient) GetCharacters(ctx context.Context, in *EntityQueryRe
 	return out, nil
 }
 
-func (c *entityQueryClient) GetRoles(ctx context.Context, in *EntityQueryRequest, opts ...client.CallOption) (*RoleResponse, error) {
-	req := c.c.NewRequest(c.serviceName, "EntityQuery.GetRoles", in)
-	out := new(RoleResponse)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // Server API for EntityQuery service
 
 type EntityQueryHandler interface {
 	GetAlliances(context.Context, *EntityQueryRequest, *AlliancesResponse) error
 	GetCorporations(context.Context, *EntityQueryRequest, *CorporationsResponse) error
 	GetCharacters(context.Context, *EntityQueryRequest, *CharactersResponse) error
-	GetRoles(context.Context, *EntityQueryRequest, *RoleResponse) error
 }
 
 func RegisterEntityQueryHandler(s server.Server, hdlr EntityQueryHandler, opts ...server.HandlerOption) {
@@ -878,245 +652,12 @@ func (h *EntityQuery) GetCharacters(ctx context.Context, in *EntityQueryRequest,
 	return h.EntityQueryHandler.GetCharacters(ctx, in, out)
 }
 
-func (h *EntityQuery) GetRoles(ctx context.Context, in *EntityQueryRequest, out *RoleResponse) error {
-	return h.EntityQueryHandler.GetRoles(ctx, in, out)
-}
-
-// Client API for UserAuthenticationAdmin service
-
-type UserAuthenticationAdminClient interface {
-	CharacterRoleAdd(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error)
-	CharacterRoleRemove(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error)
-	CorporationAllianceRoleAdd(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error)
-	CorporationAllianceRoleRemove(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error)
-	CorporationRoleAdd(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error)
-	CorporationRoleRemove(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error)
-	AllianceRoleAdd(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error)
-	AllianceRoleRemove(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error)
-	AllianceCharacterLeadershipRoleAdd(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error)
-	AllianceCharacterLeadershipRoleRemove(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error)
-	CorporationCharacterLeadershipRoleAdd(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error)
-	CorporationCharacterLeadershipRoleRemove(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error)
-}
-
-type userAuthenticationAdminClient struct {
-	c           client.Client
-	serviceName string
-}
-
-func NewUserAuthenticationAdminClient(serviceName string, c client.Client) UserAuthenticationAdminClient {
-	if c == nil {
-		c = client.NewClient()
-	}
-	if len(serviceName) == 0 {
-		serviceName = "abaeve.auth"
-	}
-	return &userAuthenticationAdminClient{
-		c:           c,
-		serviceName: serviceName,
-	}
-}
-
-func (c *userAuthenticationAdminClient) CharacterRoleAdd(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error) {
-	req := c.c.NewRequest(c.serviceName, "UserAuthenticationAdmin.CharacterRoleAdd", in)
-	out := new(AuthAdminResponse)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userAuthenticationAdminClient) CharacterRoleRemove(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error) {
-	req := c.c.NewRequest(c.serviceName, "UserAuthenticationAdmin.CharacterRoleRemove", in)
-	out := new(AuthAdminResponse)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userAuthenticationAdminClient) CorporationAllianceRoleAdd(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error) {
-	req := c.c.NewRequest(c.serviceName, "UserAuthenticationAdmin.CorporationAllianceRoleAdd", in)
-	out := new(AuthAdminResponse)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userAuthenticationAdminClient) CorporationAllianceRoleRemove(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error) {
-	req := c.c.NewRequest(c.serviceName, "UserAuthenticationAdmin.CorporationAllianceRoleRemove", in)
-	out := new(AuthAdminResponse)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userAuthenticationAdminClient) CorporationRoleAdd(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error) {
-	req := c.c.NewRequest(c.serviceName, "UserAuthenticationAdmin.CorporationRoleAdd", in)
-	out := new(AuthAdminResponse)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userAuthenticationAdminClient) CorporationRoleRemove(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error) {
-	req := c.c.NewRequest(c.serviceName, "UserAuthenticationAdmin.CorporationRoleRemove", in)
-	out := new(AuthAdminResponse)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userAuthenticationAdminClient) AllianceRoleAdd(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error) {
-	req := c.c.NewRequest(c.serviceName, "UserAuthenticationAdmin.AllianceRoleAdd", in)
-	out := new(AuthAdminResponse)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userAuthenticationAdminClient) AllianceRoleRemove(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error) {
-	req := c.c.NewRequest(c.serviceName, "UserAuthenticationAdmin.AllianceRoleRemove", in)
-	out := new(AuthAdminResponse)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userAuthenticationAdminClient) AllianceCharacterLeadershipRoleAdd(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error) {
-	req := c.c.NewRequest(c.serviceName, "UserAuthenticationAdmin.AllianceCharacterLeadershipRoleAdd", in)
-	out := new(AuthAdminResponse)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userAuthenticationAdminClient) AllianceCharacterLeadershipRoleRemove(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error) {
-	req := c.c.NewRequest(c.serviceName, "UserAuthenticationAdmin.AllianceCharacterLeadershipRoleRemove", in)
-	out := new(AuthAdminResponse)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userAuthenticationAdminClient) CorporationCharacterLeadershipRoleAdd(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error) {
-	req := c.c.NewRequest(c.serviceName, "UserAuthenticationAdmin.CorporationCharacterLeadershipRoleAdd", in)
-	out := new(AuthAdminResponse)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userAuthenticationAdminClient) CorporationCharacterLeadershipRoleRemove(ctx context.Context, in *AuthAdminRequest, opts ...client.CallOption) (*AuthAdminResponse, error) {
-	req := c.c.NewRequest(c.serviceName, "UserAuthenticationAdmin.CorporationCharacterLeadershipRoleRemove", in)
-	out := new(AuthAdminResponse)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// Server API for UserAuthenticationAdmin service
-
-type UserAuthenticationAdminHandler interface {
-	CharacterRoleAdd(context.Context, *AuthAdminRequest, *AuthAdminResponse) error
-	CharacterRoleRemove(context.Context, *AuthAdminRequest, *AuthAdminResponse) error
-	CorporationAllianceRoleAdd(context.Context, *AuthAdminRequest, *AuthAdminResponse) error
-	CorporationAllianceRoleRemove(context.Context, *AuthAdminRequest, *AuthAdminResponse) error
-	CorporationRoleAdd(context.Context, *AuthAdminRequest, *AuthAdminResponse) error
-	CorporationRoleRemove(context.Context, *AuthAdminRequest, *AuthAdminResponse) error
-	AllianceRoleAdd(context.Context, *AuthAdminRequest, *AuthAdminResponse) error
-	AllianceRoleRemove(context.Context, *AuthAdminRequest, *AuthAdminResponse) error
-	AllianceCharacterLeadershipRoleAdd(context.Context, *AuthAdminRequest, *AuthAdminResponse) error
-	AllianceCharacterLeadershipRoleRemove(context.Context, *AuthAdminRequest, *AuthAdminResponse) error
-	CorporationCharacterLeadershipRoleAdd(context.Context, *AuthAdminRequest, *AuthAdminResponse) error
-	CorporationCharacterLeadershipRoleRemove(context.Context, *AuthAdminRequest, *AuthAdminResponse) error
-}
-
-func RegisterUserAuthenticationAdminHandler(s server.Server, hdlr UserAuthenticationAdminHandler, opts ...server.HandlerOption) {
-	s.Handle(s.NewHandler(&UserAuthenticationAdmin{hdlr}, opts...))
-}
-
-type UserAuthenticationAdmin struct {
-	UserAuthenticationAdminHandler
-}
-
-func (h *UserAuthenticationAdmin) CharacterRoleAdd(ctx context.Context, in *AuthAdminRequest, out *AuthAdminResponse) error {
-	return h.UserAuthenticationAdminHandler.CharacterRoleAdd(ctx, in, out)
-}
-
-func (h *UserAuthenticationAdmin) CharacterRoleRemove(ctx context.Context, in *AuthAdminRequest, out *AuthAdminResponse) error {
-	return h.UserAuthenticationAdminHandler.CharacterRoleRemove(ctx, in, out)
-}
-
-func (h *UserAuthenticationAdmin) CorporationAllianceRoleAdd(ctx context.Context, in *AuthAdminRequest, out *AuthAdminResponse) error {
-	return h.UserAuthenticationAdminHandler.CorporationAllianceRoleAdd(ctx, in, out)
-}
-
-func (h *UserAuthenticationAdmin) CorporationAllianceRoleRemove(ctx context.Context, in *AuthAdminRequest, out *AuthAdminResponse) error {
-	return h.UserAuthenticationAdminHandler.CorporationAllianceRoleRemove(ctx, in, out)
-}
-
-func (h *UserAuthenticationAdmin) CorporationRoleAdd(ctx context.Context, in *AuthAdminRequest, out *AuthAdminResponse) error {
-	return h.UserAuthenticationAdminHandler.CorporationRoleAdd(ctx, in, out)
-}
-
-func (h *UserAuthenticationAdmin) CorporationRoleRemove(ctx context.Context, in *AuthAdminRequest, out *AuthAdminResponse) error {
-	return h.UserAuthenticationAdminHandler.CorporationRoleRemove(ctx, in, out)
-}
-
-func (h *UserAuthenticationAdmin) AllianceRoleAdd(ctx context.Context, in *AuthAdminRequest, out *AuthAdminResponse) error {
-	return h.UserAuthenticationAdminHandler.AllianceRoleAdd(ctx, in, out)
-}
-
-func (h *UserAuthenticationAdmin) AllianceRoleRemove(ctx context.Context, in *AuthAdminRequest, out *AuthAdminResponse) error {
-	return h.UserAuthenticationAdminHandler.AllianceRoleRemove(ctx, in, out)
-}
-
-func (h *UserAuthenticationAdmin) AllianceCharacterLeadershipRoleAdd(ctx context.Context, in *AuthAdminRequest, out *AuthAdminResponse) error {
-	return h.UserAuthenticationAdminHandler.AllianceCharacterLeadershipRoleAdd(ctx, in, out)
-}
-
-func (h *UserAuthenticationAdmin) AllianceCharacterLeadershipRoleRemove(ctx context.Context, in *AuthAdminRequest, out *AuthAdminResponse) error {
-	return h.UserAuthenticationAdminHandler.AllianceCharacterLeadershipRoleRemove(ctx, in, out)
-}
-
-func (h *UserAuthenticationAdmin) CorporationCharacterLeadershipRoleAdd(ctx context.Context, in *AuthAdminRequest, out *AuthAdminResponse) error {
-	return h.UserAuthenticationAdminHandler.CorporationCharacterLeadershipRoleAdd(ctx, in, out)
-}
-
-func (h *UserAuthenticationAdmin) CorporationCharacterLeadershipRoleRemove(ctx context.Context, in *AuthAdminRequest, out *AuthAdminResponse) error {
-	return h.UserAuthenticationAdminHandler.CorporationCharacterLeadershipRoleRemove(ctx, in, out)
-}
-
 // Client API for EntityAdmin service
 
 type EntityAdminClient interface {
 	AllianceUpdate(ctx context.Context, in *AllianceAdminRequest, opts ...client.CallOption) (*EntityAdminResponse, error)
 	CorporationUpdate(ctx context.Context, in *CorporationAdminRequest, opts ...client.CallOption) (*EntityAdminResponse, error)
 	CharacterUpdate(ctx context.Context, in *CharacterAdminRequest, opts ...client.CallOption) (*EntityAdminResponse, error)
-	RoleUpdate(ctx context.Context, in *RoleAdminRequest, opts ...client.CallOption) (*EntityAdminResponse, error)
 }
 
 type entityAdminClient struct {
@@ -1167,23 +708,12 @@ func (c *entityAdminClient) CharacterUpdate(ctx context.Context, in *CharacterAd
 	return out, nil
 }
 
-func (c *entityAdminClient) RoleUpdate(ctx context.Context, in *RoleAdminRequest, opts ...client.CallOption) (*EntityAdminResponse, error) {
-	req := c.c.NewRequest(c.serviceName, "EntityAdmin.RoleUpdate", in)
-	out := new(EntityAdminResponse)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // Server API for EntityAdmin service
 
 type EntityAdminHandler interface {
 	AllianceUpdate(context.Context, *AllianceAdminRequest, *EntityAdminResponse) error
 	CorporationUpdate(context.Context, *CorporationAdminRequest, *EntityAdminResponse) error
 	CharacterUpdate(context.Context, *CharacterAdminRequest, *EntityAdminResponse) error
-	RoleUpdate(context.Context, *RoleAdminRequest, *EntityAdminResponse) error
 }
 
 func RegisterEntityAdminHandler(s server.Server, hdlr EntityAdminHandler, opts ...server.HandlerOption) {
@@ -1206,83 +736,57 @@ func (h *EntityAdmin) CharacterUpdate(ctx context.Context, in *CharacterAdminReq
 	return h.EntityAdminHandler.CharacterUpdate(ctx, in, out)
 }
 
-func (h *EntityAdmin) RoleUpdate(ctx context.Context, in *RoleAdminRequest, out *EntityAdminResponse) error {
-	return h.EntityAdminHandler.RoleUpdate(ctx, in, out)
-}
-
 func init() { proto.RegisterFile("auth-srv.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 1127 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x58, 0xed, 0x8e, 0xe2, 0x54,
-	0x18, 0xde, 0x52, 0x86, 0x85, 0x97, 0x19, 0x3e, 0xce, 0x7c, 0x21, 0x99, 0x61, 0xd9, 0x66, 0x27,
-	0x61, 0x27, 0x4a, 0x14, 0x35, 0x26, 0xfb, 0xc3, 0xd8, 0x00, 0xce, 0x12, 0x19, 0xd8, 0x3d, 0xc0,
-	0xae, 0x26, 0xea, 0xda, 0x85, 0x63, 0x68, 0x66, 0x86, 0x62, 0x5b, 0x26, 0xce, 0x05, 0xf8, 0xc3,
-	0xf8, 0xcb, 0x5b, 0xf0, 0x46, 0xbc, 0x0d, 0x2f, 0xc2, 0x3f, 0x5e, 0x81, 0xa6, 0xa7, 0xa7, 0xa7,
-	0xe7, 0x00, 0x0d, 0x8c, 0xb0, 0xbf, 0xe8, 0xf9, 0xe8, 0xf3, 0x3e, 0xef, 0xd7, 0xf3, 0x36, 0x40,
-	0xc6, 0x98, 0xb9, 0xe3, 0x0f, 0x1c, 0xfb, 0xb6, 0x3a, 0xb5, 0x2d, 0xd7, 0x42, 0x69, 0xe3, 0xad,
-	0x41, 0x6e, 0x49, 0xd5, 0xdb, 0xd6, 0xfe, 0x56, 0x20, 0xaf, 0xcf, 0xdc, 0x71, 0xdd, 0x26, 0x86,
-	0x4b, 0x30, 0xf9, 0x69, 0x46, 0x1c, 0x17, 0x1d, 0xc0, 0x4e, 0xdf, 0xba, 0x22, 0x93, 0x82, 0x52,
-	0x56, 0x2a, 0x29, 0xec, 0x2f, 0xd0, 0x27, 0x90, 0xaa, 0x8f, 0x0d, 0xdb, 0x18, 0xba, 0xc4, 0x2e,
-	0xc4, 0xca, 0x4a, 0x25, 0x5d, 0x3b, 0xaa, 0x0a, 0x60, 0x55, 0x7e, 0x8a, 0xc3, 0x8b, 0xe8, 0x19,
-	0xa4, 0xeb, 0x96, 0x3d, 0xb5, 0x6c, 0xc3, 0x35, 0xad, 0x49, 0x41, 0xa5, 0xef, 0x15, 0xe4, 0xf7,
-	0xc2, 0x73, 0x2c, 0x5e, 0x46, 0x1f, 0x41, 0x52, 0xbf, 0xbe, 0x36, 0x8d, 0xc9, 0x90, 0x14, 0xe2,
-	0xf4, 0xc5, 0x43, 0xe9, 0xc5, 0xe0, 0x10, 0xf3, 0x6b, 0xe8, 0x04, 0x52, 0x9e, 0x3f, 0xbd, 0xa1,
-	0x35, 0x25, 0x85, 0x9d, 0xb2, 0x5a, 0x49, 0xe1, 0x70, 0x43, 0xfb, 0x1e, 0x90, 0xe8, 0xad, 0x33,
-	0xb5, 0x26, 0x0e, 0x41, 0x55, 0x7f, 0x97, 0x4c, 0x5c, 0x73, 0x48, 0x0d, 0xd7, 0xad, 0x11, 0x61,
-	0xbe, 0x2f, 0x39, 0x41, 0x05, 0x78, 0xd8, 0x9b, 0x0d, 0x87, 0xc4, 0x71, 0x68, 0x18, 0x92, 0x38,
-	0x58, 0x6a, 0xdf, 0x32, 0x7c, 0x6b, 0xf2, 0xa3, 0x69, 0xdf, 0x04, 0xe1, 0x3c, 0x82, 0xc4, 0xc0,
-	0x21, 0x76, 0x6b, 0xc4, 0x30, 0xd9, 0x2a, 0xc2, 0x6e, 0x2c, 0xca, 0xae, 0x76, 0x05, 0xfb, 0x12,
-	0x3a, 0xa3, 0x2f, 0xd0, 0x51, 0x24, 0x3a, 0xe8, 0x09, 0xec, 0xf1, 0x44, 0x74, 0x8c, 0x9b, 0x00,
-	0x5b, 0xde, 0xf4, 0xb2, 0x8d, 0xad, 0x6b, 0xe2, 0x14, 0x54, 0x1a, 0x2e, 0x7f, 0xa1, 0x3d, 0x85,
-	0xec, 0x05, 0x71, 0xe9, 0xf3, 0x0a, 0x3f, 0xb4, 0x3f, 0x15, 0xc8, 0x79, 0xc4, 0xf4, 0xd1, 0x8d,
-	0x39, 0x09, 0x2e, 0x17, 0x21, 0xd9, 0x9c, 0xb8, 0xa6, 0x7b, 0x47, 0xaf, 0xab, 0x15, 0x15, 0xf3,
-	0x35, 0x2a, 0x01, 0xf8, 0xcf, 0x8c, 0x94, 0x67, 0x56, 0xd8, 0x41, 0x1a, 0xec, 0xfa, 0xab, 0xbe,
-	0x39, 0xbc, 0x22, 0x36, 0x23, 0x26, 0xed, 0xa1, 0xcf, 0x02, 0x8c, 0xfe, 0xdd, 0xd4, 0xab, 0x0e,
-	0xb5, 0x92, 0xa9, 0x1d, 0x4b, 0xd5, 0x11, 0x1e, 0x63, 0xe1, 0x2a, 0x42, 0x10, 0xf7, 0xbc, 0x2a,
-	0xec, 0x50, 0x1f, 0xe8, 0xb3, 0xf6, 0x07, 0x6b, 0x03, 0xe6, 0x01, 0x0b, 0xec, 0x26, 0x2e, 0xc8,
-	0xf4, 0xd4, 0xf5, 0xe9, 0x09, 0xd9, 0x8c, 0xcb, 0xc5, 0xf5, 0x05, 0x20, 0x9e, 0x38, 0x87, 0x93,
-	0x3c, 0x87, 0x78, 0xdb, 0x74, 0x5c, 0x4a, 0x30, 0xba, 0x21, 0xe9, 0x1d, 0x6d, 0x20, 0x74, 0x30,
-	0xca, 0x40, 0x8c, 0x65, 0x52, 0xc5, 0xb1, 0xd6, 0xc8, 0x8b, 0x8b, 0x50, 0x23, 0xf4, 0x99, 0x16,
-	0x50, 0xd8, 0x8f, 0xad, 0x11, 0x6d, 0x5f, 0x15, 0xcb, 0x9b, 0xda, 0xa7, 0xb0, 0xeb, 0x45, 0x91,
-	0x53, 0x3a, 0x93, 0x28, 0xe5, 0x25, 0x4a, 0xf4, 0xa2, 0xcf, 0xa6, 0xe3, 0x27, 0xc2, 0x0b, 0xb3,
-	0xf7, 0x4b, 0x8d, 0xfb, 0x85, 0xc5, 0xd7, 0xe8, 0x1c, 0x72, 0xf5, 0xb1, 0xe1, 0xf6, 0x88, 0x7d,
-	0x6b, 0x0e, 0xc9, 0x85, 0x6d, 0xcd, 0xa6, 0x8c, 0xe0, 0xc2, 0xbe, 0xd6, 0x80, 0x03, 0x81, 0x57,
-	0x18, 0xa1, 0xf7, 0x25, 0x3a, 0xd1, 0xd2, 0xe3, 0xb3, 0x32, 0x25, 0xbd, 0x5a, 0x2b, 0x4a, 0x47,
-	0x90, 0xe0, 0x85, 0x4a, 0xfb, 0x82, 0x95, 0x68, 0x09, 0x20, 0xd0, 0xa5, 0xd6, 0x88, 0x66, 0x53,
-	0xc5, 0xc2, 0x8e, 0xf6, 0x39, 0xe4, 0x83, 0x55, 0xc8, 0xf6, 0xa9, 0xc4, 0x36, 0x42, 0xef, 0x7c,
-	0xaa, 0x5f, 0x86, 0xf2, 0xb8, 0x09, 0x4f, 0xed, 0x12, 0xf6, 0xfd, 0x02, 0x94, 0xcb, 0x3f, 0x5a,
-	0x57, 0x4e, 0x20, 0xd5, 0xb4, 0x6d, 0xcb, 0xee, 0x93, 0x9f, 0x5d, 0x66, 0x21, 0xdc, 0xd0, 0x7e,
-	0x51, 0xe0, 0x20, 0xe0, 0x25, 0x49, 0x82, 0x28, 0xe7, 0xca, 0x7a, 0x72, 0xfe, 0x0c, 0x52, 0xdd,
-	0x29, 0x61, 0xb3, 0xc3, 0xb3, 0x94, 0xa9, 0x9d, 0x2c, 0xe9, 0x22, 0x7e, 0x07, 0x87, 0xd7, 0xb5,
-	0xdf, 0x15, 0x38, 0x16, 0x52, 0x29, 0x51, 0x99, 0x9b, 0x4a, 0xca, 0x7d, 0xa6, 0xd2, 0x26, 0x9c,
-	0x7e, 0x55, 0xe0, 0x90, 0xb7, 0xa0, 0xc4, 0x48, 0x9a, 0xae, 0xca, 0xfa, 0xd3, 0xf5, 0xff, 0x73,
-	0x99, 0x41, 0xce, 0xeb, 0x33, 0x89, 0xc5, 0x19, 0x13, 0x47, 0x9f, 0xc0, 0xb2, 0xd6, 0xa5, 0x2d,
-	0xbb, 0x89, 0xd9, 0x4b, 0x40, 0xfe, 0xe9, 0xcb, 0x19, 0xb1, 0xef, 0x02, 0xc3, 0xb2, 0x5e, 0x2a,
-	0x14, 0x72, 0x1d, 0xbd, 0x3c, 0x6f, 0x88, 0x2f, 0xa2, 0x5d, 0x48, 0xea, 0xed, 0x76, 0x4b, 0xef,
-	0xd4, 0x9b, 0xb9, 0x07, 0x28, 0x0b, 0xe9, 0x7a, 0x17, 0xbf, 0xe8, 0x62, 0xbd, 0xdf, 0xea, 0x76,
-	0x72, 0x0a, 0xda, 0x83, 0x54, 0xfd, 0xb9, 0x8e, 0xf5, 0x7a, 0xbf, 0x89, 0x73, 0x31, 0x94, 0x84,
-	0x38, 0xee, 0xb6, 0x9b, 0x39, 0xf5, 0xfc, 0x43, 0xc8, 0xce, 0x51, 0x46, 0x79, 0xd8, 0xd3, 0x1b,
-	0x8d, 0x37, 0x5d, 0xfc, 0x66, 0xf0, 0xa2, 0xa1, 0xf7, 0x3d, 0x3c, 0x80, 0x04, 0x6e, 0x5e, 0x76,
-	0x5f, 0x35, 0x73, 0x4a, 0xed, 0x5f, 0x05, 0x90, 0x37, 0xff, 0xe4, 0x39, 0x8d, 0xbe, 0x82, 0x84,
-	0xff, 0x75, 0x81, 0x4a, 0x72, 0x6d, 0xcf, 0x7f, 0x64, 0x15, 0x1f, 0x45, 0x9e, 0xfb, 0xfd, 0xa7,
-	0x3d, 0x40, 0x1d, 0x78, 0xc8, 0x86, 0x3d, 0x5a, 0x72, 0x5b, 0xfa, 0xc8, 0x28, 0x96, 0xa3, 0x2f,
-	0x70, 0xbc, 0x36, 0x24, 0x83, 0x99, 0x8e, 0xe4, 0x7c, 0xcd, 0x8d, 0xfa, 0x75, 0xd0, 0x6a, 0x7f,
-	0xc5, 0x20, 0x2d, 0x64, 0x12, 0xbd, 0x84, 0xdd, 0x0b, 0xe2, 0x72, 0x45, 0x9b, 0xa3, 0xbc, 0x98,
-	0xf3, 0x62, 0x69, 0x69, 0xf7, 0x3b, 0x02, 0xe1, 0xd7, 0xf4, 0x23, 0x44, 0x54, 0xf5, 0xd5, 0xa8,
-	0x8f, 0xa3, 0xba, 0x58, 0x04, 0xee, 0xc1, 0x9e, 0x07, 0xcc, 0xc7, 0xe9, 0x6a, 0xd8, 0x47, 0xcb,
-	0x9b, 0x51, 0x04, 0x7d, 0x2e, 0x84, 0x77, 0x25, 0xde, 0x7b, 0x8b, 0xbd, 0x15, 0x86, 0xf6, 0xb7,
-	0x14, 0x1c, 0x2f, 0x16, 0x17, 0xed, 0x54, 0xd4, 0xa3, 0x23, 0x91, 0x49, 0x01, 0xed, 0xdf, 0x11,
-	0x3a, 0x5d, 0x48, 0x97, 0xd8, 0xd5, 0xc5, 0x52, 0xd4, 0x31, 0xa7, 0xfe, 0x0a, 0xf6, 0x25, 0x50,
-	0x4c, 0x6e, 0xac, 0x5b, 0xb2, 0x39, 0xee, 0x77, 0x50, 0x14, 0x25, 0x38, 0x10, 0xf8, 0x6d, 0xd1,
-	0xfe, 0x01, 0x4e, 0x23, 0xe0, 0xb7, 0xe5, 0xc0, 0x00, 0x90, 0x38, 0x08, 0xb6, 0x45, 0xfc, 0x6b,
-	0x38, 0x9c, 0x83, 0xdd, 0x16, 0x61, 0x0c, 0xd9, 0xad, 0x87, 0x79, 0x00, 0xe8, 0x5d, 0xc4, 0x96,
-	0x80, 0x16, 0xc0, 0xf2, 0xe2, 0x6b, 0x13, 0x63, 0x44, 0x6c, 0x67, 0x6c, 0x4e, 0xb7, 0xc6, 0x7e,
-	0x0c, 0x67, 0x2b, 0xcc, 0x6c, 0xcb, 0xa1, 0x31, 0x9c, 0x09, 0x59, 0x7d, 0x97, 0x3e, 0x5d, 0x41,
-	0x65, 0xb5, 0xa5, 0x2d, 0xb9, 0x55, 0xfb, 0x87, 0x0b, 0xbd, 0xaf, 0x40, 0xaf, 0x21, 0x13, 0x04,
-	0x74, 0x30, 0x1d, 0x79, 0xb3, 0xee, 0xf1, 0x52, 0x25, 0x97, 0xcc, 0x94, 0x97, 0x08, 0xe2, 0xa2,
-	0x5a, 0xe4, 0x05, 0xaf, 0x18, 0xf6, 0x93, 0x28, 0x3d, 0xbf, 0x37, 0xfc, 0x37, 0x90, 0xe5, 0x91,
-	0x62, 0xe0, 0xda, 0x72, 0x55, 0xbf, 0x37, 0x74, 0x17, 0xc0, 0x8b, 0x38, 0x43, 0x3d, 0x5d, 0xd0,
-	0xf6, 0xfb, 0x02, 0xbe, 0x4d, 0xd0, 0x3f, 0x6b, 0x3e, 0xfe, 0x2f, 0x00, 0x00, 0xff, 0xff, 0x50,
-	0x61, 0xc6, 0x0c, 0xbe, 0x11, 0x00, 0x00,
+	// 781 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x56, 0xdd, 0x4e, 0x13, 0x41,
+	0x14, 0x66, 0xdb, 0x52, 0xda, 0x53, 0xfa, 0x77, 0xf8, 0xdb, 0x10, 0x02, 0x65, 0xc3, 0x05, 0x12,
+	0xad, 0x5a, 0x4d, 0x4c, 0xb8, 0x30, 0x6e, 0xb6, 0x15, 0x1b, 0x4b, 0x0b, 0x43, 0x2b, 0x31, 0x51,
+	0xc9, 0xd2, 0x8e, 0x61, 0x03, 0xec, 0xd6, 0xdd, 0x2d, 0x09, 0x0f, 0xe0, 0x85, 0x37, 0x26, 0xbe,
+	0x81, 0xaf, 0xe0, 0x7b, 0xf9, 0x10, 0x66, 0xff, 0x67, 0xea, 0xae, 0x80, 0xdc, 0x75, 0xce, 0xcf,
+	0x37, 0xdf, 0x99, 0xf3, 0x9d, 0xd3, 0x85, 0x92, 0x3a, 0xb1, 0xcf, 0x1e, 0x59, 0xe6, 0x55, 0x7d,
+	0x6c, 0x1a, 0xb6, 0x81, 0x05, 0xf5, 0x54, 0xa5, 0x57, 0xb4, 0xee, 0x98, 0xa5, 0xdf, 0x02, 0x54,
+	0xe5, 0x89, 0x7d, 0xa6, 0x98, 0x54, 0xb5, 0x29, 0xa1, 0x5f, 0x26, 0xd4, 0xb2, 0x71, 0x11, 0x66,
+	0xfb, 0xc6, 0x39, 0xd5, 0x45, 0xa1, 0x26, 0x6c, 0xe7, 0x89, 0x77, 0xc0, 0xe7, 0x90, 0x57, 0xce,
+	0x54, 0x53, 0x1d, 0xda, 0xd4, 0x14, 0x53, 0x35, 0x61, 0xbb, 0xd0, 0x58, 0xae, 0x33, 0x60, 0xf5,
+	0xd0, 0x4b, 0xa2, 0x40, 0xdc, 0x85, 0x82, 0x62, 0x98, 0x63, 0xc3, 0x54, 0x6d, 0xcd, 0xd0, 0xc5,
+	0xb4, 0x9b, 0x27, 0xf2, 0x79, 0x91, 0x9f, 0xb0, 0xc1, 0xf8, 0x14, 0x72, 0xf2, 0xc5, 0x85, 0xa6,
+	0xea, 0x43, 0x2a, 0x66, 0xdc, 0xc4, 0x25, 0x2e, 0x31, 0x70, 0x92, 0x30, 0x0c, 0xd7, 0x20, 0xef,
+	0xd4, 0x73, 0x34, 0x34, 0xc6, 0x54, 0x9c, 0xad, 0xa5, 0xb7, 0xf3, 0x24, 0x32, 0x48, 0x9f, 0x00,
+	0xd9, 0x6a, 0xad, 0xb1, 0xa1, 0x5b, 0x14, 0xeb, 0x9e, 0x95, 0xea, 0xb6, 0x36, 0x74, 0x2f, 0x56,
+	0x8c, 0x11, 0xf5, 0x6b, 0x8f, 0xf1, 0xa0, 0x08, 0x73, 0x47, 0x93, 0xe1, 0x90, 0x5a, 0x96, 0xfb,
+	0x0c, 0x39, 0x12, 0x1c, 0xa5, 0x0f, 0x3e, 0xbe, 0xa1, 0x7f, 0xd6, 0xcc, 0xcb, 0xe0, 0x39, 0x97,
+	0x21, 0x3b, 0xb0, 0xa8, 0xd9, 0x1e, 0xf9, 0x98, 0xfe, 0x29, 0xe1, 0xde, 0x54, 0xd2, 0xbd, 0xd2,
+	0x00, 0x16, 0x38, 0x74, 0x9f, 0x3e, 0x43, 0x47, 0xe0, 0xe8, 0xe0, 0x16, 0x14, 0xc3, 0x46, 0x74,
+	0xd5, 0xcb, 0x00, 0x9b, 0x37, 0x4a, 0xaf, 0x00, 0x43, 0x83, 0x15, 0xa2, 0xee, 0x40, 0xa6, 0xa3,
+	0x59, 0xb6, 0x28, 0xd4, 0xd2, 0xff, 0x68, 0xb4, 0x1b, 0x23, 0x0d, 0x18, 0x65, 0x60, 0x09, 0x52,
+	0x7e, 0xa5, 0x69, 0x92, 0x6a, 0x8f, 0x10, 0x21, 0xc3, 0xdc, 0xed, 0xfe, 0x76, 0x89, 0x45, 0x7d,
+	0x6e, 0x8f, 0x5c, 0x59, 0xa4, 0x09, 0x6f, 0x94, 0x9a, 0xb0, 0xc8, 0x18, 0x22, 0x6a, 0x0f, 0x39,
+	0x6a, 0xc9, 0x5a, 0xf2, 0xc8, 0x69, 0x9c, 0x00, 0x6f, 0x45, 0x6f, 0x19, 0xb2, 0x7d, 0x6d, 0x78,
+	0x4e, 0x4d, 0x97, 0x57, 0x9e, 0xf8, 0x27, 0x5c, 0x07, 0x08, 0x84, 0xd6, 0x1e, 0xb9, 0x8a, 0x4c,
+	0x13, 0xc6, 0x22, 0xbd, 0x84, 0x6a, 0x70, 0x8a, 0xd8, 0x3e, 0xe0, 0xd8, 0x26, 0x08, 0xd8, 0xa3,
+	0xfa, 0x3a, 0xd2, 0xfb, 0x7d, 0x78, 0x4a, 0x8f, 0x61, 0xa1, 0xa5, 0xdb, 0x9a, 0x7d, 0x2d, 0x8f,
+	0x2e, 0x35, 0xfd, 0x66, 0xa1, 0x48, 0x5f, 0x05, 0x58, 0x0c, 0x6e, 0xf6, 0x73, 0x3c, 0xe9, 0xb2,
+	0x13, 0x28, 0xdc, 0x6e, 0x02, 0x77, 0x21, 0xdf, 0x1b, 0x53, 0x7f, 0xdc, 0x1d, 0xb6, 0xa5, 0xc6,
+	0x1a, 0x97, 0xe3, 0x51, 0x0b, 0x63, 0x48, 0x14, 0x2e, 0xfd, 0x10, 0x60, 0x85, 0x69, 0x16, 0x47,
+	0x65, 0x6a, 0x91, 0x08, 0x77, 0x59, 0x24, 0xf7, 0xe1, 0xf4, 0x4d, 0x80, 0xa5, 0x50, 0xdd, 0x1c,
+	0x23, 0x6e, 0x21, 0x0a, 0xb7, 0x5f, 0x88, 0xff, 0xcf, 0x65, 0x1f, 0xd0, 0xf3, 0x1e, 0x4e, 0xa8,
+	0x79, 0x1d, 0xf0, 0x78, 0x01, 0xe0, 0x59, 0xfb, 0xd7, 0x63, 0xaf, 0x4d, 0xa5, 0xc6, 0x4a, 0x0c,
+	0xa4, 0xe3, 0x26, 0x4c, 0xe8, 0x4e, 0x93, 0x4d, 0xc4, 0x79, 0xc8, 0xc9, 0x9d, 0x4e, 0x5b, 0xee,
+	0x2a, 0xad, 0xca, 0x0c, 0x96, 0xa1, 0xa0, 0xf4, 0xc8, 0x41, 0x8f, 0xc8, 0xfd, 0x76, 0xaf, 0x5b,
+	0x11, 0xb0, 0x08, 0x79, 0xe5, 0x8d, 0x4c, 0x64, 0xa5, 0xdf, 0x22, 0x95, 0x14, 0xe6, 0x20, 0x43,
+	0x7a, 0x9d, 0x56, 0x25, 0xbd, 0xf3, 0x04, 0xca, 0x53, 0x94, 0xb1, 0x0a, 0x45, 0xb9, 0xd9, 0x3c,
+	0xe9, 0x91, 0x93, 0xc1, 0x41, 0x53, 0xee, 0x3b, 0x78, 0x00, 0x59, 0xd2, 0xda, 0xef, 0xbd, 0x6b,
+	0x55, 0x84, 0xc6, 0x2f, 0x01, 0xd0, 0xd9, 0x81, 0xfc, 0x8e, 0xc3, 0xb7, 0x90, 0xf5, 0x36, 0x33,
+	0xae, 0xf3, 0x22, 0x9b, 0xfe, 0x83, 0x5a, 0xdd, 0x48, 0xf4, 0x7b, 0x52, 0x97, 0x66, 0xb0, 0x0b,
+	0x73, 0xfe, 0xa2, 0xc4, 0x98, 0x68, 0x6e, 0x41, 0xaf, 0xd6, 0x92, 0x03, 0x02, 0xbc, 0xc6, 0xf7,
+	0x14, 0x14, 0x98, 0xb7, 0xc7, 0x43, 0x98, 0xdf, 0xa3, 0x76, 0x38, 0xee, 0x53, 0x97, 0xfc, 0xdd,
+	0xa5, 0xd5, 0xf5, 0xd8, 0xc1, 0xb1, 0x18, 0xca, 0xc7, 0x50, 0xde, 0xa3, 0x36, 0xbb, 0xf2, 0x6e,
+	0x46, 0xdd, 0x4c, 0x1a, 0x00, 0x16, 0xf8, 0x08, 0x8a, 0x0e, 0x70, 0xb8, 0xe4, 0x6f, 0x86, 0xdd,
+	0x88, 0xd7, 0x31, 0x03, 0xda, 0xf8, 0x19, 0x3e, 0x88, 0x3b, 0x14, 0x78, 0x0c, 0xa5, 0xa0, 0xa8,
+	0xc1, 0x78, 0xe4, 0x74, 0x71, 0x33, 0xb6, 0x62, 0x76, 0x84, 0xa6, 0x5e, 0x3e, 0x66, 0x69, 0x49,
+	0x33, 0xf8, 0x11, 0xaa, 0x4c, 0x5d, 0x3e, 0xf6, 0x56, 0x52, 0xdd, 0x77, 0x86, 0x7f, 0x0f, 0xe5,
+	0xb0, 0x3e, 0x1f, 0x5c, 0x8a, 0xaf, 0xfe, 0xae, 0xd0, 0xa7, 0x59, 0xf7, 0x8b, 0xeb, 0xd9, 0x9f,
+	0x00, 0x00, 0x00, 0xff, 0xff, 0x15, 0xfa, 0x60, 0x52, 0x83, 0x09, 0x00, 0x00,
 }

@@ -21,9 +21,6 @@ service UserAuthentication {
     //Called by the auth-bot or another system to state that they've linked a character to their account
     rpc Confirm (AuthConfirmRequest) returns (AuthConfirmResponse) {
     };
-    //Called to get all roles for an already authed user
-    rpc GetRoles (GetRolesRequest) returns (AuthConfirmResponse) {
-    };
 }
 
 service EntityQuery {
@@ -33,35 +30,6 @@ service EntityQuery {
     };
     rpc GetCharacters (EntityQueryRequest) returns (CharactersResponse) {
     };
-    rpc GetRoles (EntityQueryRequest) returns (RoleResponse) {
-    };
-}
-
-service UserAuthenticationAdmin {
-    rpc CharacterRoleAdd (AuthAdminRequest) returns (AuthAdminResponse) {
-    };
-    rpc CharacterRoleRemove (AuthAdminRequest) returns (AuthAdminResponse) {
-    };
-    rpc CorporationAllianceRoleAdd (AuthAdminRequest) returns (AuthAdminResponse) {
-    };
-    rpc CorporationAllianceRoleRemove (AuthAdminRequest) returns (AuthAdminResponse) {
-    };
-    rpc CorporationRoleAdd (AuthAdminRequest) returns (AuthAdminResponse) {
-    };
-    rpc CorporationRoleRemove (AuthAdminRequest) returns (AuthAdminResponse) {
-    };
-    rpc AllianceRoleAdd (AuthAdminRequest) returns (AuthAdminResponse) {
-    };
-    rpc AllianceRoleRemove (AuthAdminRequest) returns (AuthAdminResponse) {
-    };
-    rpc AllianceCharacterLeadershipRoleAdd (AuthAdminRequest) returns (AuthAdminResponse) {
-    };
-    rpc AllianceCharacterLeadershipRoleRemove (AuthAdminRequest) returns (AuthAdminResponse) {
-    };
-    rpc CorporationCharacterLeadershipRoleAdd (AuthAdminRequest) returns (AuthAdminResponse) {
-    };
-    rpc CorporationCharacterLeadershipRoleRemove (AuthAdminRequest) returns (AuthAdminResponse) {
-    };
 }
 
 service EntityAdmin {
@@ -70,8 +38,6 @@ service EntityAdmin {
     rpc CorporationUpdate (CorporationAdminRequest) returns (EntityAdminResponse) {
     };
     rpc CharacterUpdate (CharacterAdminRequest) returns (EntityAdminResponse) {
-    };
-    rpc RoleUpdate (RoleAdminRequest) returns (EntityAdminResponse) {
     };
 }
 
@@ -96,26 +62,6 @@ message AuthConfirmRequest {
 message AuthConfirmResponse {
     bool Success = 1;
     string CharacterName = 2;
-    repeated string Roles = 3;
-}
-
-message GetRolesRequest {
-    string UserId = 1;
-}
-
-message AuthAdminRequest {
-    repeated int64 EntityId = 1;
-    repeated string EntityName = 2;
-    repeated string EntityTicker = 3;
-    repeated EntityType EntityType = 4;
-    string Role = 5;
-}
-
-message AuthAdminResponse {
-    repeated int64 EntityId = 1;
-    repeated string EntityName = 2;
-    repeated EntityType EntityType = 3;
-    bool Success = 4;
 }
 
 message CharactersResponse {
@@ -126,15 +72,6 @@ message Character {
     int64 Id = 1;
     string Name = 2;
     int64 CorporationId = 3;
-}
-
-message RoleResponse {
-    repeated Role List = 1;
-}
-
-message Role {
-    string RoleName = 1;
-    string ChatServiceGroup = 2;
 }
 
 message CorporationsResponse {
@@ -174,11 +111,6 @@ message CorporationAdminRequest {
 
 message CharacterAdminRequest {
     Character Character = 1;
-    EntityOperation Operation = 2;
-}
-
-message RoleAdminRequest {
-    Role Role = 1;
     EntityOperation Operation = 2;
 }
 
