@@ -7,6 +7,10 @@ import (
 	"github.com/chremoas/auth-srv/model"
 	"github.com/chremoas/auth-srv/proto"
 	"github.com/chremoas/auth-srv/repository"
+	rolesrv "github.com/chremoas/role-srv/proto"
+	"github.com/chremoas/services-common/config"
+	"github.com/chremoas/services-common/sets"
+	"github.com/micro/go-micro"
 	"github.com/micro/go-micro/client"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
@@ -23,6 +27,22 @@ func (ae *authError) Error() string {
 type AuthHandler struct {
 	Client client.Client
 	Logger *zap.Logger
+}
+
+type clientList struct {
+	roles rolesrv.RolesClient
+}
+
+var clients clientList
+
+func NewAuthHandler(config *config.Configuration, service micro.Service, log *zap.Logger) abaeve_auth.UserAuthenticationHandler {
+	c := service.Client()
+
+	clients = clientList{
+		roles: rolesrv.NewRolesClient(config.LookupService("srv", "role"), c),
+	}
+
+	return &AuthHandler{Client: c, Logger: log}
 }
 
 func (ah *AuthHandler) Create(context context.Context, request *abaeve_auth.AuthCreateRequest, response *abaeve_auth.AuthCreateResponse) error {
@@ -142,4 +162,94 @@ func (ah *AuthHandler) Confirm(context context.Context, request *abaeve_auth.Aut
 	response.CharacterName = character.CharacterName
 
 	return nil
+}
+
+func (ah *AuthHandler) SyncToRoleService(ctx context.Context, request *abaeve_auth.NilRequest, response *abaeve_auth.SyncToRoleResponse) error {
+	var allianceMembers = make(map[string]*sets.StringSet)
+	var corpMembers = make(map[string]*sets.StringSet)
+	var allianceSet = sets.NewStringSet()
+	var corpSet = sets.NewStringSet()
+	var filterSet = sets.NewStringSet()
+
+	sugar := ah.Logger.Sugar()
+	sugar.Info("Call to SyncToRoleService()")
+
+	filters, err := clients.roles.GetFilters(ctx, &rolesrv.NilMessage{})
+	if err != nil {
+		return err
+	}
+
+	for f := range filters.FilterList {
+		filterSet.Add(filters.FilterList[f].Name)
+	}
+
+	authMembers, err := repository.AccessRepo.GetMembership()
+	if err != nil {
+		return err
+	}
+
+	// Check if the filters exist, if they don't, create them
+	for m := range authMembers {
+		if _, ok := allianceMembers[authMembers[m].AllianceTicker]; !ok {
+			allianceMembers[authMembers[m].AllianceTicker] = sets.NewStringSet()
+		}
+
+		if _, ok := corpMembers[authMembers[m].CorpTicker]; !ok {
+			corpMembers[authMembers[m].CorpTicker] = sets.NewStringSet()
+		}
+
+		// Why doesn't response get updated?
+		if !filterSet.Contains(authMembers[m].AllianceTicker) {
+			ah.addFilter(ctx, authMembers[m].AllianceTicker, authMembers[m].AllianceName, response)
+		}
+
+		if !filterSet.Contains(authMembers[m].CorpTicker) {
+			ah.addFilter(ctx, authMembers[m].CorpTicker, authMembers[m].CorpName, response)
+		}
+	}
+
+	for m := range authMembers {
+		allianceMembers[authMembers[m].AllianceTicker].Add(authMembers[m].ChatId)
+		corpMembers[authMembers[m].CorpTicker].Add(authMembers[m].ChatId)
+	}
+
+	for a := range allianceMembers {
+		members, err := clients.roles.GetMembers(ctx, &rolesrv.Filter{Name: a})
+		if err != nil {
+			return err
+		}
+
+		allianceSet.FromSlice(members.Members)
+		clients.roles.AddMembers(ctx, &rolesrv.Members{Filter: a, Name: allianceMembers[a].Difference(allianceSet).ToSlice()})
+		clients.roles.RemoveMembers(ctx, &rolesrv.Members{Filter: a, Name: allianceSet.Difference(allianceMembers[a]).ToSlice()})
+	}
+
+	for c := range corpMembers {
+		members, err := clients.roles.GetMembers(ctx, &rolesrv.Filter{Name: c})
+		if err != nil {
+			return err
+		}
+
+		corpSet.FromSlice(members.Members)
+		clients.roles.AddMembers(ctx, &rolesrv.Members{Filter: c, Name: corpMembers[c].Difference(corpSet).ToSlice()})
+		clients.roles.RemoveMembers(ctx, &rolesrv.Members{Filter: c, Name: corpSet.Difference(corpMembers[c]).ToSlice()})
+	}
+
+	clients.roles.SyncRoles(ctx, &rolesrv.NilMessage{})
+	return nil
+}
+
+func (ah AuthHandler) addFilter(ctx context.Context, name string, description string, response *abaeve_auth.SyncToRoleResponse) {
+	sugar := ah.Logger.Sugar()
+	sugar.Infof("Adding filter '%s': %s", name, description)
+
+	clients.roles.AddFilter(ctx, &rolesrv.Filter{
+		Name:        name,
+		Description: description,
+	})
+
+	response.Roles = append(response.Roles, &abaeve_auth.Role{
+		Name:        name,
+		Description: description,
+	})
 }
