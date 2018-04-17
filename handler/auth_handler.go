@@ -170,6 +170,7 @@ func (ah *AuthHandler) SyncToRoleService(ctx context.Context, request *abaeve_au
 	var allianceSet = sets.NewStringSet()
 	var corpSet = sets.NewStringSet()
 	var filterSet = sets.NewStringSet()
+	var roleSet = sets.NewStringSet()
 
 	sugar := ah.Logger.Sugar()
 	sugar.Info("Call to SyncToRoleService()")
@@ -181,6 +182,15 @@ func (ah *AuthHandler) SyncToRoleService(ctx context.Context, request *abaeve_au
 
 	for f := range filters.FilterList {
 		filterSet.Add(filters.FilterList[f].Name)
+	}
+
+	roles, err := clients.roles.GetRoles(ctx, &rolesrv.NilMessage{})
+	if err != nil {
+		return err
+	}
+
+	for r := range roles.Roles {
+		roleSet.Add(roles.Roles[r].Name)
 	}
 
 	authMembers, err := repository.AccessRepo.GetMembership()
@@ -198,13 +208,11 @@ func (ah *AuthHandler) SyncToRoleService(ctx context.Context, request *abaeve_au
 			corpMembers[authMembers[m].CorpTicker] = sets.NewStringSet()
 		}
 
-		// Why doesn't response get updated?
 		if !filterSet.Contains(authMembers[m].AllianceTicker) {
 			ah.addFilter(
 				ctx,
 				authMembers[m].AllianceTicker,
 				authMembers[m].AllianceName,
-				response,
 			)
 		}
 
@@ -212,7 +220,21 @@ func (ah *AuthHandler) SyncToRoleService(ctx context.Context, request *abaeve_au
 			ah.addFilter(ctx,
 				authMembers[m].CorpTicker,
 				authMembers[m].CorpName,
-				response,
+			)
+		}
+
+		if !roleSet.Contains(authMembers[m].AllianceTicker) {
+			ah.addRole(
+				ctx,
+				authMembers[m].AllianceTicker,
+				authMembers[m].AllianceName,
+			)
+		}
+
+		if !roleSet.Contains(authMembers[m].CorpTicker) {
+			ah.addRole(ctx,
+				authMembers[m].CorpTicker,
+				authMembers[m].CorpName,
 			)
 		}
 	}
@@ -224,7 +246,9 @@ func (ah *AuthHandler) SyncToRoleService(ctx context.Context, request *abaeve_au
 
 	ah.addMembers(ctx, allianceMembers, allianceSet)
 	ah.addMembers(ctx, corpMembers, corpSet)
+
 	clients.roles.SyncRoles(ctx, &rolesrv.NilMessage{})
+	clients.roles.SyncMembers(ctx, &rolesrv.NilMessage{})
 	return nil
 }
 
@@ -253,19 +277,35 @@ func (ah AuthHandler) addMembers(
 	return nil
 }
 
-func (ah AuthHandler) addFilter(ctx context.Context, name string, description string, response *abaeve_auth.SyncToRoleResponse) *abaeve_auth.SyncToRoleResponse {
+func (ah AuthHandler) addRole(ctx context.Context, shortName string, name string) error {
+	sugar := ah.Logger.Sugar()
+	sugar.Infof("Adding role '%s': %s", shortName, name)
+
+	_, err := clients.roles.AddRole(ctx, &rolesrv.Role{
+		Type:      "discord",
+		ShortName: shortName,
+		FilterA:   shortName,
+		FilterB:   "wildcard",
+		Name:      name,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (ah AuthHandler) addFilter(ctx context.Context, name string, description string) error {
 	sugar := ah.Logger.Sugar()
 	sugar.Infof("Adding filter '%s': %s", name, description)
 
-	clients.roles.AddFilter(ctx, &rolesrv.Filter{
+	_, err := clients.roles.AddFilter(ctx, &rolesrv.Filter{
 		Name:        name,
 		Description: description,
 	})
+	if err != nil {
+		return err
+	}
 
-	response.Roles = append(response.Roles, &abaeve_auth.Role{
-		Name:        name,
-		Description: description,
-	})
-
-	return response
+	return nil
 }
