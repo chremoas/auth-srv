@@ -190,7 +190,7 @@ func (ah *AuthHandler) SyncToRoleService(ctx context.Context, request *abaeve_au
 	}
 
 	for r := range roles.Roles {
-		roleSet.Add(roles.Roles[r].Name)
+		roleSet.Add(roles.Roles[r].ShortName)
 	}
 
 	authMembers, err := repository.AccessRepo.GetMembership()
