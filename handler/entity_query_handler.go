@@ -5,13 +5,17 @@ import (
 	"github.com/chremoas/auth-srv/repository"
 	"github.com/micro/go-micro/client"
 	"golang.org/x/net/context"
+	"go.uber.org/zap"
 )
 
 type EntityQueryHandler struct {
 	Client client.Client
+	Logger *zap.Logger
 }
 
 func (eqh *EntityQueryHandler) GetAlliances(ctx context.Context, request *abaeve_auth.EntityQueryRequest, response *abaeve_auth.AlliancesResponse) error {
+	eqh.Logger.Info("Call to GetAlliances()")
+
 	dbAliances := repository.AllianceRepo.FindAll()
 	respAlliances := []*abaeve_auth.Alliance{}
 
@@ -31,6 +35,8 @@ func (eqh *EntityQueryHandler) GetAlliances(ctx context.Context, request *abaeve
 }
 
 func (eqh *EntityQueryHandler) GetCorporations(ctx context.Context, request *abaeve_auth.EntityQueryRequest, response *abaeve_auth.CorporationsResponse) error {
+	eqh.Logger.Info("Call to GetCorporations()")
+
 	dbCorporations := repository.CorporationRepo.FindAll()
 	respCorporations := []*abaeve_auth.Corporation{}
 
@@ -54,6 +60,10 @@ func (eqh *EntityQueryHandler) GetCorporations(ctx context.Context, request *aba
 }
 
 func (eqh *EntityQueryHandler) GetCharacters(ctx context.Context, request *abaeve_auth.EntityQueryRequest, response *abaeve_auth.CharactersResponse) error {
+	eqh.Logger.Info("Call to GetCharacters()")
+
+
+
 	dbCharacters := repository.CharacterRepo.FindAll()
 	respCharacters := []*abaeve_auth.Character{}
 
@@ -68,24 +78,6 @@ func (eqh *EntityQueryHandler) GetCharacters(ctx context.Context, request *abaev
 	}
 
 	response.List = respCharacters
-
-	return nil
-}
-
-func (eqh *EntityQueryHandler) GetRoles(ctx context.Context, request *abaeve_auth.EntityQueryRequest, response *abaeve_auth.RoleResponse) error {
-	dbRoles := repository.RoleRepo.FindAll()
-	respRoles := []*abaeve_auth.Role{}
-
-	for _, role := range dbRoles {
-		respRoles = append(respRoles,
-			&abaeve_auth.Role{
-				RoleName:         role.RoleName,
-				ChatServiceGroup: role.ChatServiceGroup,
-			},
-		)
-	}
-
-	response.List = respRoles
 
 	return nil
 }

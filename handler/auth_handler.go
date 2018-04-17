@@ -7,7 +7,12 @@ import (
 	"github.com/chremoas/auth-srv/model"
 	"github.com/chremoas/auth-srv/proto"
 	"github.com/chremoas/auth-srv/repository"
+	rolesrv "github.com/chremoas/role-srv/proto"
+	"github.com/chremoas/services-common/config"
+	"github.com/chremoas/services-common/sets"
+	"github.com/micro/go-micro"
 	"github.com/micro/go-micro/client"
+	"go.uber.org/zap"
 	"golang.org/x/net/context"
 )
 
@@ -21,9 +26,28 @@ func (ae *authError) Error() string {
 
 type AuthHandler struct {
 	Client client.Client
+	Logger *zap.Logger
+}
+
+type clientList struct {
+	roles rolesrv.RolesClient
+}
+
+var clients clientList
+
+func NewAuthHandler(config *config.Configuration, service micro.Service, log *zap.Logger) abaeve_auth.UserAuthenticationHandler {
+	c := service.Client()
+
+	clients = clientList{
+		roles: rolesrv.NewRolesClient(config.LookupService("srv", "role"), c),
+	}
+
+	return &AuthHandler{Client: c, Logger: log}
 }
 
 func (ah *AuthHandler) Create(context context.Context, request *abaeve_auth.AuthCreateRequest, response *abaeve_auth.AuthCreateResponse) error {
+	ah.Logger.Info("Call to Create()")
+
 	var alliance *model.Alliance
 
 	//We MIGHT NOT have any kind of alliance information
@@ -109,6 +133,8 @@ func (ah *AuthHandler) Create(context context.Context, request *abaeve_auth.Auth
 }
 
 func (ah *AuthHandler) Confirm(context context.Context, request *abaeve_auth.AuthConfirmRequest, response *abaeve_auth.AuthConfirmResponse) error {
+	ah.Logger.Info("Call to Confirm()")
+
 	character := repository.CharacterRepo.FindByAutenticationCode(request.AuthenticationCode)
 
 	if character == nil {
@@ -132,35 +158,154 @@ func (ah *AuthHandler) Confirm(context context.Context, request *abaeve_auth.Aut
 		return errors.New("Error linking user: " + err.Error())
 	}
 
-	roles, err := repository.AccessRepo.FindByChatId(user.ChatId)
-
-	if err != nil {
-		return errors.New("Error finding roles: " + err.Error())
-	}
-
-	response.Roles = roles
 	response.Success = true
 	response.CharacterName = character.CharacterName
 
 	return nil
 }
 
-func (ah *AuthHandler) GetRoles(ctx context.Context, request *abaeve_auth.GetRolesRequest, response *abaeve_auth.AuthConfirmResponse) error {
-	user := repository.UserRepo.FindByChatId(request.UserId)
+func (ah *AuthHandler) SyncToRoleService(ctx context.Context, request *abaeve_auth.NilRequest, response *abaeve_auth.SyncToRoleResponse) error {
+	var allianceMembers = make(map[string]*sets.StringSet)
+	var corpMembers = make(map[string]*sets.StringSet)
+	var allianceSet = sets.NewStringSet()
+	var corpSet = sets.NewStringSet()
+	var filterSet = sets.NewStringSet()
+	var roleSet = sets.NewStringSet()
 
-	if user == nil {
-		response.Success = false
-		return nil
-	}
+	sugar := ah.Logger.Sugar()
+	sugar.Info("Call to SyncToRoleService()")
 
-	roles, err := repository.AccessRepo.FindByChatId(request.UserId)
-
+	filters, err := clients.roles.GetFilters(ctx, &rolesrv.NilMessage{})
 	if err != nil {
-		return errors.New("Error finding roles: " + err.Error())
+		return err
 	}
 
-	response.Success = true
-	response.Roles = roles
+	for f := range filters.FilterList {
+		filterSet.Add(filters.FilterList[f].Name)
+	}
+
+	roles, err := clients.roles.GetRoles(ctx, &rolesrv.NilMessage{})
+	if err != nil {
+		return err
+	}
+
+	for r := range roles.Roles {
+		roleSet.Add(roles.Roles[r].Name)
+	}
+
+	authMembers, err := repository.AccessRepo.GetMembership()
+	if err != nil {
+		return err
+	}
+
+	// Check if the filters exist, if they don't, create them
+	for m := range authMembers {
+		if _, ok := allianceMembers[authMembers[m].AllianceTicker]; !ok {
+			allianceMembers[authMembers[m].AllianceTicker] = sets.NewStringSet()
+		}
+
+		if _, ok := corpMembers[authMembers[m].CorpTicker]; !ok {
+			corpMembers[authMembers[m].CorpTicker] = sets.NewStringSet()
+		}
+
+		if !filterSet.Contains(authMembers[m].AllianceTicker) {
+			ah.addFilter(
+				ctx,
+				authMembers[m].AllianceTicker,
+				authMembers[m].AllianceName,
+			)
+		}
+
+		if !filterSet.Contains(authMembers[m].CorpTicker) {
+			ah.addFilter(ctx,
+				authMembers[m].CorpTicker,
+				authMembers[m].CorpName,
+			)
+		}
+
+		if !roleSet.Contains(authMembers[m].AllianceTicker) {
+			ah.addRole(
+				ctx,
+				authMembers[m].AllianceTicker,
+				authMembers[m].AllianceName,
+			)
+		}
+
+		if !roleSet.Contains(authMembers[m].CorpTicker) {
+			ah.addRole(ctx,
+				authMembers[m].CorpTicker,
+				authMembers[m].CorpName,
+			)
+		}
+	}
+
+	for m := range authMembers {
+		allianceMembers[authMembers[m].AllianceTicker].Add(authMembers[m].ChatId)
+		corpMembers[authMembers[m].CorpTicker].Add(authMembers[m].ChatId)
+	}
+
+	ah.addMembers(ctx, allianceMembers, allianceSet)
+	ah.addMembers(ctx, corpMembers, corpSet)
+
+	clients.roles.SyncRoles(ctx, &rolesrv.NilMessage{})
+	clients.roles.SyncMembers(ctx, &rolesrv.NilMessage{})
+	return nil
+}
+
+func (ah AuthHandler) addMembers(
+	ctx context.Context,
+	memberMap map[string]*sets.StringSet,
+	memberSet *sets.StringSet) error {
+
+	for m := range memberMap {
+		memberList, err := clients.roles.GetMembers(ctx, &rolesrv.Filter{Name: m})
+		if err != nil {
+			return err
+		}
+
+		memberSet.FromSlice(memberList.Members)
+		clients.roles.AddMembers(ctx, &rolesrv.Members{
+			Filter: m,
+			Name:   memberMap[m].Difference(memberSet).ToSlice(),
+		})
+		clients.roles.RemoveMembers(ctx, &rolesrv.Members{
+			Filter: m,
+			Name:   memberSet.Difference(memberMap[m]).ToSlice(),
+		})
+	}
+
+	return nil
+}
+
+func (ah AuthHandler) addRole(ctx context.Context, shortName string, name string) error {
+	sugar := ah.Logger.Sugar()
+	sugar.Infof("Adding role '%s': %s", shortName, name)
+
+	_, err := clients.roles.AddRole(ctx, &rolesrv.Role{
+		Type:      "discord",
+		ShortName: shortName,
+		FilterA:   shortName,
+		FilterB:   "wildcard",
+		Name:      name,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (ah AuthHandler) addFilter(ctx context.Context, name string, description string) error {
+	sugar := ah.Logger.Sugar()
+	sugar.Infof("Adding filter '%s': %s", name, description)
+
+	_, err := clients.roles.AddFilter(ctx, &rolesrv.Filter{
+		Name:        name,
+		Description: description,
+	})
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

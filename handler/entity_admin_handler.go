@@ -6,15 +6,19 @@ import (
 	"github.com/chremoas/auth-srv/proto"
 	"github.com/chremoas/auth-srv/repository"
 	"github.com/micro/go-micro/client"
+	"go.uber.org/zap"
 	"golang.org/x/net/context"
 )
 
 type EntityAdminHandler struct {
 	Client client.Client
+	Logger *zap.Logger
 }
 
 //TODO: Do I really give a shit on delete whether or not the attributes besides id's are valid?
 func (eah *EntityAdminHandler) AllianceUpdate(ctx context.Context, request *abaeve_auth.AllianceAdminRequest, response *abaeve_auth.EntityAdminResponse) error {
+	eah.Logger.Info("Call to AllianceUpdate()")
+
 	if request.Alliance == nil {
 		return fmt.Errorf("Invalid Alliance (nil)")
 	}
@@ -57,6 +61,8 @@ func (eah *EntityAdminHandler) AllianceUpdate(ctx context.Context, request *abae
 }
 
 func (eah *EntityAdminHandler) CorporationUpdate(ctx context.Context, request *abaeve_auth.CorporationAdminRequest, response *abaeve_auth.EntityAdminResponse) error {
+	eah.Logger.Info("Call to CorporationUpdate()")
+
 	if request.Corporation == nil {
 		return fmt.Errorf("Invalid Corporation (nil)")
 	}
@@ -108,6 +114,8 @@ func (eah *EntityAdminHandler) CorporationUpdate(ctx context.Context, request *a
 }
 
 func (eah *EntityAdminHandler) CharacterUpdate(ctx context.Context, request *abaeve_auth.CharacterAdminRequest, response *abaeve_auth.EntityAdminResponse) error {
+	eah.Logger.Info("Call to CharacterUpdate()")
+
 	if request.Character == nil {
 		return fmt.Errorf("Invalid Character (nil)")
 	}
@@ -149,48 +157,6 @@ func (eah *EntityAdminHandler) CharacterUpdate(ctx context.Context, request *aba
 		if err != nil {
 			return err
 		}
-	}
-
-	response.Success = true
-	return nil
-}
-
-func (eah *EntityAdminHandler) RoleUpdate(ctx context.Context, request *abaeve_auth.RoleAdminRequest, response *abaeve_auth.EntityAdminResponse) error {
-	if request.Role == nil {
-		return fmt.Errorf("Invalid Role (nil)")
-	}
-
-	if len(request.Role.RoleName) == 0 {
-		return fmt.Errorf("Invalid Role Name (0/nil)")
-	}
-
-	if request.Operation == abaeve_auth.EntityOperation_ADD_OR_UPDATE {
-		if len(request.Role.ChatServiceGroup) == 0 {
-			return fmt.Errorf("Invalid Chat Service Group (empty/nil)")
-		}
-	}
-
-	//role := repository.RoleRepo.FindByRoleName(request.Role.Name)
-	//if role == nil {
-	//	response.Success = false
-	//	response.ErrorText = "Invalid Corporation Id, Corporation doesn't exist"
-	//	return nil
-	//}
-
-	var err error
-	if request.Operation == abaeve_auth.EntityOperation_ADD_OR_UPDATE {
-		role := model.Role{
-			RoleName:         request.Role.RoleName,
-			ChatServiceGroup: request.Role.ChatServiceGroup,
-		}
-
-		err = repository.RoleRepo.Save(&role)
-	} else {
-		err = repository.RoleRepo.Delete(request.Role.RoleName)
-	}
-
-	if err != nil {
-		return err
 	}
 
 	response.Success = true

@@ -12,10 +12,6 @@ func (Character) TableName() string {
 	return "characters"
 }
 
-func (Role) TableName() string {
-	return "roles"
-}
-
 func (User) TableName() string {
 	return "users"
 }
