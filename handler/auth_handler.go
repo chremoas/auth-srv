@@ -200,11 +200,20 @@ func (ah *AuthHandler) SyncToRoleService(ctx context.Context, request *abaeve_au
 
 		// Why doesn't response get updated?
 		if !filterSet.Contains(authMembers[m].AllianceTicker) {
-			ah.addFilter(ctx, authMembers[m].AllianceTicker, authMembers[m].AllianceName, response)
+			ah.addFilter(
+				ctx,
+				authMembers[m].AllianceTicker,
+				authMembers[m].AllianceName,
+				response,
+			)
 		}
 
 		if !filterSet.Contains(authMembers[m].CorpTicker) {
-			ah.addFilter(ctx, authMembers[m].CorpTicker, authMembers[m].CorpName, response)
+			ah.addFilter(ctx,
+				authMembers[m].CorpTicker,
+				authMembers[m].CorpName,
+				response,
+			)
 		}
 	}
 
@@ -213,33 +222,38 @@ func (ah *AuthHandler) SyncToRoleService(ctx context.Context, request *abaeve_au
 		corpMembers[authMembers[m].CorpTicker].Add(authMembers[m].ChatId)
 	}
 
-	for a := range allianceMembers {
-		members, err := clients.roles.GetMembers(ctx, &rolesrv.Filter{Name: a})
-		if err != nil {
-			return err
-		}
-
-		allianceSet.FromSlice(members.Members)
-		clients.roles.AddMembers(ctx, &rolesrv.Members{Filter: a, Name: allianceMembers[a].Difference(allianceSet).ToSlice()})
-		clients.roles.RemoveMembers(ctx, &rolesrv.Members{Filter: a, Name: allianceSet.Difference(allianceMembers[a]).ToSlice()})
-	}
-
-	for c := range corpMembers {
-		members, err := clients.roles.GetMembers(ctx, &rolesrv.Filter{Name: c})
-		if err != nil {
-			return err
-		}
-
-		corpSet.FromSlice(members.Members)
-		clients.roles.AddMembers(ctx, &rolesrv.Members{Filter: c, Name: corpMembers[c].Difference(corpSet).ToSlice()})
-		clients.roles.RemoveMembers(ctx, &rolesrv.Members{Filter: c, Name: corpSet.Difference(corpMembers[c]).ToSlice()})
-	}
-
+	ah.addMembers(ctx, allianceMembers, allianceSet)
+	ah.addMembers(ctx, corpMembers, corpSet)
 	clients.roles.SyncRoles(ctx, &rolesrv.NilMessage{})
 	return nil
 }
 
-func (ah AuthHandler) addFilter(ctx context.Context, name string, description string, response *abaeve_auth.SyncToRoleResponse) {
+func (ah AuthHandler) addMembers(
+	ctx context.Context,
+	memberMap map[string]*sets.StringSet,
+	memberSet *sets.StringSet) error {
+
+	for m := range memberMap {
+		memberList, err := clients.roles.GetMembers(ctx, &rolesrv.Filter{Name: m})
+		if err != nil {
+			return err
+		}
+
+		memberSet.FromSlice(memberList.Members)
+		clients.roles.AddMembers(ctx, &rolesrv.Members{
+			Filter: m,
+			Name:   memberMap[m].Difference(memberSet).ToSlice(),
+		})
+		clients.roles.RemoveMembers(ctx, &rolesrv.Members{
+			Filter: m,
+			Name:   memberSet.Difference(memberMap[m]).ToSlice(),
+		})
+	}
+
+	return nil
+}
+
+func (ah AuthHandler) addFilter(ctx context.Context, name string, description string, response *abaeve_auth.SyncToRoleResponse) *abaeve_auth.SyncToRoleResponse {
 	sugar := ah.Logger.Sugar()
 	sugar.Infof("Adding filter '%s': %s", name, description)
 
@@ -252,4 +266,6 @@ func (ah AuthHandler) addFilter(ctx context.Context, name string, description st
 		Name:        name,
 		Description: description,
 	})
+
+	return response
 }
