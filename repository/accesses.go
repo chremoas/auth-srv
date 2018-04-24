@@ -3,6 +3,7 @@ package repository
 
 import (
 	"github.com/jmoiron/sqlx"
+	"database/sql"
 )
 
 type AccessesRepository interface {
@@ -122,7 +123,7 @@ SELECT a.alliance_name
     , c.corporation_ticker
     , u.chat_id
 FROM corporations c
-INNER JOIN alliances a
+LEFT JOIN alliances a
     ON c.alliance_id = a.alliance_id
 INNER JOIN characters ch
     ON c.corporation_id = ch.corporation_id
@@ -133,11 +134,11 @@ INNER JOIN users u
 `
 
 type membership struct {
-	AllianceName   string `db:"alliance_name"`
-	AllianceTicker string `db:"alliance_ticker"`
-	CorpName       string `db:"corporation_name"`
-	CorpTicker     string `db:"corporation_ticker"`
-	ChatId         string `db:"chat_id"`
+	AllianceName   sql.NullString `db:"alliance_name"`
+	AllianceTicker sql.NullString `db:"alliance_ticker"`
+	CorpName       sql.NullString `db:"corporation_name"`
+	CorpTicker     sql.NullString `db:"corporation_ticker"`
+	ChatId         sql.NullString `db:"chat_id"`
 }
 
 func (acc *accessesRepo) GetMembership() (members []membership, err error) {

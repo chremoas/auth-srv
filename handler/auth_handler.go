@@ -200,48 +200,48 @@ func (ah *AuthHandler) SyncToRoleService(ctx context.Context, request *abaeve_au
 
 	// Check if the filters exist, if they don't, create them
 	for m := range authMembers {
-		if _, ok := allianceMembers[authMembers[m].AllianceTicker]; !ok {
-			allianceMembers[authMembers[m].AllianceTicker] = sets.NewStringSet()
+		if _, ok := allianceMembers[authMembers[m].AllianceTicker.String]; !ok {
+			allianceMembers[authMembers[m].AllianceTicker.String] = sets.NewStringSet()
 		}
 
-		if _, ok := corpMembers[authMembers[m].CorpTicker]; !ok {
-			corpMembers[authMembers[m].CorpTicker] = sets.NewStringSet()
+		if _, ok := corpMembers[authMembers[m].CorpTicker.String]; !ok {
+			corpMembers[authMembers[m].CorpTicker.String] = sets.NewStringSet()
 		}
 
-		if !filterSet.Contains(authMembers[m].AllianceTicker) {
+		if !filterSet.Contains(authMembers[m].AllianceTicker.String) {
 			ah.addFilter(
 				ctx,
-				authMembers[m].AllianceTicker,
-				authMembers[m].AllianceName,
+				authMembers[m].AllianceTicker.String,
+				authMembers[m].AllianceName.String,
 			)
 		}
 
-		if !filterSet.Contains(authMembers[m].CorpTicker) {
+		if !filterSet.Contains(authMembers[m].CorpTicker.String) {
 			ah.addFilter(ctx,
-				authMembers[m].CorpTicker,
-				authMembers[m].CorpName,
+				authMembers[m].CorpTicker.String,
+				authMembers[m].CorpName.String,
 			)
 		}
 
-		if !roleSet.Contains(authMembers[m].AllianceTicker) {
+		if !roleSet.Contains(authMembers[m].AllianceTicker.String) {
 			ah.addRole(
 				ctx,
-				authMembers[m].AllianceTicker,
-				authMembers[m].AllianceName,
+				authMembers[m].AllianceTicker.String,
+				authMembers[m].AllianceName.String,
 			)
 		}
 
-		if !roleSet.Contains(authMembers[m].CorpTicker) {
+		if !roleSet.Contains(authMembers[m].CorpTicker.String) {
 			ah.addRole(ctx,
-				authMembers[m].CorpTicker,
-				authMembers[m].CorpName,
+				authMembers[m].CorpTicker.String,
+				authMembers[m].CorpName.String,
 			)
 		}
 	}
 
 	for m := range authMembers {
-		allianceMembers[authMembers[m].AllianceTicker].Add(authMembers[m].ChatId)
-		corpMembers[authMembers[m].CorpTicker].Add(authMembers[m].ChatId)
+		allianceMembers[authMembers[m].AllianceTicker.String].Add(authMembers[m].ChatId.String)
+		corpMembers[authMembers[m].CorpTicker.String].Add(authMembers[m].ChatId.String)
 	}
 
 	ah.addMembers(ctx, allianceMembers, allianceSet)
@@ -279,7 +279,9 @@ func (ah AuthHandler) addMembers(
 
 func (ah AuthHandler) addRole(ctx context.Context, shortName string, name string) error {
 	sugar := ah.Logger.Sugar()
-	sugar.Infof("Adding role '%s': %s", shortName, name)
+	if shortName != "" {
+		sugar.Infof("Adding role '%s': %s", shortName, name)
+	}
 
 	_, err := clients.roles.AddRole(ctx, &rolesrv.Role{
 		Type:      "discord",
@@ -297,7 +299,9 @@ func (ah AuthHandler) addRole(ctx context.Context, shortName string, name string
 
 func (ah AuthHandler) addFilter(ctx context.Context, name string, description string) error {
 	sugar := ah.Logger.Sugar()
-	sugar.Infof("Adding filter '%s': %s", name, description)
+	if name != "" {
+		sugar.Infof("Adding filter '%s': %s", name, description)
+	}
 
 	_, err := clients.roles.AddFilter(ctx, &rolesrv.Filter{
 		Name:        name,
