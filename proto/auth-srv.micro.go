@@ -62,7 +62,7 @@ type UserAuthenticationService interface {
 	Create(ctx context.Context, in *AuthCreateRequest, opts ...client.CallOption) (*AuthCreateResponse, error)
 	// Called by the auth-bot or another system to state that they've linked a character to their account
 	Confirm(ctx context.Context, in *AuthConfirmRequest, opts ...client.CallOption) (*AuthConfirmResponse, error)
-	SyncToRoleService(ctx context.Context, in *NilRequest, opts ...client.CallOption) (*NilRequest, error)
+	SyncToRoleService(ctx context.Context, in *NilRequest, opts ...client.CallOption) (*SyncToRoleResponse, error)
 }
 
 type userAuthenticationService struct {
@@ -103,9 +103,9 @@ func (c *userAuthenticationService) Confirm(ctx context.Context, in *AuthConfirm
 	return out, nil
 }
 
-func (c *userAuthenticationService) SyncToRoleService(ctx context.Context, in *NilRequest, opts ...client.CallOption) (*NilRequest, error) {
+func (c *userAuthenticationService) SyncToRoleService(ctx context.Context, in *NilRequest, opts ...client.CallOption) (*SyncToRoleResponse, error) {
 	req := c.c.NewRequest(c.name, "UserAuthentication.SyncToRoleService", in)
-	out := new(NilRequest)
+	out := new(SyncToRoleResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -120,14 +120,14 @@ type UserAuthenticationHandler interface {
 	Create(context.Context, *AuthCreateRequest, *AuthCreateResponse) error
 	// Called by the auth-bot or another system to state that they've linked a character to their account
 	Confirm(context.Context, *AuthConfirmRequest, *AuthConfirmResponse) error
-	SyncToRoleService(context.Context, *NilRequest, *NilRequest) error
+	SyncToRoleService(context.Context, *NilRequest, *SyncToRoleResponse) error
 }
 
 func RegisterUserAuthenticationHandler(s server.Server, hdlr UserAuthenticationHandler, opts ...server.HandlerOption) {
 	type userAuthentication interface {
 		Create(ctx context.Context, in *AuthCreateRequest, out *AuthCreateResponse) error
 		Confirm(ctx context.Context, in *AuthConfirmRequest, out *AuthConfirmResponse) error
-		SyncToRoleService(ctx context.Context, in *NilRequest, out *NilRequest) error
+		SyncToRoleService(ctx context.Context, in *NilRequest, out *SyncToRoleResponse) error
 	}
 	type UserAuthentication struct {
 		userAuthentication
@@ -148,7 +148,7 @@ func (h *userAuthenticationHandler) Confirm(ctx context.Context, in *AuthConfirm
 	return h.UserAuthenticationHandler.Confirm(ctx, in, out)
 }
 
-func (h *userAuthenticationHandler) SyncToRoleService(ctx context.Context, in *NilRequest, out *NilRequest) error {
+func (h *userAuthenticationHandler) SyncToRoleService(ctx context.Context, in *NilRequest, out *SyncToRoleResponse) error {
 	return h.UserAuthenticationHandler.SyncToRoleService(ctx, in, out)
 }
 

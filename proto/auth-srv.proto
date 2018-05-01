@@ -21,7 +21,7 @@ service UserAuthentication {
     //Called by the auth-bot or another system to state that they've linked a character to their account
     rpc Confirm (AuthConfirmRequest) returns (AuthConfirmResponse) {
     };
-    rpc SyncToRoleService (NilRequest) returns (NilRequest) {};
+    rpc SyncToRoleService (NilRequest) returns (SyncToRoleResponse) {};
 }
 
 service EntityQuery {

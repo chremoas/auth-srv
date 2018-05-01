@@ -30,7 +30,7 @@ type AuthHandler struct {
 }
 
 type clientList struct {
-	roles rolesrv.RolesClient
+	roles rolesrv.RolesService
 }
 
 var clients clientList
@@ -39,7 +39,7 @@ func NewAuthHandler(config *config.Configuration, service micro.Service, log *za
 	c := service.Client()
 
 	clients = clientList{
-		roles: rolesrv.NewRolesClient(config.LookupService("srv", "role"), c),
+		roles: rolesrv.NewRolesService(config.LookupService("srv", "role"), c),
 	}
 
 	return &AuthHandler{Client: c, Logger: log}
