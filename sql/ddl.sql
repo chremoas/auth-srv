@@ -1,3 +1,5 @@
+USE chremoas;
+
 CREATE TABLE authentication_scopes
 (
   authentication_scope_id   BIGINT(20) PRIMARY KEY NOT NULL AUTO_INCREMENT,
