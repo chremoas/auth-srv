@@ -170,24 +170,29 @@ func (ah *AuthHandler) SyncToRoleService(ctx context.Context, request *abaeve_au
 	if err != nil {
 		return err
 	}
+	sugar.Info("Got Filters")
 
 	for f := range filters.FilterList {
 		filterSet.Add(filters.FilterList[f].Name)
 	}
+	sugar.Infof("Filters: %v", filterSet)
 
 	roles, err := clients.roles.GetRoles(ctx, &rolesrv.NilMessage{})
 	if err != nil {
 		return err
 	}
+	sugar.Info("Got Roles")
 
 	for r := range roles.Roles {
 		roleSet.Add(roles.Roles[r].ShortName)
 	}
+	sugar.Infof("Roles: %v", roleSet)
 
 	authMembers, err := repository.AccessRepo.GetMembership()
 	if err != nil {
 		return err
 	}
+	sugar.Infof("authMembers: %v", authMembers)
 
 	// Check if the filters exist, if they don't, create them
 	for m := range authMembers {
@@ -205,6 +210,7 @@ func (ah *AuthHandler) SyncToRoleService(ctx context.Context, request *abaeve_au
 				authMembers[m].AllianceTicker.String,
 				authMembers[m].AllianceName.String,
 			)
+			sugar.Infof("Added Alliance Filter: %s", authMembers[m].AllianceName.String)
 		}
 
 		if !filterSet.Contains(authMembers[m].CorpTicker.String) {
@@ -212,6 +218,7 @@ func (ah *AuthHandler) SyncToRoleService(ctx context.Context, request *abaeve_au
 				authMembers[m].CorpTicker.String,
 				authMembers[m].CorpName.String,
 			)
+			sugar.Infof("Added Corp Filter: %s", authMembers[m].CorpName.String)
 		}
 
 		if !roleSet.Contains(authMembers[m].AllianceTicker.String) {
@@ -220,6 +227,7 @@ func (ah *AuthHandler) SyncToRoleService(ctx context.Context, request *abaeve_au
 				authMembers[m].AllianceTicker.String,
 				authMembers[m].AllianceName.String,
 			)
+			sugar.Infof("Added Alliance Role: %s", authMembers[m].AllianceName.String)
 		}
 
 		if !roleSet.Contains(authMembers[m].CorpTicker.String) {
@@ -227,6 +235,7 @@ func (ah *AuthHandler) SyncToRoleService(ctx context.Context, request *abaeve_au
 				authMembers[m].CorpTicker.String,
 				authMembers[m].CorpName.String,
 			)
+			sugar.Infof("Added Corp Role: %s", authMembers[m].CorpName.String)
 		}
 	}
 
@@ -235,11 +244,16 @@ func (ah *AuthHandler) SyncToRoleService(ctx context.Context, request *abaeve_au
 		corpMembers[authMembers[m].CorpTicker.String].Add(authMembers[m].ChatId.String)
 	}
 
+	sugar.Info("Adding Members")
 	ah.addMembers(ctx, allianceMembers, allianceSet)
 	ah.addMembers(ctx, corpMembers, corpSet)
+	sugar.Info("Added Members")
 
+	sugar.Info("Syncing Roles")
 	clients.roles.SyncRoles(ctx, &rolesrv.NilMessage{})
+	sugar.Info("Syncing Members")
 	clients.roles.SyncMembers(ctx, &rolesrv.NilMessage{})
+	sugar.Info("Done Syncing")
 	return nil
 }
 
