@@ -155,7 +155,7 @@ func (ah *AuthHandler) Confirm(context context.Context, request *abaeve_auth.Aut
 	return nil
 }
 
-func (ah *AuthHandler) SyncToRoleService(ctx context.Context, request *abaeve_auth.NilRequest, response *abaeve_auth.SyncToRoleResponse) error {
+func (ah *AuthHandler) SyncToRoleService(ctx context.Context, request *abaeve_auth.SyncRequest, response *abaeve_auth.SyncToRoleResponse) error {
 	var allianceMembers = make(map[string]*sets.StringSet)
 	var corpMembers = make(map[string]*sets.StringSet)
 	var allianceSet = sets.NewStringSet()
@@ -249,10 +249,11 @@ func (ah *AuthHandler) SyncToRoleService(ctx context.Context, request *abaeve_au
 	ah.addMembers(ctx, corpMembers, corpSet)
 	sugar.Info("Added Members")
 
+	syncRequest := &rolesrv.SyncRequest{ChannelId: request.ChannelId, UserId: request.UserId}
 	sugar.Info("Syncing Roles")
-	clients.roles.SyncRoles(ctx, &rolesrv.NilMessage{})
+	clients.roles.SyncRoles(ctx, syncRequest)
 	sugar.Info("Syncing Members")
-	clients.roles.SyncMembers(ctx, &rolesrv.NilMessage{})
+	clients.roles.SyncMembers(ctx, syncRequest)
 	sugar.Info("Done Syncing")
 	return nil
 }
