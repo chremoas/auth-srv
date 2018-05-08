@@ -125,11 +125,11 @@ SELECT a.alliance_name
 FROM corporations c
 LEFT JOIN alliances a
     ON c.alliance_id = a.alliance_id
-INNER JOIN characters ch
+LEFT JOIN characters ch
     ON c.corporation_id = ch.corporation_id
-INNER JOIN user_character_map ucm
+LEFT JOIN user_character_map ucm
     ON ch.character_id = ucm.character_id
-INNER JOIN users u
+LEFT JOIN users u
     ON u.user_id = ucm.user_id;
 `
 
