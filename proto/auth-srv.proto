@@ -16,30 +16,22 @@ enum EntityOperation {
 
 service UserAuthentication {
     //Called by the auth-web to state someone has started the auth process
-    rpc Create (AuthCreateRequest) returns (AuthCreateResponse) {
-    };
+    rpc Create (AuthCreateRequest) returns (AuthCreateResponse) {};
     //Called by the auth-bot or another system to state that they've linked a character to their account
-    rpc Confirm (AuthConfirmRequest) returns (AuthConfirmResponse) {
-    };
+    rpc Confirm (AuthConfirmRequest) returns (AuthConfirmResponse) {};
     rpc SyncToRoleService (SyncRequest) returns (SyncToRoleResponse) {};
 }
 
 service EntityQuery {
-    rpc GetAlliances (EntityQueryRequest) returns (AlliancesResponse) {
-    };
-    rpc GetCorporations (EntityQueryRequest) returns (CorporationsResponse) {
-    };
-    rpc GetCharacters (EntityQueryRequest) returns (CharactersResponse) {
-    };
+    rpc GetAlliances (EntityQueryRequest) returns (AlliancesResponse) {};
+    rpc GetCorporations (EntityQueryRequest) returns (CorporationsResponse) {};
+    rpc GetCharacters (EntityQueryRequest) returns (CharactersResponse) {};
 }
 
 service EntityAdmin {
-    rpc AllianceUpdate (AllianceAdminRequest) returns (EntityAdminResponse) {
-    };
-    rpc CorporationUpdate (CorporationAdminRequest) returns (EntityAdminResponse) {
-    };
-    rpc CharacterUpdate (CharacterAdminRequest) returns (EntityAdminResponse) {
-    };
+    rpc AllianceUpdate (AllianceAdminRequest) returns (EntityAdminResponse) {};
+    rpc CorporationUpdate (CorporationAdminRequest) returns (EntityAdminResponse) {};
+    rpc CharacterUpdate (CharacterAdminRequest) returns (EntityAdminResponse) {};
 }
 
 message SyncRequest {
