@@ -35,8 +35,9 @@ service EntityAdmin {
 }
 
 message SyncRequest {
-    string channelId = 1;
-    string userId = 2;
+    string ChannelId = 1;
+    string UserId = 2;
+    bool SendMessage = 3;
 }
 
 message Role {

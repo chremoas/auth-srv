@@ -249,7 +249,7 @@ func (ah *AuthHandler) SyncToRoleService(ctx context.Context, request *abaeve_au
 	ah.addMembers(ctx, corpMembers, corpSet)
 	sugar.Info("Added Members")
 
-	syncRequest := &rolesrv.SyncRequest{ChannelId: request.ChannelId, UserId: request.UserId, SendMessage: true}
+	syncRequest := &rolesrv.SyncRequest{ChannelId: request.ChannelId, UserId: request.UserId, SendMessage: request.SendMessage}
 	sugar.Info("Syncing Roles and Members")
 	clients.roles.SyncToChatService(ctx, syncRequest)
 	sugar.Info("Done Syncing")

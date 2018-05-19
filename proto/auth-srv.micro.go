@@ -66,25 +66,25 @@ type UserAuthenticationService interface {
 }
 
 type userAuthenticationService struct {
-	c    client.Client
-	name string
+	c           client.Client
+	serviceName string
 }
 
-func NewUserAuthenticationService(name string, c client.Client) UserAuthenticationService {
+func UserAuthenticationServiceClient(serviceName string, c client.Client) UserAuthenticationService {
 	if c == nil {
 		c = client.NewClient()
 	}
-	if len(name) == 0 {
-		name = "abaeve.auth"
+	if len(serviceName) == 0 {
+		serviceName = "abaeve.auth"
 	}
 	return &userAuthenticationService{
-		c:    c,
-		name: name,
+		c:           c,
+		serviceName: serviceName,
 	}
 }
 
 func (c *userAuthenticationService) Create(ctx context.Context, in *AuthCreateRequest, opts ...client.CallOption) (*AuthCreateResponse, error) {
-	req := c.c.NewRequest(c.name, "UserAuthentication.Create", in)
+	req := c.c.NewRequest(c.serviceName, "UserAuthentication.Create", in)
 	out := new(AuthCreateResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -94,7 +94,7 @@ func (c *userAuthenticationService) Create(ctx context.Context, in *AuthCreateRe
 }
 
 func (c *userAuthenticationService) Confirm(ctx context.Context, in *AuthConfirmRequest, opts ...client.CallOption) (*AuthConfirmResponse, error) {
-	req := c.c.NewRequest(c.name, "UserAuthentication.Confirm", in)
+	req := c.c.NewRequest(c.serviceName, "UserAuthentication.Confirm", in)
 	out := new(AuthConfirmResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -104,7 +104,7 @@ func (c *userAuthenticationService) Confirm(ctx context.Context, in *AuthConfirm
 }
 
 func (c *userAuthenticationService) SyncToRoleService(ctx context.Context, in *SyncRequest, opts ...client.CallOption) (*SyncToRoleResponse, error) {
-	req := c.c.NewRequest(c.name, "UserAuthentication.SyncToRoleService", in)
+	req := c.c.NewRequest(c.serviceName, "UserAuthentication.SyncToRoleService", in)
 	out := new(SyncToRoleResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -124,31 +124,22 @@ type UserAuthenticationHandler interface {
 }
 
 func RegisterUserAuthenticationHandler(s server.Server, hdlr UserAuthenticationHandler, opts ...server.HandlerOption) {
-	type userAuthentication interface {
-		Create(ctx context.Context, in *AuthCreateRequest, out *AuthCreateResponse) error
-		Confirm(ctx context.Context, in *AuthConfirmRequest, out *AuthConfirmResponse) error
-		SyncToRoleService(ctx context.Context, in *SyncRequest, out *SyncToRoleResponse) error
-	}
-	type UserAuthentication struct {
-		userAuthentication
-	}
-	h := &userAuthenticationHandler{hdlr}
-	s.Handle(s.NewHandler(&UserAuthentication{h}, opts...))
+	s.Handle(s.NewHandler(&UserAuthentication{hdlr}, opts...))
 }
 
-type userAuthenticationHandler struct {
+type UserAuthentication struct {
 	UserAuthenticationHandler
 }
 
-func (h *userAuthenticationHandler) Create(ctx context.Context, in *AuthCreateRequest, out *AuthCreateResponse) error {
+func (h *UserAuthentication) Create(ctx context.Context, in *AuthCreateRequest, out *AuthCreateResponse) error {
 	return h.UserAuthenticationHandler.Create(ctx, in, out)
 }
 
-func (h *userAuthenticationHandler) Confirm(ctx context.Context, in *AuthConfirmRequest, out *AuthConfirmResponse) error {
+func (h *UserAuthentication) Confirm(ctx context.Context, in *AuthConfirmRequest, out *AuthConfirmResponse) error {
 	return h.UserAuthenticationHandler.Confirm(ctx, in, out)
 }
 
-func (h *userAuthenticationHandler) SyncToRoleService(ctx context.Context, in *SyncRequest, out *SyncToRoleResponse) error {
+func (h *UserAuthentication) SyncToRoleService(ctx context.Context, in *SyncRequest, out *SyncToRoleResponse) error {
 	return h.UserAuthenticationHandler.SyncToRoleService(ctx, in, out)
 }
 
@@ -161,25 +152,25 @@ type EntityQueryService interface {
 }
 
 type entityQueryService struct {
-	c    client.Client
-	name string
+	c           client.Client
+	serviceName string
 }
 
-func NewEntityQueryService(name string, c client.Client) EntityQueryService {
+func EntityQueryServiceClient(serviceName string, c client.Client) EntityQueryService {
 	if c == nil {
 		c = client.NewClient()
 	}
-	if len(name) == 0 {
-		name = "abaeve.auth"
+	if len(serviceName) == 0 {
+		serviceName = "abaeve.auth"
 	}
 	return &entityQueryService{
-		c:    c,
-		name: name,
+		c:           c,
+		serviceName: serviceName,
 	}
 }
 
 func (c *entityQueryService) GetAlliances(ctx context.Context, in *EntityQueryRequest, opts ...client.CallOption) (*AlliancesResponse, error) {
-	req := c.c.NewRequest(c.name, "EntityQuery.GetAlliances", in)
+	req := c.c.NewRequest(c.serviceName, "EntityQuery.GetAlliances", in)
 	out := new(AlliancesResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -189,7 +180,7 @@ func (c *entityQueryService) GetAlliances(ctx context.Context, in *EntityQueryRe
 }
 
 func (c *entityQueryService) GetCorporations(ctx context.Context, in *EntityQueryRequest, opts ...client.CallOption) (*CorporationsResponse, error) {
-	req := c.c.NewRequest(c.name, "EntityQuery.GetCorporations", in)
+	req := c.c.NewRequest(c.serviceName, "EntityQuery.GetCorporations", in)
 	out := new(CorporationsResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -199,7 +190,7 @@ func (c *entityQueryService) GetCorporations(ctx context.Context, in *EntityQuer
 }
 
 func (c *entityQueryService) GetCharacters(ctx context.Context, in *EntityQueryRequest, opts ...client.CallOption) (*CharactersResponse, error) {
-	req := c.c.NewRequest(c.name, "EntityQuery.GetCharacters", in)
+	req := c.c.NewRequest(c.serviceName, "EntityQuery.GetCharacters", in)
 	out := new(CharactersResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -217,31 +208,22 @@ type EntityQueryHandler interface {
 }
 
 func RegisterEntityQueryHandler(s server.Server, hdlr EntityQueryHandler, opts ...server.HandlerOption) {
-	type entityQuery interface {
-		GetAlliances(ctx context.Context, in *EntityQueryRequest, out *AlliancesResponse) error
-		GetCorporations(ctx context.Context, in *EntityQueryRequest, out *CorporationsResponse) error
-		GetCharacters(ctx context.Context, in *EntityQueryRequest, out *CharactersResponse) error
-	}
-	type EntityQuery struct {
-		entityQuery
-	}
-	h := &entityQueryHandler{hdlr}
-	s.Handle(s.NewHandler(&EntityQuery{h}, opts...))
+	s.Handle(s.NewHandler(&EntityQuery{hdlr}, opts...))
 }
 
-type entityQueryHandler struct {
+type EntityQuery struct {
 	EntityQueryHandler
 }
 
-func (h *entityQueryHandler) GetAlliances(ctx context.Context, in *EntityQueryRequest, out *AlliancesResponse) error {
+func (h *EntityQuery) GetAlliances(ctx context.Context, in *EntityQueryRequest, out *AlliancesResponse) error {
 	return h.EntityQueryHandler.GetAlliances(ctx, in, out)
 }
 
-func (h *entityQueryHandler) GetCorporations(ctx context.Context, in *EntityQueryRequest, out *CorporationsResponse) error {
+func (h *EntityQuery) GetCorporations(ctx context.Context, in *EntityQueryRequest, out *CorporationsResponse) error {
 	return h.EntityQueryHandler.GetCorporations(ctx, in, out)
 }
 
-func (h *entityQueryHandler) GetCharacters(ctx context.Context, in *EntityQueryRequest, out *CharactersResponse) error {
+func (h *EntityQuery) GetCharacters(ctx context.Context, in *EntityQueryRequest, out *CharactersResponse) error {
 	return h.EntityQueryHandler.GetCharacters(ctx, in, out)
 }
 
@@ -254,25 +236,25 @@ type EntityAdminService interface {
 }
 
 type entityAdminService struct {
-	c    client.Client
-	name string
+	c           client.Client
+	serviceName string
 }
 
-func NewEntityAdminService(name string, c client.Client) EntityAdminService {
+func EntityAdminServiceClient(serviceName string, c client.Client) EntityAdminService {
 	if c == nil {
 		c = client.NewClient()
 	}
-	if len(name) == 0 {
-		name = "abaeve.auth"
+	if len(serviceName) == 0 {
+		serviceName = "abaeve.auth"
 	}
 	return &entityAdminService{
-		c:    c,
-		name: name,
+		c:           c,
+		serviceName: serviceName,
 	}
 }
 
 func (c *entityAdminService) AllianceUpdate(ctx context.Context, in *AllianceAdminRequest, opts ...client.CallOption) (*EntityAdminResponse, error) {
-	req := c.c.NewRequest(c.name, "EntityAdmin.AllianceUpdate", in)
+	req := c.c.NewRequest(c.serviceName, "EntityAdmin.AllianceUpdate", in)
 	out := new(EntityAdminResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -282,7 +264,7 @@ func (c *entityAdminService) AllianceUpdate(ctx context.Context, in *AllianceAdm
 }
 
 func (c *entityAdminService) CorporationUpdate(ctx context.Context, in *CorporationAdminRequest, opts ...client.CallOption) (*EntityAdminResponse, error) {
-	req := c.c.NewRequest(c.name, "EntityAdmin.CorporationUpdate", in)
+	req := c.c.NewRequest(c.serviceName, "EntityAdmin.CorporationUpdate", in)
 	out := new(EntityAdminResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -292,7 +274,7 @@ func (c *entityAdminService) CorporationUpdate(ctx context.Context, in *Corporat
 }
 
 func (c *entityAdminService) CharacterUpdate(ctx context.Context, in *CharacterAdminRequest, opts ...client.CallOption) (*EntityAdminResponse, error) {
-	req := c.c.NewRequest(c.name, "EntityAdmin.CharacterUpdate", in)
+	req := c.c.NewRequest(c.serviceName, "EntityAdmin.CharacterUpdate", in)
 	out := new(EntityAdminResponse)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -310,30 +292,21 @@ type EntityAdminHandler interface {
 }
 
 func RegisterEntityAdminHandler(s server.Server, hdlr EntityAdminHandler, opts ...server.HandlerOption) {
-	type entityAdmin interface {
-		AllianceUpdate(ctx context.Context, in *AllianceAdminRequest, out *EntityAdminResponse) error
-		CorporationUpdate(ctx context.Context, in *CorporationAdminRequest, out *EntityAdminResponse) error
-		CharacterUpdate(ctx context.Context, in *CharacterAdminRequest, out *EntityAdminResponse) error
-	}
-	type EntityAdmin struct {
-		entityAdmin
-	}
-	h := &entityAdminHandler{hdlr}
-	s.Handle(s.NewHandler(&EntityAdmin{h}, opts...))
+	s.Handle(s.NewHandler(&EntityAdmin{hdlr}, opts...))
 }
 
-type entityAdminHandler struct {
+type EntityAdmin struct {
 	EntityAdminHandler
 }
 
-func (h *entityAdminHandler) AllianceUpdate(ctx context.Context, in *AllianceAdminRequest, out *EntityAdminResponse) error {
+func (h *EntityAdmin) AllianceUpdate(ctx context.Context, in *AllianceAdminRequest, out *EntityAdminResponse) error {
 	return h.EntityAdminHandler.AllianceUpdate(ctx, in, out)
 }
 
-func (h *entityAdminHandler) CorporationUpdate(ctx context.Context, in *CorporationAdminRequest, out *EntityAdminResponse) error {
+func (h *EntityAdmin) CorporationUpdate(ctx context.Context, in *CorporationAdminRequest, out *EntityAdminResponse) error {
 	return h.EntityAdminHandler.CorporationUpdate(ctx, in, out)
 }
 
-func (h *entityAdminHandler) CharacterUpdate(ctx context.Context, in *CharacterAdminRequest, out *EntityAdminResponse) error {
+func (h *EntityAdmin) CharacterUpdate(ctx context.Context, in *CharacterAdminRequest, out *EntityAdminResponse) error {
 	return h.EntityAdminHandler.CharacterUpdate(ctx, in, out)
 }
