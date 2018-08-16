@@ -293,6 +293,7 @@ func (ah AuthHandler) addRole(ctx context.Context, shortName string, name string
 		FilterA:   shortName,
 		FilterB:   "wildcard",
 		Name:      name,
+		Sync:      false,
 	})
 	if err != nil {
 		return err
