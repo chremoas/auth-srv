@@ -22,11 +22,12 @@ func main() {
 
 	// TODO pick stuff up from the config
 	logger, err = zap.NewProduction()
+	sugar := logger.Sugar()
 	if err != nil {
 		panic(err)
 	}
-	defer logger.Sync()
-	logger.Info("Initialized logger")
+	defer sugar.Sync()
+	sugar.Info("Initialized logger")
 
 	abaeve_auth.RegisterEntityQueryHandler(service.Server(), &handler.EntityQueryHandler{service.Client(), logger})
 	abaeve_auth.RegisterEntityAdminHandler(service.Server(), &handler.EntityAdminHandler{service.Client(), logger})
@@ -35,7 +36,10 @@ func main() {
 		return repository.DB.Close()
 	}))
 
-	service.Run()
+	err = service.Run()
+	if err != nil {
+		sugar.Errorf("Running service failed: %s", err.Error())
+	}
 }
 
 func initialize(configuration *config.Configuration) error {
