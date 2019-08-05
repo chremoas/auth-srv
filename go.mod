@@ -3,8 +3,8 @@ module github.com/chremoas/auth-srv
 go 1.12
 
 require (
-	github.com/chremoas/role-srv v1.1.16
-	github.com/chremoas/services-common v1.2.0
+	github.com/chremoas/role-srv v1.2.2
+	github.com/chremoas/services-common v1.2.1
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/golang/mock v1.3.1
 	github.com/golang/protobuf v1.3.2
