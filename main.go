@@ -7,6 +7,7 @@ import (
 	"github.com/chremoas/auth-srv/repository"
 	"github.com/chremoas/services-common/config"
 	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/micro/go-micro"
 	"go.uber.org/zap"
 )
