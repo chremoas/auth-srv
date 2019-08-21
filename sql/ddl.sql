@@ -1,15 +1,15 @@
-USE chremoas;
+SET DATABASE = chremoas;
 
 CREATE TABLE authentication_scopes
 (
-  authentication_scope_id   BIGINT PRIMARY KEY NOT NULL,
+  authentication_scope_id   BIGSERIAL PRIMARY KEY NOT NULL,
   authentication_scope_name VARCHAR(255)           NOT NULL
 );
 
 
 CREATE TABLE users
 (
-  user_id BIGINT     PRIMARY KEY NOT NULL,
+  user_id BIGSERIAL     PRIMARY KEY NOT NULL,
   chat_id VARCHAR(255)           NOT NULL
 );
 

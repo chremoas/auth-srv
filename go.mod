@@ -17,4 +17,4 @@ require (
 	golang.org/x/net v0.0.0-20190724013045-ca1201d0de80
 )
 
-replace github.com/chremoas/services-common => /home/wonko/gohack/github.com/chremoas/services-common
+
