@@ -9,7 +9,7 @@ github.com/armon/consul-api
 github.com/armon/go-metrics
 # github.com/cheekybits/genny v1.0.0
 github.com/cheekybits/genny/generic
-# github.com/chremoas/role-srv v1.2.2
+# github.com/chremoas/role-srv v1.2.3
 github.com/chremoas/role-srv/proto
 # github.com/chremoas/services-common v1.2.4
 github.com/chremoas/services-common/config

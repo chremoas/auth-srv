@@ -49,9 +49,13 @@ github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghf
 github.com/cheekybits/genny v1.0.0 h1:uGGa4nei+j20rOSeDeP5Of12XVm7TGUd4dJA9RDitfE=
 github.com/cheekybits/genny v1.0.0/go.mod h1:+tQajlRqAUrPI7DOSpB0XAqZYtQakVtB7wXkRAgjxjQ=
 github.com/chremoas/discord-gateway v1.2.1/go.mod h1:ZDaZsScNnHK2X01p4Qy71cVYBlh1pIQdihOm2OCFJ8M=
+github.com/chremoas/discord-gateway v1.2.2/go.mod h1:YG55eIBBv+wOJcPmmikxoAUlthMjsQ+MHZqHzml9MjQ=
 github.com/chremoas/perms-srv v1.2.1/go.mod h1:kIndVKyE6ojEeTt72o6NUSDldfTG+w4vRVeNYyIu3dU=
+github.com/chremoas/perms-srv v1.2.2/go.mod h1:qKgMoX37fnof4+Xo0atzLjwU5t2spab+keL7AF6rHhg=
 github.com/chremoas/role-srv v1.2.2 h1:F6VlaKUbb1luA/n0I8d3ITJ4vaftk21i4hFxZi9lKq4=
 github.com/chremoas/role-srv v1.2.2/go.mod h1:7K9THNlG5/IL2Sj0PtiERVi551VWx1um6oqIFDlAa+s=
+github.com/chremoas/role-srv v1.2.3 h1:x8Ms49StAbeiaMeM1AIbna/jaG50Um6DhzlCOU6Jb6Y=
+github.com/chremoas/role-srv v1.2.3/go.mod h1:z3/BKnZRFazUVQo0mWh7G43LlY02pMWp26qyFh+5xq4=
 github.com/chremoas/services-common v1.2.1 h1:q4j6SQCHNwu3wsLYYLt1t/II5bkWDW0NCZ4DpFGuiPU=
 github.com/chremoas/services-common v1.2.1/go.mod h1:Erqmm1ecYwNm/jIyH6TpZTVKXYNdi0DIeF+51e425SI=
 github.com/chremoas/services-common v1.2.2 h1:vt60QiFViJax4hxv772oF6lUwdTOQTiBRCCESkR0+Pg=
