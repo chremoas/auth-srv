@@ -1,5 +1,4 @@
 .idea
 *.iml
 application.yaml
-vendor/
 auth-srv-linux-amd64
