@@ -9,9 +9,9 @@ github.com/armon/consul-api
 github.com/armon/go-metrics
 # github.com/cheekybits/genny v1.0.0
 github.com/cheekybits/genny/generic
-# github.com/chremoas/role-srv v1.2.3
+# github.com/chremoas/role-srv v1.2.6
 github.com/chremoas/role-srv/proto
-# github.com/chremoas/services-common v1.2.4
+# github.com/chremoas/services-common v1.2.5
 github.com/chremoas/services-common/config
 github.com/chremoas/services-common/sets
 # github.com/coreos/etcd v3.3.13+incompatible
