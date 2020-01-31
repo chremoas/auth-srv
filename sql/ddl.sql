@@ -1,4 +1,4 @@
-SET DATABASE = chremoas;
+SET DATABASE = "chremoas-dev";
 
 CREATE TABLE authentication_scopes
 (
