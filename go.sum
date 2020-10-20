@@ -48,11 +48,17 @@ github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghf
 github.com/cheekybits/genny v1.0.0 h1:uGGa4nei+j20rOSeDeP5Of12XVm7TGUd4dJA9RDitfE=
 github.com/cheekybits/genny v1.0.0/go.mod h1:+tQajlRqAUrPI7DOSpB0XAqZYtQakVtB7wXkRAgjxjQ=
 github.com/chremoas/discord-gateway v1.2.5/go.mod h1:OMxhGRQBc0s4gM4q/IrMo5A2Ra9aAGRvcKLP1yIOMes=
+github.com/chremoas/discord-gateway v1.3.0/go.mod h1:kb+aUYu0vmyTMaceiG6mmcRvvZym/QZOuOF/KL8IQw8=
 github.com/chremoas/perms-srv v1.2.5/go.mod h1:1DoHu/sFjsktn6m91VbQsoZTWMML/rvc4mjPtd7+NM8=
+github.com/chremoas/perms-srv v1.3.0/go.mod h1:i5MAaSOkUDm4EXZMC1SeS6iuoZWJpMwdLw86O2gvtNk=
 github.com/chremoas/role-srv v1.2.6 h1:SDwmf6fmy/70sthdMJ+XCMeSkfyom4u/soAi0ZRrzsE=
 github.com/chremoas/role-srv v1.2.6/go.mod h1:S4XplQETKi5yFYbRJOBrJ7+pwIA9Xdu/KHaviKpstX8=
+github.com/chremoas/role-srv v1.3.0 h1:+AktIQ/0gTjKOhpyQCKI3Q6uDcJ5qSii8Gb3seKKRR0=
+github.com/chremoas/role-srv v1.3.0/go.mod h1:rrWHprG1mmPw3qtYCplRMqlxJTjr9rFWSfWktvpsw50=
 github.com/chremoas/services-common v1.2.5 h1:43d+roMFdVzOv7KzUKV7B2z3hUNnGJhgT8Ps8canyV8=
 github.com/chremoas/services-common v1.2.5/go.mod h1:LQDKkCa7367dW2jcNfS3C4vHFP0UuxJ/krSXjx31kRo=
+github.com/chremoas/services-common v1.3.0 h1:+9Q0X5EBuDaycp1Jt/k1yhtIje49wV8yMpnqhXq/W5I=
+github.com/chremoas/services-common v1.3.0/go.mod h1:LQDKkCa7367dW2jcNfS3C4vHFP0UuxJ/krSXjx31kRo=
 github.com/circonus-labs/circonus-gometrics v2.3.1+incompatible/go.mod h1:nmEj6Dob7S7YxXgwXpfOuvO54S+tGdZdw9fuRZt25Ag=
 github.com/circonus-labs/circonusllhist v0.1.3/go.mod h1:kMXHVDlOchFAehlya5ePtbp5jckzBHf4XRpQvBOLI+I=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=

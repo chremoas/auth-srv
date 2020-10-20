@@ -1,5 +1,3 @@
-SET DATABASE = chremoas;
-
 CREATE TABLE authentication_scopes
 (
   authentication_scope_id   BIGSERIAL PRIMARY KEY NOT NULL,
