@@ -12,7 +12,7 @@ github.com/cheekybits/genny/generic
 # github.com/chremoas/role-srv v1.3.0
 ## explicit
 github.com/chremoas/role-srv/proto
-# github.com/chremoas/services-common v1.3.0
+# github.com/chremoas/services-common v1.3.1
 ## explicit
 github.com/chremoas/services-common/config
 github.com/chremoas/services-common/sets
