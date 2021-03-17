@@ -2,20 +2,25 @@ package main
 
 import (
 	"errors"
-	"github.com/chremoas/auth-srv/handler"
-	"github.com/chremoas/auth-srv/proto"
-	"github.com/chremoas/auth-srv/repository"
+
 	"github.com/chremoas/services-common/config"
+	chremoasPrometheus "github.com/chremoas/services-common/prometheus"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/micro/go-micro"
 	"go.uber.org/zap"
+
+	"github.com/chremoas/auth-srv/handler"
+	"github.com/chremoas/auth-srv/proto"
+	"github.com/chremoas/auth-srv/repository"
 )
 
-var version = "1.0.0"
-var service micro.Service
-var logger *zap.Logger
-var name = "auth"
+var (
+	version = "1.0.0"
+	service micro.Service
+	logger  *zap.Logger
+	name    = "auth"
+)
 
 func main() {
 	var err error
@@ -29,6 +34,8 @@ func main() {
 	}
 	defer sugar.Sync()
 	sugar.Info("Initialized logger")
+
+	go chremoasPrometheus.PrometheusExporter(logger)
 
 	abaeve_auth.RegisterEntityQueryHandler(service.Server(), &handler.EntityQueryHandler{service.Client(), logger})
 	abaeve_auth.RegisterEntityAdminHandler(service.Server(), &handler.EntityAdminHandler{service.Client(), logger})

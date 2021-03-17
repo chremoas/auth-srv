@@ -55,6 +55,8 @@ github.com/chremoas/services-common v1.3.0 h1:+9Q0X5EBuDaycp1Jt/k1yhtIje49wV8yMp
 github.com/chremoas/services-common v1.3.0/go.mod h1:LQDKkCa7367dW2jcNfS3C4vHFP0UuxJ/krSXjx31kRo=
 github.com/chremoas/services-common v1.3.1 h1:tUs1i3xqdpDaUY66JfLMNxMtyTqGC42e6jIvS7UoR7I=
 github.com/chremoas/services-common v1.3.1/go.mod h1:LQDKkCa7367dW2jcNfS3C4vHFP0UuxJ/krSXjx31kRo=
+github.com/chremoas/services-common v1.3.2 h1:vCszOmlHpl56mcvLeuls+OMT4CoPSxCL+Ulsyl4krGM=
+github.com/chremoas/services-common v1.3.2/go.mod h1:+EH1dw7COGWhk4dhhU7FepdurSWLoga04HCbQn4x68g=
 github.com/circonus-labs/circonus-gometrics v2.3.1+incompatible/go.mod h1:nmEj6Dob7S7YxXgwXpfOuvO54S+tGdZdw9fuRZt25Ag=
 github.com/circonus-labs/circonusllhist v0.1.3/go.mod h1:kMXHVDlOchFAehlya5ePtbp5jckzBHf4XRpQvBOLI+I=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=

@@ -21,4 +21,4 @@ MAINTAINER Brian Hechinger <wonko@4amlunch.net>
 VOLUME /etc/chremoas
 COPY --from=build /app/service /service
 
-ENTRYPOINT ["/service", "--configuration_file", "/etc/chremoas/chremoas.yaml"]]
+ENTRYPOINT ["/service", "--configuration_file", "/etc/chremoas/chremoas.yaml"]
